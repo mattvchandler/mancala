@@ -20,6 +20,8 @@
 //number of availible moves
 //seeds in play
 //seed distribution (large piles waiting to be collected? seed ratio between sides)
+//possibilty of extra turns
+//if we wanted to, we could use a genetic algorithm for determining the importance of each of these
 //
 //representation
 //circular array?
@@ -102,8 +104,6 @@ public:
             bowls[bowls[bowl].across].count = 0;
             bowls[bowl].count = 0;
         }
-            
-
         return false;
     }
 
@@ -114,6 +114,13 @@ public:
         std::swap(p1_store, p2_store);
     }
 
+    //heuristics to evaluate the board status
+    int evaluate() const
+    {
+        //simple
+        return bowls[p1_store].count - bowls[p2_store].count;
+    }
+
     void crapprint() const //delete me!
     {
         std::cout<<bowls[p2_store].count<<std::endl;
@@ -122,14 +129,33 @@ public:
         std::cout<<bowls[p1_store].count<<std::endl;
     }
 
+
     int num_bowls, num_seeds;
     std::vector<Bowl> bowls;
     int p1_start, p2_start;
     int p1_store, p2_store;
 };
 
+int choosemove(Board b) //purposely doing pass by value here
+{
+    int best = 0;
+    int best_i = 0;
+    //loop over available moves
+    for(int i =0; i < 6; ++i)
+    {
+        if(b.bowls[b.p1_start + 1].count <= 0)
+            continue;
+        Board sub_b = b;
+        sub_b.move(i);
+        if(sub_b.evaluate() > best)
+        {
+            best = sub_b.evaluate();
+            best_i = i;
+        }
+    }
+}
+
 int main()
 {
-    Board b;
     return 0;
 }
