@@ -168,5 +168,25 @@ int choosemove(Board b) //purposely doing pass by value here
 
 int main()
 {
+    Board b;
+    char nextmove = '\0';
+    int player = 1;
+    while(nextmove != 'q' && nextmove != 'Q')
+    {
+        std::cout<<"Player "<<player<<std::endl;
+        b.crapprint();
+        std::cout<<"Best move: "<<choosemove(b)<<std::endl;
+        std::cout<<"Next move: ";
+        std::cin>>nextmove;
+        std::cout<<std::endl;
+        if(nextmove >= '0' && nextmove <= '5')
+        {
+            if(!b.move(nextmove - '0'))
+            {
+                b.swapsides();
+                player = (player == 1) ? 2 : 1;
+            }
+        }
+    }
     return 0;
 }
