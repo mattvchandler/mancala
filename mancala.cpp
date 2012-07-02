@@ -148,12 +148,12 @@ public:
 
 int choosemove(Board b) //purposely doing pass by value here
 {
-    int best = 0;
+    int best = std::numeric_limits<int>::min();
     int best_i = 0;
     //loop over available moves
     for(int i =0; i < 6; ++i)
     {
-        if(b.bowls[b.p1_start + 1].count <= 0)
+        if(b.bowls[b.p1_start + i].count == 0)
             continue;
         Board sub_b = b;
         sub_b.move(i);
