@@ -2,7 +2,9 @@
 //Copyright Matthew Chandler 2012
 
 #include <iostream>
+#include <iomanip>
 #include <vector>
+#include <limits>
 
 //board:
 //2 rows of 6 bowls
@@ -123,12 +125,20 @@ public:
 
     void crapprint() const //delete me!
     {
-        std::cout<<bowls[p2_store].count<<std::endl;
+        std::cout<<"    ";
         for(int i = p1_start; i < p1_start + 6; ++i)
-            std::cout<<bowls[i].count<<"\t"<<bowls[bowls[i].across].count<<std::endl;
-        std::cout<<bowls[p1_store].count<<std::endl;
+            std::cout<<std::setw(2)<<std::setfill(' ')<<bowls[bowls[i].across].count<<" ";
+        std::cout<<std::endl;
+        std::cout<<std::setw(2)<<std::setfill(' ')<<bowls[p2_store].count<<std::setw(3*7)<<" "<<std::setw(2)<<bowls[p1_store].count<<std::endl;
+        std::cout<<"    ";
+        for(int i = p1_start; i < p1_start + 6; ++i)
+            std::cout<<std::setw(2)<<std::setfill(' ')<<bowls[i].count<<" ";
+        std::cout<<std::endl;
+        std::cout<<"    ";
+        for(int i = 0; i < 6 ; ++i)
+            std::cout<<std::setw(2)<<std::setfill(' ')<<i<<" ";
+        std::cout<<std::endl;
     }
-
 
     int num_bowls, num_seeds;
     std::vector<Bowl> bowls;
