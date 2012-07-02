@@ -67,7 +67,7 @@ public:
             else
                 bowls[i].next = 0;
 
-            if(i != num_bowls && i != 2 * num_bowls + 1)
+            if(i != (size_t)num_bowls && i != 2 * (size_t)num_bowls + 1)
             {
                 bowls[i].across = 2 * num_bowls - i;
                 bowls[i].count = num_seeds;
@@ -153,6 +153,7 @@ int choosemove(Board b) //purposely doing pass by value here
             best_i = i;
         }
     }
+    return best_i;
 }
 
 int main()
