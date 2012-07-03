@@ -116,6 +116,20 @@ public:
         std::swap(p1_store, p2_store);
     }
 
+    //is the game over
+    bool finished()
+    {
+        int p1_side = 0;
+        for(int i = p1_start; i < p1_start + 6; ++i)
+            p1_side |= bowls[i].count;
+        if(p1_side == 0)
+            return true;
+        int p2_side = 0;
+        for(int i = p2_start; i < p2_start + 6; ++i)
+            p2_side |= bowls[i].count;
+        return p2_side == 0;
+    }
+
     //heuristics to evaluate the board status
     int evaluate() const
     {
@@ -146,7 +160,7 @@ public:
     int p1_store, p2_store;
 };
 
-int choosemove(Board b) //purposely doing pass by value here
+int choosemove(Board b) //purposely doing pass by value here as to not corrupt passed board (we may want to use different method when we do actual move search)
 {
     int best = std::numeric_limits<int>::min();
     int best_i = 0;
@@ -156,10 +170,11 @@ int choosemove(Board b) //purposely doing pass by value here
         if(b.bowls[b.p1_start + i].count == 0)
             continue;
         Board sub_b = b;
-        sub_b.move(i);
-        if(sub_b.evaluate() > best)
+        int move_again = 0;
+        move_again = sub_b.move(i) ? 5 : 0;
+        if(sub_b.evaluate() + move_again > best)
         {
-            best = sub_b.evaluate();
+            best = sub_b.evaluate() + move_again;
             best_i = i;
         }
     }
@@ -171,7 +186,7 @@ int main()
     Board b;
     char nextmove = '\0';
     int player = 1;
-    while(nextmove != 'q' && nextmove != 'Q')
+    while(!b.finished() && nextmove != 'q' && nextmove != 'Q')
     {
         std::cout<<"Player "<<player<<std::endl;
         b.crapprint();
