@@ -160,6 +160,49 @@ public:
     int p1_store, p2_store;
 };
 
+enum PLAYER {PLAYER_MIN, PLAYER_MAX};
+
+int choosemove_alphabeta(Board b, int depth, int alpha, int beta, PLAYER player)
+{
+    if(depth == 0 || b.finished())
+    {
+        if(player == PLAYER_MAX)
+            return b.evaluate();
+        else
+            return -b.evaluate();
+    }
+    if(player == PLAYER_MAX)
+    {
+        for(int i = 0; i < 6; ++i)
+        {
+            if(b.bowls[b.p1_start + i].count == 0)
+                continue;
+            Board sub_b = b;
+            sub_b.move(i); // do we get another move?
+            sub_b.swapsides();
+            alpha = std::max(alpha, choosemove_alphabeta(sub_b, depth - 1, alpha, beta, PLAYER_MIN));
+            if(beta <= alpha)
+                return beta;
+        }
+        return alpha;
+    }
+    else
+    {
+        for(int i = 0; i < 6; ++i)
+        {
+            if(b.bowls[b.p1_start + i].count == 0)
+                continue;
+            Board sub_b = b;
+            sub_b.move(i); // do we get another move?
+            beta = std::min(beta, choosemove_alphabeta(sub_b, depth - 1, alpha, beta, PLAYER_MAX));
+            sub_b.swapsides();
+            if(beta <= alpha)
+                return alpha;
+        }
+        return beta;
+    }
+}
+
 int choosemove(Board b) //purposely doing pass by value here as to not corrupt passed board (we may want to use different method when we do actual move search)
 {
     int best = std::numeric_limits<int>::min();
@@ -170,11 +213,12 @@ int choosemove(Board b) //purposely doing pass by value here as to not corrupt p
         if(b.bowls[b.p1_start + i].count == 0)
             continue;
         Board sub_b = b;
-        int move_again = 0;
-        move_again = sub_b.move(i) ? 5 : 0;
-        if(sub_b.evaluate() + move_again > best)
+        sub_b.move(i);
+        int score = choosemove_alphabeta(sub_b, 10, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), PLAYER_MAX);
+        std::cout<<"choose: "<<i<<" "<<score<<" "<<sub_b.evaluate()<<std::endl;
+        if(score > best)
         {
-            best = sub_b.evaluate() + move_again;
+            best = score;
             best_i = i;
         }
     }
@@ -196,12 +240,24 @@ int main()
         std::cout<<std::endl;
         if(nextmove >= '0' && nextmove <= '5')
         {
-            if(!b.move(nextmove - '0'))
+            if(!b.move(nextmove - '0'));
             {
                 b.swapsides();
                 player = (player == 1) ? 2 : 1;
             }
         }
     }
+    if(b.bowls[b.p1_store].count == b.bowls[b.p2_store].count)
+        std::cout<<"Tie"<<std::endl;
+    else if(player == 1)
+        if(b.bowls[b.p1_store].count > b.bowls[b.p2_store].count)
+            std::cout<<"Player 1 wins"<<std::endl;
+        else
+            std::cout<<"Player 2 wins"<<std::endl;
+    else
+        if(b.bowls[b.p1_store].count > b.bowls[b.p2_store].count)
+            std::cout<<"Player 2 wins"<<std::endl;
+        else
+            std::cout<<"Player 1 wins"<<std::endl;
     return 0;
 }
