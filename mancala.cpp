@@ -135,16 +135,7 @@ public:
     int evaluate() const
     {
         //simple
-        int diff = bowls[p1_store].count - bowls[p2_store].count;
-        //return inf on win, -inf on lose
-        if(finished())
-        {
-            if(diff > 0)
-                return std::numeric_limits<int>::max();
-            else
-                return std::numeric_limits<int>::min();
-        }
-        return diff;
+        return bowls[p1_store].count - bowls[p2_store].count;
     }
 
     void crapprint() const //delete me!
@@ -176,8 +167,16 @@ int choosemove_minimax(Board b, int depth, PLAYER player)
 {
     if(player == PLAYER_MAX)
     {
-        if(depth == 0 || b.finished())
+        if(depth == 0)
             return b.evaluate();
+        if(b.finished())
+        {
+            int diff = b.evaluate();
+            if(diff > 0)
+                return 1000 + depth;
+            else
+                return -1000 - depth;
+        }
         int max = std::numeric_limits<int>::min();
         for(int i = 0; i < 6; ++i)
         {
@@ -185,14 +184,32 @@ int choosemove_minimax(Board b, int depth, PLAYER player)
                 continue;
             Board sub_b = b;
             sub_b.move(i); // do we get another move?
-            max = std::max(max, choosemove_minimax(sub_b, depth - 1, PLAYER_MIN));
+            sub_b.swapsides();
+            //max = std::max(max, choosemove_minimax(sub_b, depth - 1, PLAYER_MIN));
+            //sub_b.crapprint();
+            //for(int i = 3-depth; i >=0; --i)
+            //    std::cout<<"  ";
+            //std::cout<<"i: "<<i<<std::endl;
+            int score = choosemove_minimax(sub_b, depth - 1, PLAYER_MIN);
+            max = std::max(max,score);
+            //for(int i = 3-depth; i >=0; --i)
+            //    std::cout<<"  ";
+            //std::cout<<"score: "<<score<<std::endl;
         }
         return max;
     }
     else
     {
-        if(depth == 0 || b.finished())
+        if(depth == 0)
             return -b.evaluate();
+        if(b.finished())
+        {
+            int diff = b.evaluate();
+            if(diff > 0)
+                return -1000 - depth;
+            else
+                return 1000 + depth;
+        }
         int min = std::numeric_limits<int>::max();
         for(int i = 0; i < 6; ++i)
         {
@@ -200,7 +217,17 @@ int choosemove_minimax(Board b, int depth, PLAYER player)
                 continue;
             Board sub_b = b;
             sub_b.move(i); // do we get another move?
-            min = std::min(min, choosemove_minimax(sub_b, depth - 1, PLAYER_MAX));
+            sub_b.swapsides();
+            //min = std::min(min, choosemove_minimax(sub_b, depth - 1, PLAYER_MAX));
+            //sub_b.crapprint();
+            //for(int i = 3-depth; i >=0; --i)
+            //    std::cout<<"  ";
+            //std::cout<<"i: "<<i<<std::endl;
+            int score = choosemove_minimax(sub_b, depth - 1, PLAYER_MAX);
+            min = std::min(min, score);
+            //for(int i = 3-depth; i >=0; --i)
+            //    std::cout<<"  ";
+            //std::cout<<"score: "<<score<<std::endl;
         }
         return min;
     }
@@ -217,8 +244,9 @@ int choosemove(Board b) //purposely doing pass by value here as to not corrupt p
             continue;
         Board sub_b = b;
         sub_b.move(i);
+        sub_b.swapsides();
         int score = choosemove_minimax(sub_b, 10, PLAYER_MIN);
-        std::cout<<"choose: "<<i<<" "<<score<<" "<<sub_b.evaluate()<<std::endl;
+        std::cout<<"choose: "<<i<<" "<<score<<" "<<-sub_b.evaluate()<<std::endl;
         if(score > best)
         {
             best = score;
@@ -235,6 +263,7 @@ int main()
 {
     srand(time(0));
     Board b;
+    //b.bowls=std::vector<Bowl>({Bowl(3,1,12), Bowl(2,2,11), Bowl(1,3,10), Bowl(0,4,9), Bowl(10,5,8), Bowl(0,6,7), Bowl(0,7,0), Bowl(1,8,5), Bowl(0,9,4), Bowl(10,10,3), Bowl(1,11,2), Bowl(1,12,1), Bowl(1,13,0), Bowl(0,0,0)});
     char nextmove = '\0';
     int player = 1;
     while(!b.finished() && nextmove != 'q' && nextmove != 'Q')
@@ -261,6 +290,8 @@ int main()
     }
     if(b.finished())
     {
+        std::cout<<"Player "<<player<<std::endl;
+        b.crapprint();
         if(b.bowls[b.p1_store].count == b.bowls[b.p2_store].count)
             std::cout<<"Tie"<<std::endl;
         else if(player == 1)
@@ -273,7 +304,7 @@ int main()
                 std::cout<<"Player 2 wins"<<std::endl;
             else
                 std::cout<<"Player 1 wins"<<std::endl;
-        if(abs(b.evaluate()) >= 10)
+        if(abs(b.bowls[b.p1_store].count - b.bowls[b.p2_store].count) >= 10)
             std::cout<<"FATALITY"<<std::endl;
     }
     return 0;
