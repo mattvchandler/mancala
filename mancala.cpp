@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <vector>
 #include <limits>
+#include <cstdlib>
 
 //board:
 //2 rows of 6 bowls
@@ -135,6 +136,7 @@ public:
     {
         //simple
         return bowls[p1_store].count - bowls[p2_store].count;
+        //TODO, determine if win, return infinity
     }
 
     void crapprint() const //delete me!
@@ -162,51 +164,44 @@ public:
 
 enum PLAYER {PLAYER_MIN, PLAYER_MAX};
 
-int choosemove_alphabeta(Board b, int depth, int alpha, int beta, PLAYER player)
+int choosemove_minimax(Board b, int depth, PLAYER player)
 {
-    if(depth == 0 || b.finished())
-    {
-        if(player == PLAYER_MAX)
-            return b.evaluate();
-        else
-            return -b.evaluate();
-    }
     if(player == PLAYER_MAX)
     {
+        if(depth == 0 || b.finished())
+            return b.evaluate();
+        int max = std::numeric_limits<int>::min();
         for(int i = 0; i < 6; ++i)
         {
             if(b.bowls[b.p1_start + i].count == 0)
                 continue;
             Board sub_b = b;
             sub_b.move(i); // do we get another move?
-            sub_b.swapsides();
-            alpha = std::max(alpha, choosemove_alphabeta(sub_b, depth - 1, alpha, beta, PLAYER_MIN));
-            if(beta <= alpha)
-                return beta;
+            max = std::max(max, choosemove_minimax(sub_b, depth - 1, PLAYER_MIN));
         }
-        return alpha;
+        return max;
     }
     else
     {
+        if(depth == 0 || b.finished())
+            return -b.evaluate();
+        int min = std::numeric_limits<int>::max();
         for(int i = 0; i < 6; ++i)
         {
             if(b.bowls[b.p1_start + i].count == 0)
                 continue;
             Board sub_b = b;
             sub_b.move(i); // do we get another move?
-            beta = std::min(beta, choosemove_alphabeta(sub_b, depth - 1, alpha, beta, PLAYER_MAX));
-            sub_b.swapsides();
-            if(beta <= alpha)
-                return alpha;
+            min = std::min(min, choosemove_minimax(sub_b, depth - 1, PLAYER_MAX));
         }
-        return beta;
+        return min;
     }
 }
 
 int choosemove(Board b) //purposely doing pass by value here as to not corrupt passed board (we may want to use different method when we do actual move search)
 {
     int best = std::numeric_limits<int>::min();
-    int best_i = 0;
+    std::vector<int> best_i;
     //loop over available moves
     for(int i =0; i < 6; ++i)
     {
@@ -214,19 +209,23 @@ int choosemove(Board b) //purposely doing pass by value here as to not corrupt p
             continue;
         Board sub_b = b;
         sub_b.move(i);
-        int score = choosemove_alphabeta(sub_b, 10, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), PLAYER_MAX);
+        int score = choosemove_minimax(sub_b, 10, PLAYER_MIN);
         std::cout<<"choose: "<<i<<" "<<score<<" "<<sub_b.evaluate()<<std::endl;
         if(score > best)
         {
             best = score;
-            best_i = i;
+            best_i.clear();
+            best_i.push_back(i);
         }
+        if(score == best);
+            best_i.push_back(i);
     }
-    return best_i;
+    return best_i[0];//rand() % best_i.size()];
 }
 
 int main()
 {
+    srand(time(0));
     Board b;
     char nextmove = '\0';
     int player = 1;
@@ -238,6 +237,11 @@ int main()
         std::cout<<"Next move: ";
         std::cin>>nextmove;
         std::cout<<std::endl;
+        if(nextmove == 'S' || nextmove == 's')
+        {
+            b.swapsides();
+            player = (player == 1) ? 2 : 1;
+        }
         if(nextmove >= '0' && nextmove <= '5')
         {
             if(!b.move(nextmove - '0'));
@@ -247,17 +251,22 @@ int main()
             }
         }
     }
-    if(b.bowls[b.p1_store].count == b.bowls[b.p2_store].count)
-        std::cout<<"Tie"<<std::endl;
-    else if(player == 1)
-        if(b.bowls[b.p1_store].count > b.bowls[b.p2_store].count)
-            std::cout<<"Player 1 wins"<<std::endl;
+    if(b.finished())
+    {
+        if(b.bowls[b.p1_store].count == b.bowls[b.p2_store].count)
+            std::cout<<"Tie"<<std::endl;
+        else if(player == 1)
+            if(b.bowls[b.p1_store].count > b.bowls[b.p2_store].count)
+                std::cout<<"Player 1 wins"<<std::endl;
+            else
+                std::cout<<"Player 2 wins"<<std::endl;
         else
-            std::cout<<"Player 2 wins"<<std::endl;
-    else
-        if(b.bowls[b.p1_store].count > b.bowls[b.p2_store].count)
-            std::cout<<"Player 2 wins"<<std::endl;
-        else
-            std::cout<<"Player 1 wins"<<std::endl;
+            if(b.bowls[b.p1_store].count > b.bowls[b.p2_store].count)
+                std::cout<<"Player 2 wins"<<std::endl;
+            else
+                std::cout<<"Player 1 wins"<<std::endl;
+        if(abs(b.evaluate()) >= 10)
+            std::cout<<"FATALITY"<<std::endl;
+    }
     return 0;
 }
