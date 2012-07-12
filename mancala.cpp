@@ -169,6 +169,7 @@ int choosemove_minimax(Board b, int depth, PLAYER player)
     {
         if(depth == 0)
             return b.evaluate();
+        //move toward closest win, avoid loss as long as possible
         if(b.finished())
         {
             int diff = b.evaluate();
@@ -185,16 +186,7 @@ int choosemove_minimax(Board b, int depth, PLAYER player)
             Board sub_b = b;
             sub_b.move(i); // do we get another move?
             sub_b.swapsides();
-            //max = std::max(max, choosemove_minimax(sub_b, depth - 1, PLAYER_MIN));
-            //sub_b.crapprint();
-            //for(int i = 3-depth; i >=0; --i)
-            //    std::cout<<"  ";
-            //std::cout<<"i: "<<i<<std::endl;
-            int score = choosemove_minimax(sub_b, depth - 1, PLAYER_MIN);
-            max = std::max(max,score);
-            //for(int i = 3-depth; i >=0; --i)
-            //    std::cout<<"  ";
-            //std::cout<<"score: "<<score<<std::endl;
+            max = std::max(max, choosemove_minimax(sub_b, depth - 1, PLAYER_MIN));
         }
         return max;
     }
@@ -202,6 +194,7 @@ int choosemove_minimax(Board b, int depth, PLAYER player)
     {
         if(depth == 0)
             return -b.evaluate();
+        //move toward closest win, avoid loss as long as possible
         if(b.finished())
         {
             int diff = b.evaluate();
@@ -218,16 +211,7 @@ int choosemove_minimax(Board b, int depth, PLAYER player)
             Board sub_b = b;
             sub_b.move(i); // do we get another move?
             sub_b.swapsides();
-            //min = std::min(min, choosemove_minimax(sub_b, depth - 1, PLAYER_MAX));
-            //sub_b.crapprint();
-            //for(int i = 3-depth; i >=0; --i)
-            //    std::cout<<"  ";
-            //std::cout<<"i: "<<i<<std::endl;
-            int score = choosemove_minimax(sub_b, depth - 1, PLAYER_MAX);
-            min = std::min(min, score);
-            //for(int i = 3-depth; i >=0; --i)
-            //    std::cout<<"  ";
-            //std::cout<<"score: "<<score<<std::endl;
+            min = std::min(min, choosemove_minimax(sub_b, depth - 1, PLAYER_MAX));
         }
         return min;
     }
