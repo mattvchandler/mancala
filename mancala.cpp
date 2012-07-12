@@ -118,7 +118,7 @@ public:
     }
 
     //is the game over
-    bool finished()
+    bool finished() const
     {
         int p1_side = 0;
         for(int i = p1_start; i < p1_start + 6; ++i)
@@ -135,8 +135,16 @@ public:
     int evaluate() const
     {
         //simple
-        return bowls[p1_store].count - bowls[p2_store].count;
-        //TODO, determine if win, return infinity
+        int diff = bowls[p1_store].count - bowls[p2_store].count;
+        //return inf on win, -inf on lose
+        if(finished())
+        {
+            if(diff > 0)
+                return std::numeric_limits<int>::max();
+            else
+                return std::numeric_limits<int>::min();
+        }
+        return diff;
     }
 
     void crapprint() const //delete me!
