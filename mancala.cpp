@@ -163,7 +163,7 @@ public:
 
 enum PLAYER {PLAYER_MIN, PLAYER_MAX};
 
-int choosemove_minimax(Board b, int depth, PLAYER player)
+int choosemove_alphabeta(Board b, int depth, PLAYER player, int alpha, int beta)
 {
     if(player == PLAYER_MAX)
     {
@@ -178,7 +178,6 @@ int choosemove_minimax(Board b, int depth, PLAYER player)
             else
                 return -1000 - depth;
         }
-        int max = std::numeric_limits<int>::min();
         for(int i = 0; i < 6; ++i)
         {
             if(b.bowls[b.p1_start + i].count == 0)
@@ -186,9 +185,13 @@ int choosemove_minimax(Board b, int depth, PLAYER player)
             Board sub_b = b;
             sub_b.move(i); // do we get another move?
             sub_b.swapsides();
-            max = std::max(max, choosemove_minimax(sub_b, depth - 1, PLAYER_MIN));
+            int score = choosemove_alphabeta(sub_b, depth - 1, PLAYER_MIN, alpha, beta);
+            if(score >= beta)
+                return beta;
+            if(score > alpha)
+                alpha = score;
         }
-        return max;
+        return alpha;
     }
     else
     {
@@ -203,7 +206,6 @@ int choosemove_minimax(Board b, int depth, PLAYER player)
             else
                 return 1000 + depth;
         }
-        int min = std::numeric_limits<int>::max();
         for(int i = 0; i < 6; ++i)
         {
             if(b.bowls[b.p1_start + i].count == 0)
@@ -211,9 +213,13 @@ int choosemove_minimax(Board b, int depth, PLAYER player)
             Board sub_b = b;
             sub_b.move(i); // do we get another move?
             sub_b.swapsides();
-            min = std::min(min, choosemove_minimax(sub_b, depth - 1, PLAYER_MAX));
+            int score = choosemove_alphabeta(sub_b, depth - 1, PLAYER_MAX, alpha, beta);
+            if(score <= alpha)
+                return alpha;
+            if(score < beta)
+                beta = score;
         }
-        return min;
+        return beta;
     }
 }
 
@@ -229,8 +235,7 @@ int choosemove(Board b) //purposely doing pass by value here as to not corrupt p
         Board sub_b = b;
         sub_b.move(i);
         sub_b.swapsides();
-        int score = choosemove_minimax(sub_b, 10, PLAYER_MIN);
-        std::cout<<"choose: "<<i<<" "<<score<<" "<<-sub_b.evaluate()<<std::endl;
+        int score = choosemove_alphabeta(sub_b, 10, PLAYER_MIN, std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
         if(score > best)
         {
             best = score;
