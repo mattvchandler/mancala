@@ -42,6 +42,30 @@
 //
 //If we wanted to get really fancy, we could do 3D graphics with particle physics for the seeds.
 
+Board::Board(const int Num_bowls, const int Num_seeds):
+num_bowls(Num_bowls), num_seeds(Num_seeds)
+{
+    bowls.resize(2 * num_bowls + 2);
+    p1_start = 0;
+    p1_store = num_bowls;
+    p2_start = num_bowls + 1;
+    p2_store = 2 * num_bowls + 1;
+
+    for(size_t i = 0; i < bowls.size(); ++i)
+    {
+        if(i < bowls.size() - 1)
+            bowls[i].next = i + 1;
+        else
+            bowls[i].next = 0;
+
+        if(i != (size_t)num_bowls && i != 2 * (size_t)num_bowls + 1)
+        {
+            bowls[i].across = 2 * num_bowls - i;
+            bowls[i].count = num_seeds;
+        }
+    }
+}
+//
 //perform a move
 //returns true if the move earns an extra turn
 bool Board::move(int bowl)
