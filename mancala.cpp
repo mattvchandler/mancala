@@ -173,19 +173,26 @@ int choosemove_alphabeta(Board b, int depth, PLAYER player, int alpha, int beta)
         if(b.finished())
         {
             int diff = b.evaluate();
-            if(diff > 0)
-                return 1000 + depth;
+            if(diff == 0)
+                return depth;
+            else if(diff > 0)
+                return 1000 + diff + depth;
             else
-                return -1000 - depth;
+                return -1000 + diff - depth;
         }
         for(int i = 0; i < 6; ++i)
         {
             if(b.bowls[b.p1_start + i].count == 0)
                 continue;
             Board sub_b = b;
-            sub_b.move(i); // do we get another move?
-            sub_b.swapsides();
-            int score = choosemove_alphabeta(sub_b, depth - 1, PLAYER_MIN, alpha, beta);
+            int score = 0;
+            if(sub_b.move(i)) // do we get another move?
+                score = choosemove_alphabeta(sub_b, depth - 1, PLAYER_MAX, alpha, beta);
+            else
+            {
+                sub_b.swapsides();
+                score = choosemove_alphabeta(sub_b, depth - 1, PLAYER_MIN, alpha, beta);
+            }
             if(score >= beta)
                 return beta;
             if(score > alpha)
@@ -201,19 +208,26 @@ int choosemove_alphabeta(Board b, int depth, PLAYER player, int alpha, int beta)
         if(b.finished())
         {
             int diff = b.evaluate();
-            if(diff > 0)
-                return -1000 - depth;
+            if(diff == 0)
+                return -depth;
+            else if(diff > 0)
+                return -1000 - diff - depth;
             else
-                return 1000 + depth;
+                return 1000 - diff + depth;
         }
         for(int i = 0; i < 6; ++i)
         {
             if(b.bowls[b.p1_start + i].count == 0)
                 continue;
             Board sub_b = b;
-            sub_b.move(i); // do we get another move?
-            sub_b.swapsides();
-            int score = choosemove_alphabeta(sub_b, depth - 1, PLAYER_MAX, alpha, beta);
+            int score = 0;
+            if(sub_b.move(i)) // do we get another move?
+                score = choosemove_alphabeta(sub_b, depth - 1, PLAYER_MIN, alpha, beta);
+            else
+            {
+                sub_b.swapsides();
+                score = choosemove_alphabeta(sub_b, depth - 1, PLAYER_MAX, alpha, beta);
+            }
             if(score <= alpha)
                 return alpha;
             if(score < beta)
@@ -233,9 +247,15 @@ int choosemove(Board b) //purposely doing pass by value here as to not corrupt p
         if(b.bowls[b.p1_start + i].count == 0)
             continue;
         Board sub_b = b;
-        sub_b.move(i);
-        sub_b.swapsides();
-        int score = choosemove_alphabeta(sub_b, 10, PLAYER_MIN, std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
+        int score = 0;
+        if(sub_b.move(i))
+            score = choosemove_alphabeta(sub_b, 10, PLAYER_MAX, std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
+        else
+        {
+            sub_b.swapsides();
+            score = choosemove_alphabeta(sub_b, 10, PLAYER_MIN, std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
+        }
+        //std::cout<<"choose: "<<i<<" "<<score<<" "<<-sub_b.evaluate()<<std::endl;
         if(score > best)
         {
             best = score;
@@ -245,17 +265,17 @@ int choosemove(Board b) //purposely doing pass by value here as to not corrupt p
         if(score == best);
             best_i.push_back(i);
     }
-    return best_i[0];//rand() % best_i.size()];
+    return best_i[rand() % best_i.size()];
 }
 
 int main()
 {
     srand(time(0));
     Board b;
-    //b.bowls=std::vector<Bowl>({Bowl(3,1,12), Bowl(2,2,11), Bowl(1,3,10), Bowl(0,4,9), Bowl(10,5,8), Bowl(0,6,7), Bowl(0,7,0), Bowl(1,8,5), Bowl(0,9,4), Bowl(10,10,3), Bowl(1,11,2), Bowl(1,12,1), Bowl(1,13,0), Bowl(0,0,0)});
+    //b.bowls=std::vector<Bowl>({Bowl(1,1,12), Bowl(0,2,11), Bowl(0,3,10), Bowl(0,4,9), Bowl(2,5,8), Bowl(1,6,7), Bowl(0,7,0), Bowl(0,8,5), Bowl(0,9,4), Bowl(0,10,3), Bowl(0,11,2), Bowl(0,12,1), Bowl(1,13,0), Bowl(0,0,0)});
     char nextmove = '\0';
     int player = 1;
-    while(!b.finished() && nextmove != 'q' && nextmove != 'Q')
+    while(std::cin && !b.finished() && nextmove != 'q' && nextmove != 'Q')
     {
         std::cout<<"Player "<<player<<std::endl;
         b.crapprint();
@@ -270,7 +290,7 @@ int main()
         }
         if(nextmove >= '0' && nextmove <= '5')
         {
-            if(!b.move(nextmove - '0'));
+            if(!b.move(nextmove - '0'))
             {
                 b.swapsides();
                 player = (player == 1) ? 2 : 1;
