@@ -196,7 +196,7 @@ int choosemove_alphabeta(Board b, int depth, PLAYER player, int alpha, int beta)
     }
 }
 
-int choosemove(Board b) //purposely doing pass by value here as to not corrupt passed board (we may want to use different method when we do actual move search)
+int choosemove(Board b) //purposely doing pass by value here as to not corrupt passed board
 {
     int best = std::numeric_limits<int>::min();
     std::vector<int> best_i;

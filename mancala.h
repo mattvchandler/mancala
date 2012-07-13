@@ -94,4 +94,5 @@ public:
     int p1_start, p2_start;
     int p1_store, p2_store;
 };
+int choosemove(Board b); //purposely doing pass by value here as to not corrupt passed board
 #endif
