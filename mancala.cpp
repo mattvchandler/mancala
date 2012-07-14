@@ -146,7 +146,7 @@ void Board::crapprint() const //delete me!
 
 enum PLAYER {PLAYER_MIN, PLAYER_MAX};
 
-int choosemove_alphabeta(Board b, int depth, PLAYER player, int alpha, int beta)
+int choosemove_alphabeta(const Board b, int depth, PLAYER player, int alpha, int beta)
 {
     if(player == PLAYER_MAX)
     {
@@ -220,7 +220,7 @@ int choosemove_alphabeta(Board b, int depth, PLAYER player, int alpha, int beta)
     }
 }
 
-int choosemove(Board b) //purposely doing pass by value here as to not corrupt passed board
+int choosemove(const Board b) //purposely doing pass by value here as to not corrupt passed board
 {
     int best = std::numeric_limits<int>::min();
     std::vector<int> best_i;
