@@ -1,11 +1,11 @@
+//mancala.cpp
 //Mancala AI
 //Copyright Matthew Chandler 2012
 
-#include <iostream>
-#include <iomanip>
+#include <iostream> // TODO: delete when done with crapprint
+#include <iomanip>  // ditto
 #include <vector>
 #include <limits>
-#include <cstdlib>
 
 #include "mancala.h"
 
@@ -65,7 +65,7 @@ num_bowls(Num_bowls), num_seeds(Num_seeds)
         }
     }
 }
-//
+
 //perform a move
 //returns true if the move earns an extra turn
 bool Board::move(int bowl)
@@ -120,14 +120,14 @@ bool Board::finished() const
     return p2_side == 0;
 }
 
-//heuristics to evaluate the board status
+// heuristics to evaluate the board status
 int Board::evaluate() const
 {
-    //simple
+    // simple - will probably need improvement
     return bowls[p1_store].count - bowls[p2_store].count;
 }
 
-void Board::crapprint() const //delete me!
+void Board::crapprint() const // TODO: delete me!
 {
     std::cout<<"    ";
     for(int i = p1_start; i < p1_start + 6; ++i)
@@ -152,7 +152,7 @@ int choosemove_alphabeta(const Board b, int depth, PLAYER player, int alpha, int
     {
         if(depth == 0)
             return b.evaluate();
-        //move toward closest win, avoid loss as long as possible
+        // move toward closest win, avoid loss as long as possible
         if(b.finished())
         {
             int diff = b.evaluate();
@@ -187,7 +187,7 @@ int choosemove_alphabeta(const Board b, int depth, PLAYER player, int alpha, int
     {
         if(depth == 0)
             return -b.evaluate();
-        //move toward closest win, avoid loss as long as possible
+        // move toward closest win, avoid loss as long as possible
         if(b.finished())
         {
             int diff = b.evaluate();
@@ -220,11 +220,11 @@ int choosemove_alphabeta(const Board b, int depth, PLAYER player, int alpha, int
     }
 }
 
-int choosemove(const Board b) //purposely doing pass by value here as to not corrupt passed board
+int choosemove(const Board b) // purposely doing pass by value here as to not corrupt passed board
 {
     int best = std::numeric_limits<int>::min();
     std::vector<int> best_i;
-    //loop over available moves
+    // loop over available moves
     for(int i =0; i < 6; ++i)
     {
         if(b.bowls[b.p1_start + i].count == 0)
@@ -251,53 +251,3 @@ int choosemove(const Board b) //purposely doing pass by value here as to not cor
     return best_i[rand() % best_i.size()];
 }
 
-int main()
-{
-    srand(time(0));
-    Board b;
-    //b.bowls=std::vector<Bowl>({Bowl(1,1,12), Bowl(0,2,11), Bowl(0,3,10), Bowl(0,4,9), Bowl(2,5,8), Bowl(1,6,7), Bowl(0,7,0), Bowl(0,8,5), Bowl(0,9,4), Bowl(0,10,3), Bowl(0,11,2), Bowl(0,12,1), Bowl(1,13,0), Bowl(0,0,0)});
-    char nextmove = '\0';
-    int player = 1;
-    while(std::cin && !b.finished() && nextmove != 'q' && nextmove != 'Q')
-    {
-        std::cout<<"Player "<<player<<std::endl;
-        b.crapprint();
-        std::cout<<"Best move: "<<choosemove(b)<<std::endl;
-        std::cout<<"Next move: ";
-        std::cin>>nextmove;
-        std::cout<<std::endl;
-        if(nextmove == 'S' || nextmove == 's')
-        {
-            b.swapsides();
-            player = (player == 1) ? 2 : 1;
-        }
-        if(nextmove >= '0' && nextmove <= '5')
-        {
-            if(!b.move(nextmove - '0'))
-            {
-                b.swapsides();
-                player = (player == 1) ? 2 : 1;
-            }
-        }
-    }
-    if(b.finished())
-    {
-        std::cout<<"Player "<<player<<std::endl;
-        b.crapprint();
-        if(b.bowls[b.p1_store].count == b.bowls[b.p2_store].count)
-            std::cout<<"Tie"<<std::endl;
-        else if(player == 1)
-            if(b.bowls[b.p1_store].count > b.bowls[b.p2_store].count)
-                std::cout<<"Player 1 wins"<<std::endl;
-            else
-                std::cout<<"Player 2 wins"<<std::endl;
-        else
-            if(b.bowls[b.p1_store].count > b.bowls[b.p2_store].count)
-                std::cout<<"Player 2 wins"<<std::endl;
-            else
-                std::cout<<"Player 1 wins"<<std::endl;
-        if(abs(b.bowls[b.p1_store].count - b.bowls[b.p2_store].count) >= 10)
-            std::cout<<"FATALITY"<<std::endl;
-    }
-    return 0;
-}

@@ -1,3 +1,4 @@
+//mancala.h
 //Mancala AI
 //Copyright Matthew Chandler 2012
 #ifndef __MANCALA_H__
