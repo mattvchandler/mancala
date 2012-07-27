@@ -5,6 +5,8 @@
 #define __MANCALA_H__
 #include <vector>
 
+enum PLAYER {PLAYER_MIN, PLAYER_MAX};
+
 struct Bowl
 {
 public:
@@ -36,10 +38,15 @@ public:
     void crapprint() const; //delete me!
 
     int num_bowls, num_seeds;
+    
+    friend int choosemove(const Board b);
+    friend int choosemove_alphabeta(const Board b, int depth, PLAYER player, int alpha, int beta);
+    friend void cli_game();
+private:
     std::vector<Bowl> bowls;
     int p1_start, p2_start;
     int p1_store, p2_store;
 };
 
-int choosemove(Board b); //purposely doing pass by value here as to not corrupt passed board
+int choosemove(const Board b); //purposely doing pass by value here as to not corrupt passed board
 #endif
