@@ -1,6 +1,6 @@
 TARGET := mancala
 C_SOURCES :=
-CXX_SOURCES := appstart.cpp mancala.cpp
+CXX_SOURCES := appstart.cpp gui.cpp mancala.cpp
 SOURCES := $(C_SOURCES) $(CXX_SOURCES)
 C_OBJECTS := ${C_SOURCES:.c=.o}
 CXX_OBJECTS := ${CXX_SOURCES:.cpp=.o}
@@ -12,9 +12,9 @@ LIBRARIES :=
 
 CPPFLAGS += $(foreach includedir,$(INCLUDE_DIRS),-I$(includedir))
 CFLAGS   +=
-CXXFLAGS += -O3 -Wall -std=c++0x
+CXXFLAGS += -O2 -Wall -std=c++0x `pkg-config --cflags gtkmm-3.0`
 LDFLAGS  += $(foreach librarydir,$(LIBRARY_DIRS),-L$(librarydir))
-LDFLAGS  += $(foreach library,$(LIBRARIES),-l$(library))
+LDFLAGS  += $(foreach library,$(LIBRARIES),-l$(library)) `pkg-config --libs gtkmm-3.0`
 
 CC := gcc
 CXX := g++

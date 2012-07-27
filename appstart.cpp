@@ -4,11 +4,22 @@
 
 #include <iostream>
 
+#include <cstdlib>
+#include <ctime>
+
+#include <gtkmm/application.h>
+#include <gtkmm/window.h>
+
 #include "mancala.h"
 
-int main()
+int main(int argc, char * argv[])
 {
+    //initialize random seed
     srand(time(0));
+
+
+    Glib::RefPtr<Gtk::Application> app = Gtk::Application::create(argc, argv, "mancala.mancala");
+
     Board b;
     //b.bowls=std::vector<Bowl>({Bowl(1,1,12), Bowl(0,2,11), Bowl(0,3,10), Bowl(0,4,9), Bowl(2,5,8), Bowl(1,6,7), Bowl(0,7,0), Bowl(0,8,5), Bowl(0,9,4), Bowl(0,10,3), Bowl(0,11,2), Bowl(0,12,1), Bowl(1,13,0), Bowl(0,0,0)});
     char nextmove = '\0';
