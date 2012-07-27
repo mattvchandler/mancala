@@ -110,12 +110,12 @@ void Board::swapsides()
 bool Board::finished() const
 {
     int p1_side = 0;
-    for(int i = p1_start; i < p1_start + 6; ++i)
+    for(int i = p1_start; i < p1_start + num_bowls; ++i)
         p1_side |= bowls[i].count;
     if(p1_side == 0)
         return true;
     int p2_side = 0;
-    for(int i = p2_start; i < p2_start + 6; ++i)
+    for(int i = p2_start; i < p2_start + num_bowls; ++i)
         p2_side |= bowls[i].count;
     return p2_side == 0;
 }
@@ -130,16 +130,16 @@ int Board::evaluate() const
 void Board::crapprint() const // TODO: delete me!
 {
     std::cout<<"    ";
-    for(int i = p1_start; i < p1_start + 6; ++i)
+    for(int i = p1_start; i < p1_start + num_bowls; ++i)
         std::cout<<std::setw(2)<<std::setfill(' ')<<bowls[bowls[i].across].count<<" ";
     std::cout<<std::endl;
-    std::cout<<std::setw(2)<<std::setfill(' ')<<bowls[p2_store].count<<std::setw(3*7)<<" "<<std::setw(2)<<bowls[p1_store].count<<std::endl;
+    std::cout<<std::setw(2)<<std::setfill(' ')<<bowls[p2_store].count<<std::setw(3 * (num_bowls + 1))<<" "<<std::setw(2)<<bowls[p1_store].count<<std::endl;
     std::cout<<"    ";
-    for(int i = p1_start; i < p1_start + 6; ++i)
+    for(int i = p1_start; i < p1_start + num_bowls; ++i)
         std::cout<<std::setw(2)<<std::setfill(' ')<<bowls[i].count<<" ";
     std::cout<<std::endl;
     std::cout<<"    ";
-    for(int i = 0; i < 6 ; ++i)
+    for(int i = 0; i < num_bowls; ++i)
         std::cout<<std::setw(2)<<std::setfill(' ')<<i<<" ";
     std::cout<<std::endl;
 }
@@ -163,7 +163,7 @@ int choosemove_alphabeta(const Board b, int depth, PLAYER player, int alpha, int
             else
                 return -1000 + diff - depth;
         }
-        for(int i = 0; i < 6; ++i)
+        for(int i = 0; i < b.num_bowls; ++i)
         {
             if(b.bowls[b.p1_start + i].count == 0)
                 continue;
@@ -198,7 +198,7 @@ int choosemove_alphabeta(const Board b, int depth, PLAYER player, int alpha, int
             else
                 return 1000 - diff + depth;
         }
-        for(int i = 0; i < 6; ++i)
+        for(int i = 0; i < b.num_bowls; ++i)
         {
             if(b.bowls[b.p1_start + i].count == 0)
                 continue;
@@ -225,7 +225,7 @@ int choosemove(const Board b) // purposely doing pass by value here as to not co
     int best = std::numeric_limits<int>::min();
     std::vector<int> best_i;
     // loop over available moves
-    for(int i =0; i < 6; ++i)
+    for(int i =0; i < b.num_bowls; ++i)
     {
         if(b.bowls[b.p1_start + i].count == 0)
             continue;
