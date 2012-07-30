@@ -22,7 +22,7 @@ protected:
     // signal handlers
 
     // make a move (called by button signals)
-    void move();
+    void move(const int i);
 
     // containers
     Gtk::Box main_box;
@@ -43,6 +43,8 @@ private:
     // update the numbers for each bowl / store
     void update_board();
 
+    //which player's turn is it?
+    int player;
     // the actual mancala board
     Board b;
 };

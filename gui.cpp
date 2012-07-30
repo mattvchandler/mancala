@@ -13,9 +13,7 @@ Mancala_win::Mancala_win():
     sub_board_box(Gtk::ORIENTATION_VERTICAL),
     top_row_box(Gtk::ORIENTATION_HORIZONTAL),
     bottom_row_box(Gtk::ORIENTATION_HORIZONTAL),
-    l_store("0"),
-    r_store("0"),
-    player_label("Player 1")
+    player(1)
 {
 
     // set window properties
@@ -44,27 +42,39 @@ Mancala_win::Mancala_win():
 
         bottom_row_bowls.push_back(std::unique_ptr<Gtk::Button> (new Gtk::Button));
         bottom_row_box.pack_start(*bottom_row_bowls[i]);
-        bottom_row_bowls.back()->signal_clicked().connect(sigc::mem_fun(*this, &Mancala_win::move));// TODO: pass i as param
+        bottom_row_bowls.back()->signal_clicked().connect(sigc::bind<int>(sigc::mem_fun(*this, &Mancala_win::move), i));
     }
     update_board();
     show_all_children();
 }
 
 // make a move (called by button signals)
-void Mancala_win::move()
+void Mancala_win::move(const int i)
 {
+    if(!b.move(i))
+    {
+        player = (player == 1)? 2 : 1;
+        b.swapsides();
+    }
+    update_board();
 }
 
 // update the numbers for each bowl / store
 void Mancala_win::update_board()
 {
+    //Show who's turn it is //TODO: ugly
+    if(player == 1)
+        player_label.set_text("Player 1");
+    else
+        player_label.set_text("Player 2");
+
     // get and update the counts for the stores
     std::ostringstream l_store_count_str;
-    l_store_count_str<<b.bowls[b.p1_store].count;
+    l_store_count_str<<b.bowls[b.p2_store].count;
     l_store.set_text(l_store_count_str.str());
 
     std::ostringstream r_store_count_str;
-    r_store_count_str<<b.bowls[b.p2_store].count;
+    r_store_count_str<<b.bowls[b.p1_store].count;
     r_store.set_text(r_store_count_str.str());
 
     for(int i = 0; i < b.num_bowls; ++i)
