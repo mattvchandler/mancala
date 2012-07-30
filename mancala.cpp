@@ -1,6 +1,6 @@
-//mancala.cpp
-//Mancala AI
-//Copyright Matthew Chandler 2012
+// mancala.cpp
+// Mancala AI
+// Copyright Matthew Chandler 2012
 
 #include <iostream> // TODO: delete when done with crapprint
 #include <iomanip>  // ditto
@@ -9,38 +9,38 @@
 
 #include "mancala.h"
 
-//board:
-//2 rows of 6 bowls
-//2 larger bowls for scoring (stores)
+// board:
+// 2 rows of 6 bowls
+// 2 larger bowls for scoring (stores)
 //
-//Rules
-//play is CCW
-//ending in player's own store yields extra turn
-//ending in empty bowl earns that piece and all those in the bowl across from it
-//game ends when a player has no legal moves left
+// Rules
+// play is CCW
+// ending in player's own store yields extra turn
+// ending in empty bowl earns that piece and all those in the bowl across from it
+// game ends when a player has no legal moves left
 //
-//good heuristics:
-//score - opponent's score
-//possibly good:
-//number of availible moves
-//seeds in play
-//seed distribution (large piles waiting to be collected? seed ratio between sides)
-//possibilty of extra turns
-//if we wanted to, we could use a genetic algorithm for determining the importance of each of these
+// good heuristics:
+// score - opponent's score
+// possibly good:
+// number of availible moves
+// seeds in play
+// seed distribution (large piles waiting to be collected? seed ratio between sides)
+// possibilty of extra turns
+// if we wanted to, we could use a genetic algorithm for determining the importance of each of these
 //
-//representation
-//circular array?
+// representation
+// circular array?
 //  11 10 9  8  7  6
 //  0  1  2  3  4  5
 //  p1 store, p2 store
-//From there, we would need logic to add to player's own store and skip the opponents.
-//if we abstract out the actual array indexes, we can use 2 starting pointers to easily flip the board
-//With that in mind, it might be better to use a Digraph, so we can have a truly circular setup
-//each node could have a next, prev, and across pointer, and one that points to the stores for the ends (NULL otherwise)
+// From there, we would need logic to add to player's own store and skip the opponents.
+// if we abstract out the actual array indexes, we can use 2 starting pointers to easily flip the board
+// With that in mind, it might be better to use a Digraph, so we can have a truly circular setup
+// each node could have a next, prev, and across pointer, and one that points to the stores for the ends (NULL otherwise)
 //
 //
 //
-//If we wanted to get really fancy, we could do 3D graphics with particle physics for the seeds.
+// If we wanted to get really fancy, we could do 3D graphics with particle physics for the seeds.
 
 Board::Board(const int Num_bowls, const int Num_seeds):
 num_bowls(Num_bowls), num_seeds(Num_seeds)
@@ -66,8 +66,8 @@ num_bowls(Num_bowls), num_seeds(Num_seeds)
     }
 }
 
-//perform a move
-//returns true if the move earns an extra turn
+// perform a move
+// returns true if the move earns an extra turn
 bool Board::move(int bowl)
 {
     if(bowl < 0 || bowl >= num_bowls)
@@ -77,7 +77,7 @@ bool Board::move(int bowl)
     if(seeds == 0)
         return false;
     bowls[bowl].count = 0;
-    //make the move
+    // make the move
     for(int i = 0; i < seeds; ++i)
     {
         bowl = bowls[bowl].next;
@@ -85,11 +85,11 @@ bool Board::move(int bowl)
             bowl = bowls[bowl].next;
         bowls[bowl].count += 1;
     }
-    //extra turn if we land in our own store
+    // extra turn if we land in our own store
     if(bowl == p1_store)
         return true;
 
-    //if we land in an empty bowl, we get the last seed sown and all the seeds from the bowl across
+    // if we land in an empty bowl, we get the last seed sown and all the seeds from the bowl across
     if(bowls[bowl].count == 1 && bowls[bowls[bowl].across].count > 0)
     {
         bowls[p1_store].count += 1 + bowls[bowls[bowl].across].count;
@@ -99,14 +99,14 @@ bool Board::move(int bowl)
     return false;
 }
 
-//swap sides of the board
+// swap sides of the board
 void Board::swapsides()
 {
     std::swap(p1_start, p2_start);
     std::swap(p1_store, p2_store);
 }
 
-//is the game over
+// is the game over
 bool Board::finished() const
 {
     int p1_side = 0;
@@ -237,7 +237,7 @@ int choosemove(const Board b) // purposely doing pass by value here as to not co
             sub_b.swapsides();
             score = choosemove_alphabeta(sub_b, 10, PLAYER_MIN, std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
         }
-        //std::cout<<"choose: "<<i<<" "<<score<<" "<<-sub_b.evaluate()<<std::endl;
+        // std::cout<<"choose: "<<i<<" "<<score<<" "<<-sub_b.evaluate()<<std::endl;
         if(score > best)
         {
             best = score;

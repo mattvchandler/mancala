@@ -1,6 +1,6 @@
-//mancala.h
-//Mancala AI
-//Copyright Matthew Chandler 2012
+// mancala.h
+// Mancala AI
+// Copyright Matthew Chandler 2012
 #ifndef __MANCALA_H__
 #define __MANCALA_H__
 #include <vector>
@@ -22,20 +22,20 @@ class Board
 {
 public:
     Board(const int Num_bowls = 6, const int Num_seeds = 4);
-    //perform a move
-    //returns true if the move earns an extra turn
+    // perform a move
+    // returns true if the move earns an extra turn
     bool move(int bowl);
 
-    //swap sides of the board
+    // swap sides of the board
     void swapsides();
 
-    //is the game over
+    // is the game over
     bool finished() const;
 
-    //heuristics to evaluate the board status
+    // heuristics to evaluate the board status
     int evaluate() const;
 
-    void crapprint() const; //delete me!
+    void crapprint() const; // delete me!
 
     int num_bowls, num_seeds;
     
@@ -49,5 +49,5 @@ private:
     int p1_store, p2_store;
 };
 
-int choosemove(const Board b); //purposely doing pass by value here as to not corrupt passed board
+int choosemove(const Board b); // purposely doing pass by value here as to not corrupt passed board
 #endif
