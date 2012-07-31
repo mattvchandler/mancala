@@ -24,17 +24,23 @@ protected:
     // make a move (called by button signals)
     void move(const int i);
 
+    // get a hint, will highlight a bowl
+    void hint();
+
     // containers
     Gtk::Box main_box;
     Gtk::Box board_box;
     Gtk::Box sub_board_box;
     Gtk::Box top_row_box;
     Gtk::Box bottom_row_box;
+    Gtk::Box hint_box;
     // stores
     Gtk::Label l_store, r_store;
     // bowls
     std::vector<std::unique_ptr<Gtk::Label>> top_row_bowls;
     std::vector<std::unique_ptr<Gtk::Button>> bottom_row_bowls;
+    // hint button
+    Gtk::Button hint_b;
 
     // Identify who's turn it is
     Gtk::Label player_label;

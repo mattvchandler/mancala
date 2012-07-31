@@ -15,6 +15,8 @@ Mancala_win::Mancala_win():
     sub_board_box(Gtk::ORIENTATION_VERTICAL),
     top_row_box(Gtk::ORIENTATION_HORIZONTAL),
     bottom_row_box(Gtk::ORIENTATION_HORIZONTAL),
+    hint_box(Gtk::ORIENTATION_HORIZONTAL),
+    hint_b("Hint"),
     player(1),
     playable(true)
 {
@@ -27,7 +29,7 @@ Mancala_win::Mancala_win():
     // add widgets to contatiners
     add(main_box);
     main_box.pack_start(player_label, Gtk::PACK_SHRINK);
-    main_box.pack_end(board_box);
+    main_box.pack_start(board_box);
 
     board_box.pack_start(l_store);
     board_box.pack_end(r_store);
@@ -35,6 +37,9 @@ Mancala_win::Mancala_win():
     board_box.pack_start(sub_board_box);
     sub_board_box.pack_start(top_row_box);
     sub_board_box.pack_end(bottom_row_box);
+
+    main_box.pack_end(hint_box, Gtk::PACK_SHRINK);
+    hint_box.pack_start(hint_b, Gtk::PACK_EXPAND_PADDING);
 
     // create and store widgets for the bowls
     // bind events to each button
@@ -47,7 +52,12 @@ Mancala_win::Mancala_win():
         bottom_row_box.pack_start(*bottom_row_bowls[i]);
         bottom_row_bowls.back()->signal_clicked().connect(sigc::bind<int>(sigc::mem_fun(*this, &Mancala_win::move), i));
     }
+
+    hint_b.signal_clicked().connect(sigc::mem_fun(*this, &Mancala_win::hint));
+
+    // set all labels for number of seeds
     update_board();
+
     show_all_children();
 }
 
@@ -59,7 +69,7 @@ void Mancala_win::move(const int i)
 
     if(b.bowls[b.p1_start + i].count <= 0)
         return;
-    
+
     if(!b.move(i))
     {
         player = (player == 1)? 2 : 1;
@@ -102,6 +112,14 @@ void Mancala_win::move(const int i)
     }
 }
 
+
+// get a hint, will highlight a bowl
+void Mancala_win::hint()
+{
+    int bestmove = choosemove(b);
+    bottom_row_bowls[bestmove]->drag_highlight();
+}
+
 // update the numbers for each bowl / store
 void Mancala_win::update_board()
 {
@@ -131,5 +149,8 @@ void Mancala_win::update_board()
         bottom_count_str.clear();
         bottom_count_str<<b.bowls[b.p1_start + i].count;
         bottom_row_bowls[i]->set_label(bottom_count_str.str());
+
+        // clear any hint highlighting
+        bottom_row_bowls[i]->drag_unhighlight();
     }
 }
