@@ -35,13 +35,10 @@ public:
     // heuristics to evaluate the board status
     int evaluate() const;
 
-    void crapprint() const; // delete me!
-
     int num_bowls, num_seeds;
     
     friend int choosemove(const Board b);
     friend int choosemove_alphabeta(const Board b, int depth, PLAYER player, int alpha, int beta);
-    friend void cli_game();
     friend class Mancala_win;
 private:
     std::vector<Bowl> bowls;
