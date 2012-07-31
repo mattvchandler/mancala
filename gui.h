@@ -43,8 +43,10 @@ private:
     // update the numbers for each bowl / store
     void update_board();
 
-    //which player's turn is it?
+    //state vars
     int player;
+    bool playable;
+
     // the actual mancala board
     Board b;
 };

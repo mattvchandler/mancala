@@ -4,6 +4,8 @@
 
 #include <sstream>
 
+#include <gtkmm/messagedialog.h>
+
 #include "gui.h"
 
 
@@ -13,7 +15,8 @@ Mancala_win::Mancala_win():
     sub_board_box(Gtk::ORIENTATION_VERTICAL),
     top_row_box(Gtk::ORIENTATION_HORIZONTAL),
     bottom_row_box(Gtk::ORIENTATION_HORIZONTAL),
-    player(1)
+    player(1),
+    playable(true)
 {
 
     // set window properties
@@ -51,18 +54,58 @@ Mancala_win::Mancala_win():
 // make a move (called by button signals)
 void Mancala_win::move(const int i)
 {
+    if(!playable)
+        return;
+
+    if(b.bowls[b.p1_start + i].count <= 0)
+        return;
+    
     if(!b.move(i))
     {
         player = (player == 1)? 2 : 1;
         b.swapsides();
     }
+
     update_board();
+
+    // check to see if the game is over
+    if(b.finished())
+    {
+        Glib::ustring msg;
+        // check for a tie
+        if(b.bowls[b.p1_store].count == b.bowls[b.p2_store].count)
+            msg = "Tie";
+
+        // determine the current player, and then see if they won or lost
+        else if(player == 1)
+            if(b.bowls[b.p1_store].count > b.bowls[b.p2_store].count)
+                msg = "Player 1 wins";
+            else
+                msg = "Player 2 wins";
+        else
+            if(b.bowls[b.p1_store].count > b.bowls[b.p2_store].count)
+                msg = "Player 2 wins";
+            else
+                msg = "Player 1 wins";
+
+        // was the win full of win? 
+        if(abs(b.bowls[b.p1_store].count - b.bowls[b.p2_store].count) >= 10)
+            msg += "\nFATALITY";
+
+        //create and show a dialog announcing the winner
+        Gtk::MessageDialog dlg(*this, "Game Over");
+        dlg.set_secondary_text(msg);
+        dlg.run();
+
+        //mark the game as unplayable
+        playable = false;
+    }
 }
 
 // update the numbers for each bowl / store
 void Mancala_win::update_board()
 {
-    //Show who's turn it is //TODO: ugly
+    // Show who's turn it is TODO: ugly
     if(player == 1)
         player_label.set_text("Player 1");
     else
