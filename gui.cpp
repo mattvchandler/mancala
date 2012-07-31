@@ -116,7 +116,14 @@ void Mancala_win::move(const int i)
 // get a hint, will highlight a bowl
 void Mancala_win::hint()
 {
+    // clear any existing highlights
+    for(auto &i: bottom_row_bowls)
+        i->drag_unhighlight();
+
+    // use AI function to find best move
     int bestmove = choosemove(b);
+
+    //highlight chosen one
     bottom_row_bowls[bestmove]->drag_highlight();
 }
 
