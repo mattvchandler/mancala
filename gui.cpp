@@ -72,7 +72,18 @@ void Mancala_win::move(const int i)
 
     if(!b.move(i))
     {
-        player = (player == 1)? 2 : 1;
+        //player = (player == 1)? 2 : 1;
+        b.swapsides();
+
+        int ai_move = 0;
+        do
+        {
+            if(b.finished())
+                break;
+            ai_move = choosemove(b);
+        }
+        while(b.move(ai_move));
+
         b.swapsides();
     }
 

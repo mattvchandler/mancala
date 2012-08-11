@@ -203,6 +203,8 @@ int choosemove_alphabeta(const Board b, int depth, PLAYER player, int alpha, int
 
 int choosemove(const Board b) // purposely doing pass by value here as to not corrupt passed board
 {
+    if(b.finished())
+        return 0;
     int best = std::numeric_limits<int>::min();
     std::vector<int> best_i;
     // loop over available moves
