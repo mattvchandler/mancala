@@ -131,6 +131,9 @@ void Mancala_win::hint()
     for(auto &i: bottom_row_bowls)
         i->drag_unhighlight();
 
+    if(!playable)
+        return;
+
     // use AI function to find best move
     int bestmove = choosemove(b);
 
