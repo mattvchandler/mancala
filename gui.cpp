@@ -16,9 +16,10 @@ Mancala_win::Mancala_win():
     top_row_box(Gtk::ORIENTATION_HORIZONTAL),
     bottom_row_box(Gtk::ORIENTATION_HORIZONTAL),
     hint_box(Gtk::ORIENTATION_HORIZONTAL),
+    new_game_box(Gtk::ORIENTATION_HORIZONTAL),
     hint_b("Hint"),
-    player(1),
-    playable(true)
+    new_game_b("New Game"),
+    player(1)
 {
 
     // set window properties
@@ -38,6 +39,9 @@ Mancala_win::Mancala_win():
     sub_board_box.pack_start(top_row_box);
     sub_board_box.pack_end(bottom_row_box);
 
+    main_box.pack_end(new_game_box, Gtk::PACK_SHRINK);
+    new_game_box.pack_start(new_game_b, Gtk::PACK_EXPAND_PADDING);
+
     main_box.pack_end(hint_box, Gtk::PACK_SHRINK);
     hint_box.pack_start(hint_b, Gtk::PACK_EXPAND_PADDING);
 
@@ -55,6 +59,8 @@ Mancala_win::Mancala_win():
 
     hint_b.signal_clicked().connect(sigc::mem_fun(*this, &Mancala_win::hint));
 
+    new_game_b.signal_clicked().connect(sigc::mem_fun(*this, &Mancala_win::new_game));
+
     // set all labels for number of seeds
     update_board();
 
@@ -64,9 +70,6 @@ Mancala_win::Mancala_win():
 // make a move (called by button signals)
 void Mancala_win::move(const int i)
 {
-    if(!playable)
-        return;
-
     if(b.bowls[b.p1_start + i].count <= 0)
         return;
 
@@ -118,8 +121,10 @@ void Mancala_win::move(const int i)
         dlg.set_secondary_text(msg);
         dlg.run();
 
-        //mark the game as unplayable
-        playable = false;
+        //make the game unplayable
+        hint_b.set_state(Gtk::STATE_INSENSITIVE);
+        for(auto &i: bottom_row_bowls)
+            i->set_state(Gtk::STATE_INSENSITIVE);
     }
 }
 
@@ -131,14 +136,21 @@ void Mancala_win::hint()
     for(auto &i: bottom_row_bowls)
         i->drag_unhighlight();
 
-    if(!playable)
-        return;
-
     // use AI function to find best move
     int bestmove = choosemove(b);
 
     //highlight chosen one
     bottom_row_bowls[bestmove]->drag_highlight();
+}
+
+// start a new game
+void Mancala_win::new_game()
+{
+    hint_b.set_state(Gtk::STATE_NORMAL);
+    for(auto &i: bottom_row_bowls)
+        i->set_state(Gtk::STATE_NORMAL);
+    b = Board();
+    update_board();
 }
 
 // update the numbers for each bowl / store

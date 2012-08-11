@@ -27,6 +27,9 @@ protected:
     // get a hint, will highlight a bowl
     void hint();
 
+    // reset the game
+    void new_game();
+
     // containers
     Gtk::Box main_box;
     Gtk::Box board_box;
@@ -34,6 +37,7 @@ protected:
     Gtk::Box top_row_box;
     Gtk::Box bottom_row_box;
     Gtk::Box hint_box;
+    Gtk::Box new_game_box;
     // stores
     Gtk::Label l_store, r_store;
     // bowls
@@ -41,6 +45,8 @@ protected:
     std::vector<std::unique_ptr<Gtk::Button>> bottom_row_bowls;
     // hint button
     Gtk::Button hint_b;
+    // new game button
+    Gtk::Button new_game_b;
 
     // Identify who's turn it is
     Gtk::Label player_label;
@@ -51,7 +57,6 @@ private:
 
     //state vars
     int player;
-    bool playable;
 
     // the actual mancala board
     Board b;
