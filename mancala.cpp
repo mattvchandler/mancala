@@ -2,10 +2,9 @@
 // Mancala AI
 // Copyright Matthew Chandler 2012
 
-#include <iostream> // TODO: delete when done with crapprint
-#include <iomanip>  // ditto
 #include <vector>
 #include <limits>
+#include <cstdlib>
 
 #include "mancala.h"
 
