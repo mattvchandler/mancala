@@ -2,8 +2,6 @@
 // GUI for mancala game, using gtkmm
 // Copyright Matthew Chandler 2012
 
-#include <sstream>
-
 #include <gtkmm/messagedialog.h>
 
 #include "gui.h"
@@ -11,10 +9,6 @@
 
 Mancala_win::Mancala_win():
     main_box(Gtk::ORIENTATION_VERTICAL),
-    board_box(Gtk::ORIENTATION_HORIZONTAL),
-    sub_board_box(Gtk::ORIENTATION_VERTICAL),
-    top_row_box(Gtk::ORIENTATION_HORIZONTAL),
-    bottom_row_box(Gtk::ORIENTATION_HORIZONTAL),
     hint_box(Gtk::ORIENTATION_HORIZONTAL),
     new_game_box(Gtk::ORIENTATION_HORIZONTAL),
     hint_b("Hint"),
@@ -30,32 +24,12 @@ Mancala_win::Mancala_win():
     // add widgets to contatiners
     add(main_box);
     main_box.pack_start(player_label, Gtk::PACK_SHRINK);
-    main_box.pack_start(board_box);
-
-    board_box.pack_start(l_store);
-    board_box.pack_end(r_store);
-
-    board_box.pack_start(sub_board_box);
-    sub_board_box.pack_start(top_row_box);
-    sub_board_box.pack_end(bottom_row_box);
 
     main_box.pack_end(new_game_box, Gtk::PACK_SHRINK);
     new_game_box.pack_start(new_game_b, Gtk::PACK_EXPAND_PADDING);
 
     main_box.pack_end(hint_box, Gtk::PACK_SHRINK);
     hint_box.pack_start(hint_b, Gtk::PACK_EXPAND_PADDING);
-
-    // create and store widgets for the bowls
-    // bind events to each button
-    for(int i = 0; i < b.num_bowls; ++i)
-    {
-        top_row_bowls.push_back(std::unique_ptr<Gtk::Label> (new Gtk::Label));
-        top_row_box.pack_start(*top_row_bowls[i]);
-
-        bottom_row_bowls.push_back(std::unique_ptr<Gtk::Button> (new Gtk::Button));
-        bottom_row_box.pack_start(*bottom_row_bowls[i]);
-        bottom_row_bowls.back()->signal_clicked().connect(sigc::bind<int>(sigc::mem_fun(*this, &Mancala_win::move), i));
-    }
 
     hint_b.signal_clicked().connect(sigc::mem_fun(*this, &Mancala_win::hint));
 
@@ -123,8 +97,6 @@ void Mancala_win::move(const int i)
 
         //make the game unplayable
         hint_b.set_state(Gtk::STATE_INSENSITIVE);
-        for(auto &i: bottom_row_bowls)
-            i->set_state(Gtk::STATE_INSENSITIVE);
     }
 }
 
@@ -132,23 +104,14 @@ void Mancala_win::move(const int i)
 // get a hint, will highlight a bowl
 void Mancala_win::hint()
 {
-    // clear any existing highlights
-    for(auto &i: bottom_row_bowls)
-        i->drag_unhighlight();
-
     // use AI function to find best move
     int bestmove = choosemove(b);
-
-    //highlight chosen one
-    bottom_row_bowls[bestmove]->drag_highlight();
 }
 
 // start a new game
 void Mancala_win::new_game()
 {
     hint_b.set_state(Gtk::STATE_NORMAL);
-    for(auto &i: bottom_row_bowls)
-        i->set_state(Gtk::STATE_NORMAL);
     b = Board();
     update_board();
 }
@@ -162,28 +125,7 @@ void Mancala_win::update_board()
     else
         player_label.set_text("Player 2");
 
-    // get and update the counts for the stores
-    std::ostringstream l_store_count_str;
-    l_store_count_str<<b.bowls[b.p2_store].count;
-    l_store.set_text(l_store_count_str.str());
-
-    std::ostringstream r_store_count_str;
-    r_store_count_str<<b.bowls[b.p1_store].count;
-    r_store.set_text(r_store_count_str.str());
-
     for(int i = 0; i < b.num_bowls; ++i)
     {
-        std::ostringstream top_count_str;
-        top_count_str.clear();
-        top_count_str<<b.bowls[b.bowls[b.p1_start + i].across].count;
-        top_row_bowls[i]->set_text(top_count_str.str());
-
-        std::ostringstream bottom_count_str;
-        bottom_count_str.clear();
-        bottom_count_str<<b.bowls[b.p1_start + i].count;
-        bottom_row_bowls[i]->set_label(bottom_count_str.str());
-
-        // clear any hint highlighting
-        bottom_row_bowls[i]->drag_unhighlight();
     }
 }
