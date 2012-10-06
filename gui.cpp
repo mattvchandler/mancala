@@ -6,6 +6,39 @@
 
 #include "gui.h"
 
+Mancala_draw::Mancala_draw()
+{
+    add_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
+    signal_button_press_event().connect(sigc::mem_fun(*this, &Mancala_draw::mouse_down));
+    signal_button_release_event().connect(sigc::mem_fun(*this, &Mancala_draw::mouse_up));
+}
+
+bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
+{
+    Gtk::Allocation alloc = get_allocation();
+    
+    cr->set_source_rgb(1.0, 0.0, 0.0);
+    for(int i = 1; i < 8; ++i) 
+    {
+        cr->move_to(alloc.get_width() * (i / 8.0), 0.0);
+        cr->line_to(alloc.get_width() * (i / 8.0), alloc.get_height());
+        cr->stroke();
+    }
+    cr->move_to(0.0, alloc.get_height() * .5);
+    cr->line_to(alloc.get_width(), alloc.get_height() * .5);
+    cr->stroke();
+    return true;    
+}
+
+bool Mancala_draw::mouse_down(GdkEventButton *event)
+{
+    return true;    
+}
+
+bool Mancala_draw::mouse_up(GdkEventButton *event)
+{
+    return true;
+}
 
 Mancala_win::Mancala_win():
     main_box(Gtk::ORIENTATION_VERTICAL),
@@ -24,6 +57,8 @@ Mancala_win::Mancala_win():
     // add widgets to contatiners
     add(main_box);
     main_box.pack_start(player_label, Gtk::PACK_SHRINK);
+
+    main_box.pack_start(draw);
 
     main_box.pack_end(new_game_box, Gtk::PACK_SHRINK);
     new_game_box.pack_start(new_game_b, Gtk::PACK_EXPAND_PADDING);

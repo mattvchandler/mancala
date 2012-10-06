@@ -8,11 +8,21 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
+#include <gtkmm/drawingarea.h>
 #include <gtkmm/label.h>
 #include <gtkmm/window.h>
 
 #include "mancala.h"
 
+class Mancala_draw: public Gtk::DrawingArea
+{
+public:
+    Mancala_draw();
+protected:
+    bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr);
+    bool mouse_down(GdkEventButton *event);
+    bool mouse_up(GdkEventButton *event);
+};
 class Mancala_win: public Gtk::Window
 {
 public:
@@ -34,15 +44,15 @@ protected:
     Gtk::Box main_box;
     Gtk::Box hint_box;
     Gtk::Box new_game_box;
-    // stores
-    // bowls
     // hint button
     Gtk::Button hint_b;
     // new game button
     Gtk::Button new_game_b;
-
     // Identify who's turn it is
     Gtk::Label player_label;
+    // Drawing area
+    Mancala_draw draw;
+
 
 private:
     // update the numbers for each bowl / store
