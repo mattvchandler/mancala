@@ -17,11 +17,12 @@
 class Mancala_draw: public Gtk::DrawingArea
 {
 public:
-    Mancala_draw();
+    Mancala_draw(Board * board);
 protected:
     bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr);
     bool mouse_down(GdkEventButton *event);
-    bool mouse_up(GdkEventButton *event);
+private:
+    Board * b;
 };
 class Mancala_win: public Gtk::Window
 {

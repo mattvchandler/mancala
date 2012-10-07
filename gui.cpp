@@ -6,11 +6,10 @@
 
 #include "gui.h"
 
-Mancala_draw::Mancala_draw()
+Mancala_draw::Mancala_draw(Board * board): b(board)
 {
-    add_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
+    add_events(Gdk::BUTTON_PRESS_MASK);
     signal_button_press_event().connect(sigc::mem_fun(*this, &Mancala_draw::mouse_down));
-    signal_button_release_event().connect(sigc::mem_fun(*this, &Mancala_draw::mouse_up));
 }
 
 bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
@@ -18,14 +17,14 @@ bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
     Gtk::Allocation alloc = get_allocation();
     
     cr->set_source_rgb(1.0, 0.0, 0.0);
-    for(int i = 1; i < 8; ++i) 
+    for(int i = 1; i < b->num_bowls + 2; ++i) 
     {
-        cr->move_to(alloc.get_width() * (i / 8.0), 0.0);
-        cr->line_to(alloc.get_width() * (i / 8.0), alloc.get_height());
+        cr->move_to(alloc.get_width() * (i / (double)(b->num_bowls + 2)), 0.0);
+        cr->line_to(alloc.get_width() * (i /(double)(b->num_bowls + 2)), alloc.get_height());
         cr->stroke();
     }
-    cr->move_to(0.0, alloc.get_height() * .5);
-    cr->line_to(alloc.get_width(), alloc.get_height() * .5);
+    cr->move_to(1.0 / (b->num_bowls + 2) * alloc.get_width(), alloc.get_height() * .5);
+    cr->line_to((double)(b->num_bowls +1) / (double)(b->num_bowls + 2) * alloc.get_width(), alloc.get_height() * .5);
     cr->stroke();
     return true;    
 }
@@ -35,20 +34,15 @@ bool Mancala_draw::mouse_down(GdkEventButton *event)
     return true;    
 }
 
-bool Mancala_draw::mouse_up(GdkEventButton *event)
-{
-    return true;
-}
-
 Mancala_win::Mancala_win():
     main_box(Gtk::ORIENTATION_VERTICAL),
     hint_box(Gtk::ORIENTATION_HORIZONTAL),
     new_game_box(Gtk::ORIENTATION_HORIZONTAL),
     hint_b("Hint"),
     new_game_b("New Game"),
+    draw(&b),
     player(1)
 {
-
     // set window properties
     set_border_width(10);
     set_default_size(200,100);
@@ -134,7 +128,6 @@ void Mancala_win::move(const int i)
         hint_b.set_state(Gtk::STATE_INSENSITIVE);
     }
 }
-
 
 // get a hint, will highlight a bowl
 void Mancala_win::hint()
