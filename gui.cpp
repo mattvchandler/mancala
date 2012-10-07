@@ -2,11 +2,13 @@
 // GUI for mancala game, using gtkmm
 // Copyright Matthew Chandler 2012
 
+#include <iostream> // TODO:delete
+
 #include <gtkmm/messagedialog.h>
 
 #include "gui.h"
 
-Mancala_draw::Mancala_draw(Board * board): b(board)
+Mancala_draw::Mancala_draw(Board * Board, int * Player): b(Board), player(Player)
 {
     add_events(Gdk::BUTTON_PRESS_MASK);
     signal_button_press_event().connect(sigc::mem_fun(*this, &Mancala_draw::mouse_down));
@@ -15,23 +17,42 @@ Mancala_draw::Mancala_draw(Board * board): b(board)
 bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 {
     Gtk::Allocation alloc = get_allocation();
-    
+
     cr->set_source_rgb(1.0, 0.0, 0.0);
-    for(int i = 1; i < b->num_bowls + 2; ++i) 
+
+    for(int i = 1; i < b->num_bowls + 2; ++i)
     {
         cr->move_to(alloc.get_width() * (i / (double)(b->num_bowls + 2)), 0.0);
-        cr->line_to(alloc.get_width() * (i /(double)(b->num_bowls + 2)), alloc.get_height());
+        cr->line_to(alloc.get_width() * (i / (double)(b->num_bowls + 2)), alloc.get_height());
         cr->stroke();
     }
+
     cr->move_to(1.0 / (b->num_bowls + 2) * alloc.get_width(), alloc.get_height() * .5);
-    cr->line_to((double)(b->num_bowls +1) / (double)(b->num_bowls + 2) * alloc.get_width(), alloc.get_height() * .5);
+    cr->line_to((1.0 -  1.0 / (b->num_bowls + 2)) * alloc.get_width(), alloc.get_height() * .5);
     cr->stroke();
-    return true;    
+
+    return true;
 }
 
-bool Mancala_draw::mouse_down(GdkEventButton *event)
+bool Mancala_draw::mouse_down(GdkEventButton * event)
 {
-    return true;    
+    Gtk::Allocation alloc = get_allocation();
+
+    int grid_x = (int)((b->num_bowls + 2) * event->x / alloc.get_width());
+    int grid_y = (event->y / alloc.get_height() <= .5)? 0 : 1;
+
+    std::cout<<grid_x<<" "<<grid_y<<std::endl;
+
+    if(grid_x > 0 && grid_x < b->num_bowls + 1)
+    {
+        if(*player == 1 && grid_y == 1)
+            std::cout<<"Valid"<<std::endl;
+
+        if(*player == 2 && grid_y == 0)
+            std::cout<<"Valid"<<std::endl;
+    }
+
+        return true;
 }
 
 Mancala_win::Mancala_win():
@@ -40,7 +61,7 @@ Mancala_win::Mancala_win():
     new_game_box(Gtk::ORIENTATION_HORIZONTAL),
     hint_b("Hint"),
     new_game_b("New Game"),
-    draw(&b),
+    draw(&b, &player),
     player(1)
 {
     // set window properties
@@ -115,7 +136,7 @@ void Mancala_win::move(const int i)
             else
                 msg = "Player 1 wins";
 
-        // was the win full of win? 
+        // was the win full of win?
         if(abs(b.bowls[b.p1_store].count - b.bowls[b.p2_store].count) >= 10)
             msg += "\nFATALITY";
 
