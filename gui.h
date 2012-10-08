@@ -19,14 +19,12 @@ class Mancala_win; // predeclared to avoid circular dependency
 class Mancala_draw: public Gtk::DrawingArea
 {
 public:
-    Mancala_draw(Mancala_win * Win, Board * Board, int * Player);
+    Mancala_draw(Mancala_win * Win);
 protected:
     bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr);
     bool mouse_down(GdkEventButton * event);
 private:
     Mancala_win * win;
-    Board * b;
-    int * player;
 };
 
 class Mancala_win: public Gtk::Window
