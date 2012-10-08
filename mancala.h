@@ -40,6 +40,7 @@ public:
     friend int choosemove(const Board b);
     friend int choosemove_alphabeta(const Board b, int depth, PLAYER player, int alpha, int beta);
     friend class Mancala_win;
+    friend class Mancala_draw;
 private:
     std::vector<Bowl> bowls;
     int p1_start, p2_start;

@@ -31,6 +31,51 @@ bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
     cr->line_to((1.0 -  1.0 / (b->num_bowls + 2)) * alloc.get_width(), alloc.get_height() * .5);
     cr->stroke();
 
+    Pango::FontDescription font("Monospace");
+    font.set_size(std::min(alloc.get_width(), alloc.get_height()) * .2 * Pango::SCALE);
+    int tex_w, tex_h;
+    cr->set_source_rgb(0.0, 0.0, 0.0);
+
+    // draw # for left store
+    std::ostringstream l_store_str;
+    l_store_str<<b->bowls[b->p2_store].count;
+    Glib::RefPtr<Pango::Layout> l_store_txt = create_pango_layout(l_store_str.str());
+    l_store_txt->set_font_description(font);
+    l_store_txt->get_pixel_size(tex_w, tex_h);
+    cr->move_to(alloc.get_width() * 1.0 / (2.0 * (b->num_bowls + 2)) - tex_w * .5, (alloc.get_height() - tex_h) * .5);
+    l_store_txt->show_in_cairo_context(cr);
+
+    // draw # for right store
+    std::ostringstream r_store_str;
+    r_store_str<<b->bowls[b->p1_store].count;
+    Glib::RefPtr<Pango::Layout> r_store_txt = create_pango_layout(r_store_str.str());
+    r_store_txt->set_font_description(font);
+    r_store_txt->get_pixel_size(tex_w, tex_h);
+    cr->move_to(alloc.get_width() * (1.0 - 1.0 / (2.0 * (b->num_bowls + 2))) - tex_w * .5, (alloc.get_height() - tex_h) * .5);
+    r_store_txt->show_in_cairo_context(cr);
+
+    // draw #s for bowls
+    for(int i = 0; i < b->num_bowls; ++i)
+    {
+        //upper row
+        std::ostringstream upper_str;
+        upper_str<<b->bowls[b->bowls[b->p1_start + i].across].count;
+        Glib::RefPtr<Pango::Layout> upper_txt = create_pango_layout(upper_str.str());
+        upper_txt->set_font_description(font);
+        upper_txt->get_pixel_size(tex_w, tex_h);
+        cr->move_to(alloc.get_width() * (2 * i + 3) / (2.0 * (b->num_bowls + 2)) - tex_w * .5, alloc.get_height() * .25 - tex_h * .5);
+        upper_txt->show_in_cairo_context(cr);
+
+        //lower row
+        std::ostringstream lower_str;
+        lower_str<<b->bowls[b->p1_start + i].count;
+        Glib::RefPtr<Pango::Layout> lower_txt = create_pango_layout(lower_str.str());
+        lower_txt->set_font_description(font);
+        lower_txt->get_pixel_size(tex_w, tex_h);
+        cr->move_to(alloc.get_width() * (2 * i + 3) / (2.0 * (b->num_bowls + 2)) - tex_w * .5, alloc.get_height() * .75 - tex_h * .5);
+        lower_txt->show_in_cairo_context(cr);
+    }
+
     return true;
 }
 
