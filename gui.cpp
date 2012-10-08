@@ -2,13 +2,11 @@
 // GUI for mancala game, using gtkmm
 // Copyright Matthew Chandler 2012
 
-#include <iostream> // TODO:delete
-
 #include <gtkmm/messagedialog.h>
 
 #include "gui.h"
 
-Mancala_draw::Mancala_draw(Board * Board, int * Player): b(Board), player(Player)
+Mancala_draw::Mancala_draw(Mancala_win * Win, Board * Board, int * Player): win(Win), b(Board), player(Player)
 {
     add_events(Gdk::BUTTON_PRESS_MASK);
     signal_button_press_event().connect(sigc::mem_fun(*this, &Mancala_draw::mouse_down));
@@ -32,7 +30,7 @@ bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
     cr->stroke();
 
     Pango::FontDescription font("Monospace");
-    font.set_size(std::min(alloc.get_width(), alloc.get_height()) * .2 * Pango::SCALE);
+    font.set_size(std::min(alloc.get_width(), alloc.get_height()) * .1 * Pango::SCALE);
     int tex_w, tex_h;
     cr->set_source_rgb(0.0, 0.0, 0.0);
 
@@ -86,18 +84,18 @@ bool Mancala_draw::mouse_down(GdkEventButton * event)
     int grid_x = (int)((b->num_bowls + 2) * event->x / alloc.get_width());
     int grid_y = (event->y / alloc.get_height() <= .5)? 0 : 1;
 
-    std::cout<<grid_x<<" "<<grid_y<<std::endl;
-
-    if(grid_x > 0 && grid_x < b->num_bowls + 1)
+    if(grid_x > 0 && grid_x < b->num_bowls + 1 && !b->finished())
     {
         if(*player == 1 && grid_y == 1)
-            std::cout<<"Valid"<<std::endl;
+        {
+            win->move(grid_x - 1);
+            queue_draw();
+        }
 
-        if(*player == 2 && grid_y == 0)
-            std::cout<<"Valid"<<std::endl;
+        if(*player == 2 && grid_y == 0);
     }
 
-        return true;
+    return true;
 }
 
 Mancala_win::Mancala_win():
@@ -106,7 +104,7 @@ Mancala_win::Mancala_win():
     new_game_box(Gtk::ORIENTATION_HORIZONTAL),
     hint_b("Hint"),
     new_game_b("New Game"),
-    draw(&b, &player),
+    draw(this, &b, &player),
     player(1)
 {
     // set window properties
@@ -218,8 +216,4 @@ void Mancala_win::update_board()
         player_label.set_text("Player 1");
     else
         player_label.set_text("Player 2");
-
-    for(int i = 0; i < b.num_bowls; ++i)
-    {
-    }
 }

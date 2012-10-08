@@ -14,14 +14,17 @@
 
 #include "mancala.h"
 
+class Mancala_win; // predeclared to avoid circular dependency
+
 class Mancala_draw: public Gtk::DrawingArea
 {
 public:
-    Mancala_draw(Board * Board, int * Player);
+    Mancala_draw(Mancala_win * Win, Board * Board, int * Player);
 protected:
     bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr);
     bool mouse_down(GdkEventButton * event);
 private:
+    Mancala_win * win;
     Board * b;
     int * player;
 };
@@ -30,6 +33,8 @@ class Mancala_win: public Gtk::Window
 {
 public:
     Mancala_win();
+
+    friend class Mancala_draw;
 
 protected:
     // signal handlers
@@ -55,7 +60,6 @@ protected:
     Gtk::Label player_label;
     // Drawing area
     Mancala_draw draw;
-
 
 private:
     // update the numbers for each bowl / store
