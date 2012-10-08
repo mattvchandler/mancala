@@ -108,7 +108,7 @@ Mancala_win::Mancala_win():
 {
     // set window properties
     set_border_width(10);
-    set_default_size(200,100);
+    set_default_size(800,400);
     set_title("Mancala");
 
     // add widgets to contatiners
