@@ -25,6 +25,7 @@ protected:
     bool mouse_down(GdkEventButton * event);
 private:
     Mancala_win * win;
+    Glib::RefPtr<Gdk::Pixbuf> bg_store;
 };
 
 class Mancala_win: public Gtk::Window

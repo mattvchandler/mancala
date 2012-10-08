@@ -2,6 +2,10 @@
 // GUI for mancala game, using gtkmm
 // Copyright Matthew Chandler 2012
 
+#include <iostream>
+
+#include <gdkmm/general.h>
+#include <glibmm/fileutils.h>
 #include <gtkmm/messagedialog.h>
 
 #include "gui.h"
@@ -10,11 +14,36 @@ Mancala_draw::Mancala_draw(Mancala_win * Win): win(Win)
 {
     add_events(Gdk::BUTTON_PRESS_MASK);
     signal_button_press_event().connect(sigc::mem_fun(*this, &Mancala_draw::mouse_down));
+    try
+    {
+        bg_store = Gdk::Pixbuf::create_from_file("img/bg_store.png");
+    }
+    catch(const Glib::FileError& ex)
+    {
+        std::cerr<<"FileError: "<<ex.what()<<std::endl;
+    }
+    catch(const Gdk::PixbufError& ex)
+    {
+        std::cerr<<"PixbufError: "<< ex.what()<<std::endl;
+    }
 }
 
 bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 {
     Gtk::Allocation alloc = get_allocation();
+
+    cr->save();
+    cr->scale(alloc.get_width() / (double)bg_store->get_width() / (win->b.num_bowls + 2), alloc.get_height() / (double)bg_store->get_height());
+    Gdk::Cairo::set_source_pixbuf(cr, bg_store);
+    cr->paint();
+    cr->restore();
+
+    cr->save();
+    cr->translate(alloc.get_width() * (1.0 - 1.0 / (win->b.num_bowls + 2)), 0);
+    cr->scale(alloc.get_width() / (double)bg_store->get_width() / (win->b.num_bowls + 2), alloc.get_height() / (double)bg_store->get_height());
+    Gdk::Cairo::set_source_pixbuf(cr, bg_store);
+    cr->paint();
+    cr->restore();
 
     cr->set_source_rgb(1.0, 0.0, 0.0);
 
