@@ -30,32 +30,35 @@ Mancala_draw::Mancala_draw(Mancala_win * Win): win(Win)
 
 bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 {
+    int num_cells = win->b.num_bowls + 2;
+    double inv_num_cells = 1.0 / num_cells;
+
     Gtk::Allocation alloc = get_allocation();
 
     cr->save();
-    cr->scale(alloc.get_width() / (double)bg_store->get_width() / (win->b.num_bowls + 2), alloc.get_height() / (double)bg_store->get_height());
+    cr->scale(alloc.get_width() / (double)bg_store->get_width() * inv_num_cells, alloc.get_height() / (double)bg_store->get_height());
     Gdk::Cairo::set_source_pixbuf(cr, bg_store);
     cr->paint();
     cr->restore();
 
     cr->save();
-    cr->translate(alloc.get_width() * (1.0 - 1.0 / (win->b.num_bowls + 2)), 0);
-    cr->scale(alloc.get_width() / (double)bg_store->get_width() / (win->b.num_bowls + 2), alloc.get_height() / (double)bg_store->get_height());
+    cr->translate(alloc.get_width() * (1.0 - inv_num_cells), 0);
+    cr->scale(alloc.get_width() / (double)bg_store->get_width() * inv_num_cells, alloc.get_height() / (double)bg_store->get_height());
     Gdk::Cairo::set_source_pixbuf(cr, bg_store);
     cr->paint();
     cr->restore();
 
     cr->set_source_rgb(1.0, 0.0, 0.0);
 
-    for(int i = 1; i < win->b.num_bowls + 2; ++i)
+    for(int i = 1; i < num_cells; ++i)
     {
-        cr->move_to(alloc.get_width() * (i / (double)(win->b.num_bowls + 2)), 0.0);
-        cr->line_to(alloc.get_width() * (i / (double)(win->b.num_bowls + 2)), alloc.get_height());
+        cr->move_to(alloc.get_width() * (i * inv_num_cells), 0.0);
+        cr->line_to(alloc.get_width() * (i * inv_num_cells), alloc.get_height());
         cr->stroke();
     }
 
-    cr->move_to(1.0 / (win->b.num_bowls + 2) * alloc.get_width(), alloc.get_height() * .5);
-    cr->line_to((1.0 -  1.0 / (win->b.num_bowls + 2)) * alloc.get_width(), alloc.get_height() * .5);
+    cr->move_to(inv_num_cells * alloc.get_width(), alloc.get_height() * .5);
+    cr->line_to((1.0 -  inv_num_cells) * alloc.get_width(), alloc.get_height() * .5);
     cr->stroke();
 
     Pango::FontDescription font("Monospace");
@@ -69,7 +72,7 @@ bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
     Glib::RefPtr<Pango::Layout> l_store_txt = create_pango_layout(l_store_str.str());
     l_store_txt->set_font_description(font);
     l_store_txt->get_pixel_size(tex_w, tex_h);
-    cr->move_to(alloc.get_width() * 1.0 / (2.0 * (win->b.num_bowls + 2)) - tex_w * .5, (alloc.get_height() - tex_h) * .5);
+    cr->move_to(alloc.get_width() * .5 * inv_num_cells - tex_w * .5, (alloc.get_height() - tex_h) * .5);
     l_store_txt->show_in_cairo_context(cr);
 
     // draw # for right store
@@ -78,7 +81,7 @@ bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
     Glib::RefPtr<Pango::Layout> r_store_txt = create_pango_layout(r_store_str.str());
     r_store_txt->set_font_description(font);
     r_store_txt->get_pixel_size(tex_w, tex_h);
-    cr->move_to(alloc.get_width() * (1.0 - 1.0 / (2.0 * (win->b.num_bowls + 2))) - tex_w * .5, (alloc.get_height() - tex_h) * .5);
+    cr->move_to(alloc.get_width() * (1.0 - .5 * inv_num_cells) - tex_w * .5, (alloc.get_height() - tex_h) * .5);
     r_store_txt->show_in_cairo_context(cr);
 
     // draw #s for bowls
@@ -90,7 +93,7 @@ bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
         Glib::RefPtr<Pango::Layout> upper_txt = create_pango_layout(upper_str.str());
         upper_txt->set_font_description(font);
         upper_txt->get_pixel_size(tex_w, tex_h);
-        cr->move_to(alloc.get_width() * (2 * i + 3) / (2.0 * (win->b.num_bowls + 2)) - tex_w * .5, alloc.get_height() * .25 - tex_h * .5);
+        cr->move_to(alloc.get_width() * (2 * i + 3) * .5 * inv_num_cells - tex_w * .5, alloc.get_height() * .25 - tex_h * .5);
         upper_txt->show_in_cairo_context(cr);
 
         //lower row
@@ -99,7 +102,7 @@ bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
         Glib::RefPtr<Pango::Layout> lower_txt = create_pango_layout(lower_str.str());
         lower_txt->set_font_description(font);
         lower_txt->get_pixel_size(tex_w, tex_h);
-        cr->move_to(alloc.get_width() * (2 * i + 3) / (2.0 * (win->b.num_bowls + 2)) - tex_w * .5, alloc.get_height() * .75 - tex_h * .5);
+        cr->move_to(alloc.get_width() * (2 * i + 3) * .5 * inv_num_cells - tex_w * .5, alloc.get_height() * .75 - tex_h * .5);
         lower_txt->show_in_cairo_context(cr);
     }
 
