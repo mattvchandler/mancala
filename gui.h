@@ -27,6 +27,7 @@ private:
     Mancala_win * win;
     Glib::RefPtr<Gdk::Pixbuf> bg_store;
     Glib::RefPtr<Gdk::Pixbuf> bg_bowl;
+    Glib::RefPtr<Gdk::Pixbuf> bg_board;
 };
 
 class Mancala_win: public Gtk::Window

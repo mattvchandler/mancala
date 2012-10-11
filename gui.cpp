@@ -18,6 +18,7 @@ Mancala_draw::Mancala_draw(Mancala_win * Win): win(Win)
     {
         bg_store = Gdk::Pixbuf::create_from_file("img/bg_store.png");
         bg_bowl = Gdk::Pixbuf::create_from_file("img/bg_bowl.png");
+        bg_board = Gdk::Pixbuf::create_from_file("img/bg_board.png");
     }
     catch(const Glib::FileError& ex)
     {
@@ -40,6 +41,13 @@ bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
     Pango::FontDescription font("Monospace");
     font.set_size(std::min(alloc.get_width(), alloc.get_height()) * .1 * Pango::SCALE);
     cr->set_source_rgb(0.0, 0.0, 0.0);
+
+    // draw bg
+    cr->save();
+    cr->scale(alloc.get_width() / (bg_board->get_width() - .5), alloc.get_height() / (bg_board->get_height() - .5));
+    Gdk::Cairo::set_source_pixbuf(cr, bg_board);
+    cr->paint();
+    cr->restore();
 
     // draw bg for left store
     cr->save();
