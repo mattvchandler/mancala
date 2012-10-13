@@ -19,6 +19,7 @@ Mancala_draw::Mancala_draw(Mancala_win * Win): win(Win)
         bg_store = Gdk::Pixbuf::create_from_file("img/bg_store.png");
         bg_bowl = Gdk::Pixbuf::create_from_file("img/bg_bowl.png");
         bg_board = Gdk::Pixbuf::create_from_file("img/bg_board.png");
+        hint_img = Gdk::Pixbuf::create_from_file("img/hint.png");
         beads.push_back(Gdk::Pixbuf::create_from_file("img/bead_1.png"));
         beads.push_back(Gdk::Pixbuf::create_from_file("img/bead_2.png"));
         beads.push_back(Gdk::Pixbuf::create_from_file("img/bead_3.png"));
@@ -145,7 +146,18 @@ bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
         cr->move_to(alloc.get_width() * (2 * i + 3) * .5 * inv_num_cells - txt_w * .5, alloc.get_height() * .25 - txt_h * .5);
         upper_txt->show_in_cairo_context(cr);
 
-        //lower row bgs
+        // draw hint
+        if(win->show_hint && win->hint_i == i)
+        {
+            cr->save();
+            cr->translate(alloc.get_width() * (i + 1) * inv_num_cells, .5 * alloc.get_height());
+            cr->scale(alloc.get_width() / (hint_img->get_width() - .5) * inv_num_cells, alloc.get_height() / (hint_img->get_height() - .5) * .5);
+            Gdk::Cairo::set_source_pixbuf(cr, hint_img);
+            cr->paint();
+            cr->restore();
+        }
+
+        // lower row bgs
         cr->save();
         cr->translate(alloc.get_width() * (i + 1) * inv_num_cells, .5 * alloc.get_height());
         cr->scale(alloc.get_width() / (bg_bowl->get_width() - .5) * inv_num_cells, alloc.get_height() / (bg_bowl->get_height() - .5) * .5);
@@ -206,7 +218,8 @@ Mancala_win::Mancala_win():
     hint_b("Hint"),
     new_game_b("New Game"),
     draw(this),
-    player(1)
+    player(1),
+    show_hint(false)
 {
     // set window properties
     set_border_width(10);
@@ -292,13 +305,17 @@ void Mancala_win::move(const int i)
         //make the game unplayable
         hint_b.set_state(Gtk::STATE_INSENSITIVE);
     }
+
+    show_hint = false;
 }
 
 // get a hint, will highlight a bowl
 void Mancala_win::hint()
 {
     // use AI function to find best move
-    int bestmove = choosemove(b);
+    hint_i = choosemove(b);
+    show_hint = true;
+    update_board();
 }
 
 // start a new game
@@ -306,6 +323,7 @@ void Mancala_win::new_game()
 {
     hint_b.set_state(Gtk::STATE_NORMAL);
     b = Board();
+    show_hint = false;
     update_board();
 }
 

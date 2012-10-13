@@ -27,6 +27,7 @@ private:
     Glib::RefPtr<Gdk::Pixbuf> bg_store;
     Glib::RefPtr<Gdk::Pixbuf> bg_bowl;
     Glib::RefPtr<Gdk::Pixbuf> bg_board;
+    Glib::RefPtr<Gdk::Pixbuf> hint_img;
     std::vector<Glib::RefPtr<Gdk::Pixbuf>> beads;
 };
 
@@ -68,6 +69,8 @@ private:
 
     //state vars
     int player;
+    bool show_hint;
+    int hint_i;
 
     // the actual mancala board
     Board b;
