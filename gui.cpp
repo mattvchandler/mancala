@@ -19,6 +19,11 @@ Mancala_draw::Mancala_draw(Mancala_win * Win): win(Win)
         bg_store = Gdk::Pixbuf::create_from_file("img/bg_store.png");
         bg_bowl = Gdk::Pixbuf::create_from_file("img/bg_bowl.png");
         bg_board = Gdk::Pixbuf::create_from_file("img/bg_board.png");
+        beads.push_back(Gdk::Pixbuf::create_from_file("img/bead_1.png"));
+        beads.push_back(Gdk::Pixbuf::create_from_file("img/bead_2.png"));
+        beads.push_back(Gdk::Pixbuf::create_from_file("img/bead_3.png"));
+        beads.push_back(Gdk::Pixbuf::create_from_file("img/bead_4.png"));
+        beads.push_back(Gdk::Pixbuf::create_from_file("img/bead_5.png"));
     }
     catch(const Glib::FileError& ex)
     {
@@ -56,6 +61,19 @@ bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
     cr->paint();
     cr->restore();
 
+    // l store beads
+    int num_beads = win->b.bowls[win->b.p2_store].count;
+    int num_beads_shown = (num_beads > 5)? 5 : num_beads;
+    if(num_beads_shown > 0)
+    {
+        cr->save();
+        cr->translate(0, alloc.get_height() * .25);
+        cr->scale(alloc.get_width() / (beads[num_beads_shown - 1]->get_width() - .5) * inv_num_cells, alloc.get_height() / (beads[num_beads_shown - 1]->get_height() - .5) * .5);
+        Gdk::Cairo::set_source_pixbuf(cr, beads[num_beads_shown - 1]);
+        cr->paint();
+        cr->restore();
+    }
+
     // draw # for left store
     std::ostringstream l_store_str;
     l_store_str<<win->b.bowls[win->b.p2_store].count;
@@ -72,6 +90,18 @@ bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
     Gdk::Cairo::set_source_pixbuf(cr, bg_store);
     cr->paint();
     cr->restore();
+
+    num_beads = win->b.bowls[win->b.p1_store].count;
+    num_beads_shown = (num_beads > 5)? 5 : num_beads;
+    if(num_beads_shown > 0)
+    {
+        cr->save();
+        cr->translate(alloc.get_width() * (1.0 - inv_num_cells), alloc.get_height() * .25);
+        cr->scale(alloc.get_width() / (beads[num_beads_shown - 1]->get_width() - .5) * inv_num_cells, alloc.get_height() / (beads[num_beads_shown - 1]->get_height() - .5) * .5);
+        Gdk::Cairo::set_source_pixbuf(cr, beads[num_beads_shown - 1]);
+        cr->paint();
+        cr->restore();
+    }
 
     // draw # for right store
     std::ostringstream r_store_str;
@@ -93,9 +123,22 @@ bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
         cr->paint();
         cr->restore();
 
+        //upper row beads
+        int num_beads = win->b.bowls[win->b.bowls[win->b.p1_start + i].across].count;
+        int num_beads_shown = (num_beads > 5)? 5 : num_beads;
+        if(num_beads_shown > 0)
+        {
+            cr->save();
+            cr->translate(alloc.get_width() * (i + 1) * inv_num_cells, 0);
+            cr->scale(alloc.get_width() / (beads[num_beads_shown - 1]->get_width() - .5) * inv_num_cells, alloc.get_height() / (beads[num_beads_shown - 1]->get_height() - .5) * .5);
+            Gdk::Cairo::set_source_pixbuf(cr, beads[num_beads_shown - 1]);
+            cr->paint();
+            cr->restore();
+        }
+
         //upper row txt
         std::ostringstream upper_str;
-        upper_str<<win->b.bowls[win->b.bowls[win->b.p1_start + i].across].count;
+        upper_str<<num_beads;
         Glib::RefPtr<Pango::Layout> upper_txt = create_pango_layout(upper_str.str());
         upper_txt->set_font_description(font);
         upper_txt->get_pixel_size(txt_w, txt_h);
@@ -109,6 +152,19 @@ bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
         Gdk::Cairo::set_source_pixbuf(cr, bg_bowl);
         cr->paint();
         cr->restore();
+
+        //lower row beads
+        num_beads = win->b.bowls[win->b.p1_start + i].count;
+        num_beads_shown = (num_beads > 5)? 5 : num_beads;
+        if(num_beads_shown > 0)
+        {
+            cr->save();
+            cr->translate(alloc.get_width() * (i + 1) * inv_num_cells, .5 * alloc.get_height());
+            cr->scale(alloc.get_width() / (beads[num_beads_shown - 1]->get_width() - .5) * inv_num_cells, alloc.get_height() / (beads[num_beads_shown - 1]->get_height() - .5) * .5);
+            Gdk::Cairo::set_source_pixbuf(cr, beads[num_beads_shown - 1]);
+            cr->paint();
+            cr->restore();
+        }
 
         //lower row txt
         std::ostringstream lower_str;

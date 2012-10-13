@@ -3,7 +3,6 @@
 // Copyright Matthew Chandler 2012
 
 #ifndef __MANCALA_GUI_H__
-#include <memory>
 #include <vector>
 
 #include <gtkmm/box.h>
@@ -28,6 +27,7 @@ private:
     Glib::RefPtr<Gdk::Pixbuf> bg_store;
     Glib::RefPtr<Gdk::Pixbuf> bg_bowl;
     Glib::RefPtr<Gdk::Pixbuf> bg_board;
+    std::vector<Glib::RefPtr<Gdk::Pixbuf>> beads;
 };
 
 class Mancala_win: public Gtk::Window
