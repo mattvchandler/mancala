@@ -23,6 +23,10 @@ protected:
     bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr);
     bool mouse_down(GdkEventButton * event);
 private:
+    void draw_img(const Cairo::RefPtr<Cairo::Context>& cr, const Glib::RefPtr<Gdk::Pixbuf>&  img,
+        const double translate_x, const double translate_y, const double scale_x, const double scale_y);
+    void draw_num(const Cairo::RefPtr<Cairo::Context>& cr, const Pango::FontDescription & font, const int num,
+        const double x, const double y);
     Mancala_win * win;
     Glib::RefPtr<Gdk::Pixbuf> bg_store;
     Glib::RefPtr<Gdk::Pixbuf> bg_bowl;
