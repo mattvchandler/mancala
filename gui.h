@@ -15,6 +15,26 @@
 
 class Mancala_win; // predeclared to avoid circular dependency
 
+class Mancala_bead
+{
+public:
+    Mancala_bead(const std::vector<double> & Pos = std::vector<double>({0.0, 0.0}),
+        const std::vector<double> & Color = std::vector<double>({0.0, 0.0, 0.0}));
+    std::vector<double> pos;
+    std::vector<double> color;
+};
+
+class Mancala_bead_bowl
+{
+public:
+    Mancala_bead_bowl(const std::vector<double> Center = std::vector<double>({0.0, 0.0}),
+        const int Num = 1, const double width = 1.0, const double height = 1.0);
+
+    std::vector<Mancala_bead> beads;
+    std::vector<double> ul;
+    int num;
+};
+
 class Mancala_draw: public Gtk::DrawingArea
 {
 public:
@@ -32,7 +52,13 @@ private:
     Glib::RefPtr<Gdk::Pixbuf> bg_bowl;
     Glib::RefPtr<Gdk::Pixbuf> bg_board;
     Glib::RefPtr<Gdk::Pixbuf> hint_img;
-    std::vector<Glib::RefPtr<Gdk::Pixbuf>> beads;
+    Glib::RefPtr<Gdk::Pixbuf> bead_img;
+    Glib::RefPtr<Gdk::Pixbuf> bead_s_img;
+
+    std::vector<Mancala_bead_bowl> top_row;
+    std::vector<Mancala_bead_bowl> bottom_row;
+    Mancala_bead_bowl l_store;
+    Mancala_bead_bowl r_store;
 };
 
 class Mancala_win: public Gtk::Window
@@ -42,6 +68,9 @@ public:
 
     friend class Mancala_draw;
 
+private:
+    // the actual mancala board (must be initialized before draw)
+    Board b;
 protected:
     // signal handlers
 
@@ -75,9 +104,6 @@ private:
     int player;
     bool show_hint;
     int hint_i;
-
-    // the actual mancala board
-    Board b;
 };
 
 #define __MANCALA_GUI_H__

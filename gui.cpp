@@ -10,6 +10,32 @@
 
 #include "gui.h"
 
+// Random double between 0 and 1 
+double randd()
+{
+    float f = rand();
+    return f / RAND_MAX;
+}
+
+Mancala_bead::Mancala_bead(const std::vector<double> & Pos, const std::vector<double> & Color):
+    pos(Pos), color(Color)
+{}
+
+Mancala_bead_bowl::Mancala_bead_bowl(const std::vector<double> Center, const int Num, const double width,
+    const double height):
+    ul(Center), num(Num)
+{
+    for(int i = 0; i < num; ++i)
+    {
+        auto pos = ul;
+        double theta = randd() * 2 * M_PI;
+        double r = randd();
+        pos[0] += cos(theta) * r * width * .20;
+        pos[1] += sin(theta) * r * height * .20;
+        beads.push_back(Mancala_bead(pos, {randd(), randd(), randd()}));
+    }
+}
+
 Mancala_draw::Mancala_draw(Mancala_win * Win): win(Win)
 {
     add_events(Gdk::BUTTON_PRESS_MASK);
@@ -20,11 +46,8 @@ Mancala_draw::Mancala_draw(Mancala_win * Win): win(Win)
         bg_bowl = Gdk::Pixbuf::create_from_file("img/bg_bowl.png");
         bg_board = Gdk::Pixbuf::create_from_file("img/bg_board.png");
         hint_img = Gdk::Pixbuf::create_from_file("img/hint.png");
-        beads.push_back(Gdk::Pixbuf::create_from_file("img/bead_1.png"));
-        beads.push_back(Gdk::Pixbuf::create_from_file("img/bead_2.png"));
-        beads.push_back(Gdk::Pixbuf::create_from_file("img/bead_3.png"));
-        beads.push_back(Gdk::Pixbuf::create_from_file("img/bead_4.png"));
-        beads.push_back(Gdk::Pixbuf::create_from_file("img/bead_5.png"));
+        bead_img = Gdk::Pixbuf::create_from_file("img/bead.png");
+        bead_s_img = Gdk::Pixbuf::create_from_file("img/bead_s.png");
     }
     catch(const Glib::FileError& ex)
     {
@@ -33,6 +56,20 @@ Mancala_draw::Mancala_draw(Mancala_win * Win): win(Win)
     catch(const Gdk::PixbufError& ex)
     {
         std::cerr<<"PixbufError: "<< ex.what()<<std::endl;
+    }
+
+    int num_cells = win->b.num_bowls + 2;
+    double inv_num_cells = 1.0 / num_cells;
+
+    l_store = Mancala_bead_bowl({0.0, .25}, 5, inv_num_cells, 1.0);
+    r_store = Mancala_bead_bowl({1.0 - inv_num_cells, .25}, 5, inv_num_cells, 1.0);
+
+    for(int i = 0; i < win->b.num_bowls; ++i)
+    {
+        top_row.push_back(Mancala_bead_bowl({(double)(i + 1) * inv_num_cells, 0.0}, win->b.num_seeds,
+            inv_num_cells, .5));
+        bottom_row.push_back(Mancala_bead_bowl({(double)(i + 1) * inv_num_cells, .5}, win->b.num_seeds,
+            inv_num_cells, .5));
     }
 }
 
@@ -80,13 +117,14 @@ bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
         alloc.get_height() / (bg_store->get_height() - .5));
 
     // l store beads
-    int num_beads = win->b.bowls[win->b.p2_store].count;
-    int num_beads_shown = (num_beads > 5)? 5 : num_beads;
-    if(num_beads_shown > 0)
+    for(auto & j: l_store.beads)
     {
-        draw_img(cr, beads[num_beads_shown - 1], 0.0, alloc.get_height() * .25,
-            alloc.get_width() / (beads[num_beads_shown - 1]->get_width() - .5) * inv_num_cells,
-            alloc.get_height() / (beads[num_beads_shown - 1]->get_height() - .5) * .5);
+        draw_img(cr, bead_img, alloc.get_width() * j.pos[0], alloc.get_height() * j.pos[1],
+            alloc.get_width() / (bead_img->get_width() - .5) * inv_num_cells,
+            alloc.get_height() / (bead_img->get_height() - .5) * .5);
+        draw_img(cr, bead_s_img, alloc.get_width() * j.pos[0], alloc.get_height() * j.pos[1],
+            alloc.get_width() / (bead_s_img->get_width() - .5) * inv_num_cells,
+            alloc.get_height() / (bead_s_img->get_height() - .5) * .5);
     }
 
     // draw # for left store
@@ -98,13 +136,14 @@ bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
         alloc.get_width() / (bg_store->get_width() - .5) * inv_num_cells,
         alloc.get_height() / (bg_store->get_height() - .5));
 
-    num_beads = win->b.bowls[win->b.p1_store].count;
-    num_beads_shown = (num_beads > 5)? 5 : num_beads;
-    if(num_beads_shown > 0)
+    for(auto & j: r_store.beads)
     {
-        draw_img(cr, beads[num_beads_shown - 1], alloc.get_width() * (1.0 - inv_num_cells), alloc.get_height() * .25,
-            alloc.get_width() / (beads[num_beads_shown - 1]->get_width() - .5) * inv_num_cells,
-            alloc.get_height() / (beads[num_beads_shown - 1]->get_height() - .5) * .5);
+        draw_img(cr, bead_img, alloc.get_width() * j.pos[0], alloc.get_height() * j.pos[1],
+            alloc.get_width() / (bead_img->get_width() - .5) * inv_num_cells,
+            alloc.get_height() / (bead_img->get_height() - .5) * .5);
+        draw_img(cr, bead_s_img, alloc.get_width() * j.pos[0], alloc.get_height() * j.pos[1],
+            alloc.get_width() / (bead_s_img->get_width() - .5) * inv_num_cells,
+            alloc.get_height() / (bead_s_img->get_height() - .5) * .5);
     }
 
     // draw # for right store
@@ -120,18 +159,19 @@ bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
             alloc.get_height() / (bg_bowl->get_height() - .5) * .5);
 
         //upper row beads
-        int num_beads = win->b.bowls[win->b.bowls[win->b.p1_start + i].across].count;
-        int num_beads_shown = (num_beads > 5)? 5 : num_beads;
-        if(num_beads_shown > 0)
+        for(auto & j: top_row[i].beads)
         {
-            draw_img(cr, beads[num_beads_shown - 1], alloc.get_width() * (i + 1) * inv_num_cells, 0,
-                alloc.get_width() / (beads[num_beads_shown - 1]->get_width() - .5) * inv_num_cells,
-                alloc.get_height() / (beads[num_beads_shown - 1]->get_height() - .5) * .5);
+            draw_img(cr, bead_img, alloc.get_width() * j.pos[0], alloc.get_height() * j.pos[1],
+                alloc.get_width() / (bead_img->get_width() - .5) * inv_num_cells,
+                alloc.get_height() / (bead_img->get_height() - .5) * .5);
+            draw_img(cr, bead_s_img, alloc.get_width() * j.pos[0], alloc.get_height() * j.pos[1],
+                alloc.get_width() / (bead_s_img->get_width() - .5) * inv_num_cells,
+                alloc.get_height() / (bead_s_img->get_height() - .5) * .5);
         }
 
         //upper row txt
-        draw_num(cr, font, num_beads, alloc.get_width() * (2 * i + 3) * .5 * inv_num_cells,
-            alloc.get_height() * .25);
+        draw_num(cr, font, win->b.bowls[win->b.p1_start + win->b.bowls[i].across].count,
+            alloc.get_width() * (2 * i + 3) * .5 * inv_num_cells, alloc.get_height() * .25);
 
         // draw hint
         if(win->show_hint && win->hint_i == i)
@@ -147,19 +187,18 @@ bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
             alloc.get_height() / (bg_bowl->get_height() - .5) * .5);
 
         //lower row beads
-        num_beads = win->b.bowls[win->b.p1_start + i].count;
-        num_beads_shown = (num_beads > 5)? 5 : num_beads;
-        if(num_beads_shown > 0)
+        for(auto & j: bottom_row[i].beads)
         {
-            draw_img(cr, beads[num_beads_shown - 1],
-                alloc.get_width() * (i + 1) * inv_num_cells,
-                .5 * alloc.get_height(),
-                alloc.get_width() / (beads[num_beads_shown - 1]->get_width() - .5) * inv_num_cells,
-                alloc.get_height() / (beads[num_beads_shown - 1]->get_height() - .5) * .5);
+            draw_img(cr, bead_img, alloc.get_width() * j.pos[0], alloc.get_height() * j.pos[1],
+                alloc.get_width() / (bead_img->get_width() - .5) * inv_num_cells,
+                alloc.get_height() / (bead_img->get_height() - .5) * .5);
+            draw_img(cr, bead_s_img, alloc.get_width() * j.pos[0], alloc.get_height() * j.pos[1],
+                alloc.get_width() / (bead_s_img->get_width() - .5) * inv_num_cells,
+                alloc.get_height() / (bead_s_img->get_height() - .5) * .5);
         }
 
         //lower row txt
-        draw_num(cr, font, num_beads, alloc.get_width() * (2 * i + 3) * .5 * inv_num_cells,
+        draw_num(cr, font, win->b.bowls[win->b.p1_start + i].count, alloc.get_width() * (2 * i + 3) * .5 * inv_num_cells,
             alloc.get_height() * .75);
     }
 
