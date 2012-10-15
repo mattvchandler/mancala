@@ -17,21 +17,27 @@ double randd()
     return f / RAND_MAX;
 }
 
+std::vector<double> rand_pos(const std::vector<double> & ul, double width, double height)
+{
+    auto pos = ul;
+    double theta = randd() * 2 * M_PI;
+    double r = randd();
+    pos[0] += cos(theta) * r * width * .20;
+    pos[1] += sin(theta) * r * height * .20;
+    return pos;
+}
+
 Mancala_bead::Mancala_bead(const std::vector<double> & Pos, const std::vector<double> & Color):
     pos(Pos), color(Color)
 {}
 
-Mancala_bead_bowl::Mancala_bead_bowl(const std::vector<double> Center, const int Num, const double width,
-    const double height):
-    ul(Center), num(Num)
+Mancala_bead_bowl::Mancala_bead_bowl(const std::vector<double> Ul, const int Num, const double Width,
+    const double Height):
+    ul(Ul), num(Num), width(Width), height(Height), next(NULL), across(NULL)
 {
     for(int i = 0; i < num; ++i)
     {
-        auto pos = ul;
-        double theta = randd() * 2 * M_PI;
-        double r = randd();
-        pos[0] += cos(theta) * r * width * .20;
-        pos[1] += sin(theta) * r * height * .20;
+        auto pos = rand_pos(ul, width, height);
         beads.push_back(Mancala_bead(pos, {randd(), randd(), randd()}));
     }
 }
@@ -58,11 +64,19 @@ Mancala_draw::Mancala_draw(Mancala_win * Win): win(Win)
         std::cerr<<"PixbufError: "<< ex.what()<<std::endl;
     }
 
+    set_gui_bowls();
+}
+
+void Mancala_draw::set_gui_bowls()
+{
     int num_cells = win->b.num_bowls + 2;
     double inv_num_cells = 1.0 / num_cells;
 
-    l_store = Mancala_bead_bowl({0.0, .25}, 5, inv_num_cells, 1.0);
-    r_store = Mancala_bead_bowl({1.0 - inv_num_cells, .25}, 5, inv_num_cells, 1.0);
+    l_store = Mancala_bead_bowl({0.0, .25}, 0, inv_num_cells, 1.0);
+    r_store = Mancala_bead_bowl({1.0 - inv_num_cells, .25}, 0, inv_num_cells, 1.0);
+
+    top_row.clear();
+    bottom_row.clear();
 
     for(int i = 0; i < win->b.num_bowls; ++i)
     {
@@ -70,6 +84,55 @@ Mancala_draw::Mancala_draw(Mancala_win * Win): win(Win)
             inv_num_cells, .5));
         bottom_row.push_back(Mancala_bead_bowl({(double)(i + 1) * inv_num_cells, .5}, win->b.num_seeds,
             inv_num_cells, .5));
+    }
+
+    // set up next bowl ptrs
+    l_store.next = &bottom_row[0];
+    r_store.next = &top_row.back();
+    for(size_t i = 0; i < bottom_row.size() - 1; ++i)
+        bottom_row[i].next = &bottom_row[i + 1];
+    for(size_t i = top_row.size() - 1; i >= 1; --i)
+        top_row[i].next = &top_row[i - 1];
+    top_row[0].next = &l_store;
+    bottom_row.back().next = &r_store;
+    for(size_t i = 0; i < top_row.size(); ++i)
+    {
+        bottom_row[i].across = &top_row[i];
+        top_row[i].across = &bottom_row[i];
+    }
+}
+
+void Mancala_draw::gui_move(const int i, const Mancala_draw_player p)
+{
+    Mancala_bead_bowl * hand = (p == MANCALA_P1)? &bottom_row[i] : &top_row[top_row.size() - i - 1];
+    Mancala_bead_bowl * curr = hand;
+    while(hand->num > 0)
+    {
+        curr = curr->next;
+        auto pos = rand_pos(curr->ul, curr->width, curr->height);
+        curr->beads.push_back(Mancala_bead(pos, hand->beads.back().color));
+        ++curr->num;
+        hand->beads.pop_back();
+        --hand->num;
+    }
+
+    if(curr->num == 1 && curr->across != NULL && curr->across->num > 0)
+    {
+        Mancala_bead_bowl * store = (p == MANCALA_P1)? &r_store: &l_store;
+        auto pos = rand_pos(store->ul, store->width, store->height);
+        store->beads.push_back(Mancala_bead(pos, curr->beads[0].color));
+        ++store->num;
+        curr->beads.clear();
+        curr->num = 0;
+        for(auto & i: curr->across->beads)
+        {
+            auto pos = rand_pos(store->ul, store->width, store->height);
+            store->beads.push_back(Mancala_bead(pos, i.color));
+            ++store->num;
+        }
+
+        curr->across->beads.clear();
+        curr->across->num = 0;
     }
 }
 
@@ -267,20 +330,23 @@ void Mancala_win::move(const int i)
 {
     if(b.bowls[b.p1_start + i].count <= 0)
         return;
-
-    if(!b.move(i))
+    bool p1_extra_move = b.move(i);
+    draw.gui_move(i, MANCALA_P1);
+    if(!p1_extra_move)
     {
-        //player = (player == 1)? 2 : 1;
         b.swapsides();
 
         int ai_move = 0;
+        bool p2_extra_move = false;
         do
         {
             if(b.finished())
                 break;
             ai_move = choosemove(b);
+            p2_extra_move = b.move(ai_move);
+            draw.gui_move(ai_move, MANCALA_P2);
         }
-        while(b.move(ai_move));
+        while(p2_extra_move);
 
         b.swapsides();
     }
@@ -337,6 +403,7 @@ void Mancala_win::new_game()
 {
     hint_b.set_state(Gtk::STATE_NORMAL);
     b = Board();
+    draw.set_gui_bowls();
     show_hint = false;
     update_board();
 }

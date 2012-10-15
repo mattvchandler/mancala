@@ -27,18 +27,24 @@ public:
 class Mancala_bead_bowl
 {
 public:
-    Mancala_bead_bowl(const std::vector<double> Center = std::vector<double>({0.0, 0.0}),
-        const int Num = 1, const double width = 1.0, const double height = 1.0);
+    Mancala_bead_bowl(const std::vector<double> Ul = std::vector<double>({0.0, 0.0}),
+        const int Num = 1, const double Width = 1.0, const double Height = 1.0);
 
     std::vector<Mancala_bead> beads;
     std::vector<double> ul;
     int num;
+    float width, height;
+    Mancala_bead_bowl * next;
+    Mancala_bead_bowl * across;
 };
 
+enum Mancala_draw_player {MANCALA_P1, MANCALA_P2};
 class Mancala_draw: public Gtk::DrawingArea
 {
 public:
     Mancala_draw(Mancala_win * Win);
+    void gui_move(const int i, const Mancala_draw_player p);
+    void set_gui_bowls();
 protected:
     bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr);
     bool mouse_down(GdkEventButton * event);
