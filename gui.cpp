@@ -96,7 +96,7 @@ void Mancala_draw::set_gui_bowls()
     r_store.next = &top_row.back();
     for(size_t i = 0; i < bottom_row.size() - 1; ++i)
         bottom_row[i].next = &bottom_row[i + 1];
-    for(size_t i = top_row.size() - 1; i >= 1; --i)
+    for(size_t i = 1; i < top_row.size() ; ++i)
         top_row[i].next = &top_row[i - 1];
     top_row[0].next = &l_store;
     bottom_row.back().next = &r_store;
@@ -111,19 +111,22 @@ void Mancala_draw::gui_move(const int i, const Mancala_draw_player p)
 {
     Mancala_bead_bowl * hand = (p == MANCALA_P1)? &bottom_row[i] : &top_row[top_row.size() - i - 1];
     Mancala_bead_bowl * curr = hand;
-    while(hand->num > 0)
+    Mancala_bead_bowl * store = (p == MANCALA_P1)? &r_store: &l_store;
+    Mancala_bead_bowl * wrong_store = (p == MANCALA_P1)? &l_store: &r_store;
+    while(!hand->beads.empty())
     {
         curr = curr->next;
+        if(curr == wrong_store)
+            curr = curr->next;
         auto pos = rand_pos(curr->ul, curr->width, curr->height);
         curr->beads.push_back(Mancala_bead(pos, hand->beads.back().color_i));
         ++curr->num;
         hand->beads.pop_back();
-        --hand->num;
     }
+    hand->num = 0;
 
     if(curr->num == 1 && curr->across != NULL && curr->across->num > 0)
     {
-        Mancala_bead_bowl * store = (p == MANCALA_P1)? &r_store: &l_store;
         auto pos = rand_pos(store->ul, store->width, store->height);
         store->beads.push_back(Mancala_bead(pos, curr->beads[0].color_i));
         ++store->num;
@@ -421,5 +424,16 @@ void Mancala_win::update_board()
         player_label.set_text("Player 1");
     else
         player_label.set_text("Player 2");
+    /*for(int i = 0; i < b.num_bowls; ++i)
+    {
+        if(b.bowls[b.p1_start + i].count != draw.bottom_row[i].num)
+            std::cout<<"mismatch: bottom, cell "<<i<<" b: "<<b.bowls[b.p1_start + i].count<<" gui: "<<draw.bottom_row[i].num<<std::endl;
+        if(b.bowls[b.bowls[b.p1_start + i].across].count != draw.top_row[i].num)
+            std::cout<<"mismatch: top, cell "<<i<<" b: "<<b.bowls[b.bowls[b.p1_start + i].across].count<<" gui: "<<draw.top_row[i].num<<std::endl;
+    }
+    if(b.bowls[b.p1_store].count != draw.r_store.num)
+        std::cout<<"mismatch: r_store b: "<<b.bowls[b.p1_store].count<<" gui: "<<draw.r_store.num<<std::endl;
+    if(b.bowls[b.p2_store].count != draw.l_store.num)
+        std::cout<<"mismatch: l_store b: "<<b.bowls[b.p2_store].count<<" gui: "<<draw.l_store.num<<std::endl;*/
     draw.queue_draw();
 }
