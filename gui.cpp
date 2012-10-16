@@ -27,8 +27,8 @@ std::vector<double> rand_pos(const std::vector<double> & ul, double width, doubl
     return pos;
 }
 
-Mancala_bead::Mancala_bead(const std::vector<double> & Pos, const std::vector<double> & Color):
-    pos(Pos), color(Color)
+Mancala_bead::Mancala_bead(const std::vector<double> & Pos, const int Color_i):
+    pos(Pos), color_i(Color_i)
 {}
 
 Mancala_bead_bowl::Mancala_bead_bowl(const std::vector<double> Ul, const int Num, const double Width,
@@ -38,7 +38,7 @@ Mancala_bead_bowl::Mancala_bead_bowl(const std::vector<double> Ul, const int Num
     for(int i = 0; i < num; ++i)
     {
         auto pos = rand_pos(ul, width, height);
-        beads.push_back(Mancala_bead(pos, {randd(), randd(), randd()}));
+        beads.push_back(Mancala_bead(pos, rand() % Mancala_draw::num_colors));
     }
 }
 
@@ -52,8 +52,13 @@ Mancala_draw::Mancala_draw(Mancala_win * Win): win(Win)
         bg_bowl = Gdk::Pixbuf::create_from_file("img/bg_bowl.png");
         bg_board = Gdk::Pixbuf::create_from_file("img/bg_board.png");
         hint_img = Gdk::Pixbuf::create_from_file("img/hint.png");
-        bead_img = Gdk::Pixbuf::create_from_file("img/bead.png");
         bead_s_img = Gdk::Pixbuf::create_from_file("img/bead_s.png");
+        bead_imgs.push_back(Gdk::Pixbuf::create_from_file("img/bead_red.png"));
+        bead_imgs.push_back(Gdk::Pixbuf::create_from_file("img/bead_green.png"));
+        bead_imgs.push_back(Gdk::Pixbuf::create_from_file("img/bead_blue.png"));
+        bead_imgs.push_back(Gdk::Pixbuf::create_from_file("img/bead_yellow.png"));
+        bead_imgs.push_back(Gdk::Pixbuf::create_from_file("img/bead_magenta.png"));
+        bead_imgs.push_back(Gdk::Pixbuf::create_from_file("img/bead_cyan.png"));
     }
     catch(const Glib::FileError& ex)
     {
@@ -110,7 +115,7 @@ void Mancala_draw::gui_move(const int i, const Mancala_draw_player p)
     {
         curr = curr->next;
         auto pos = rand_pos(curr->ul, curr->width, curr->height);
-        curr->beads.push_back(Mancala_bead(pos, hand->beads.back().color));
+        curr->beads.push_back(Mancala_bead(pos, hand->beads.back().color_i));
         ++curr->num;
         hand->beads.pop_back();
         --hand->num;
@@ -120,14 +125,14 @@ void Mancala_draw::gui_move(const int i, const Mancala_draw_player p)
     {
         Mancala_bead_bowl * store = (p == MANCALA_P1)? &r_store: &l_store;
         auto pos = rand_pos(store->ul, store->width, store->height);
-        store->beads.push_back(Mancala_bead(pos, curr->beads[0].color));
+        store->beads.push_back(Mancala_bead(pos, curr->beads[0].color_i));
         ++store->num;
         curr->beads.clear();
         curr->num = 0;
         for(auto & i: curr->across->beads)
         {
             auto pos = rand_pos(store->ul, store->width, store->height);
-            store->beads.push_back(Mancala_bead(pos, i.color));
+            store->beads.push_back(Mancala_bead(pos, i.color_i));
             ++store->num;
         }
 
@@ -182,9 +187,9 @@ bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
     // l store beads
     for(auto & j: l_store.beads)
     {
-        draw_img(cr, bead_img, alloc.get_width() * j.pos[0], alloc.get_height() * j.pos[1],
-            alloc.get_width() / (bead_img->get_width() - .5) * inv_num_cells,
-            alloc.get_height() / (bead_img->get_height() - .5) * .5);
+        draw_img(cr, bead_imgs[j.color_i], alloc.get_width() * j.pos[0], alloc.get_height() * j.pos[1],
+            alloc.get_width() / (bead_imgs[j.color_i]->get_width() - .5) * inv_num_cells,
+            alloc.get_height() / (bead_imgs[j.color_i]->get_height() - .5) * .5);
         draw_img(cr, bead_s_img, alloc.get_width() * j.pos[0], alloc.get_height() * j.pos[1],
             alloc.get_width() / (bead_s_img->get_width() - .5) * inv_num_cells,
             alloc.get_height() / (bead_s_img->get_height() - .5) * .5);
@@ -201,9 +206,9 @@ bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 
     for(auto & j: r_store.beads)
     {
-        draw_img(cr, bead_img, alloc.get_width() * j.pos[0], alloc.get_height() * j.pos[1],
-            alloc.get_width() / (bead_img->get_width() - .5) * inv_num_cells,
-            alloc.get_height() / (bead_img->get_height() - .5) * .5);
+        draw_img(cr, bead_imgs[j.color_i], alloc.get_width() * j.pos[0], alloc.get_height() * j.pos[1],
+            alloc.get_width() / (bead_imgs[j.color_i]->get_width() - .5) * inv_num_cells,
+            alloc.get_height() / (bead_imgs[j.color_i]->get_height() - .5) * .5);
         draw_img(cr, bead_s_img, alloc.get_width() * j.pos[0], alloc.get_height() * j.pos[1],
             alloc.get_width() / (bead_s_img->get_width() - .5) * inv_num_cells,
             alloc.get_height() / (bead_s_img->get_height() - .5) * .5);
@@ -224,9 +229,9 @@ bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
         //upper row beads
         for(auto & j: top_row[i].beads)
         {
-            draw_img(cr, bead_img, alloc.get_width() * j.pos[0], alloc.get_height() * j.pos[1],
-                alloc.get_width() / (bead_img->get_width() - .5) * inv_num_cells,
-                alloc.get_height() / (bead_img->get_height() - .5) * .5);
+            draw_img(cr, bead_imgs[j.color_i], alloc.get_width() * j.pos[0], alloc.get_height() * j.pos[1],
+                alloc.get_width() / (bead_imgs[j.color_i]->get_width() - .5) * inv_num_cells,
+                alloc.get_height() / (bead_imgs[j.color_i]->get_height() - .5) * .5);
             draw_img(cr, bead_s_img, alloc.get_width() * j.pos[0], alloc.get_height() * j.pos[1],
                 alloc.get_width() / (bead_s_img->get_width() - .5) * inv_num_cells,
                 alloc.get_height() / (bead_s_img->get_height() - .5) * .5);
@@ -252,9 +257,9 @@ bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
         //lower row beads
         for(auto & j: bottom_row[i].beads)
         {
-            draw_img(cr, bead_img, alloc.get_width() * j.pos[0], alloc.get_height() * j.pos[1],
-                alloc.get_width() / (bead_img->get_width() - .5) * inv_num_cells,
-                alloc.get_height() / (bead_img->get_height() - .5) * .5);
+            draw_img(cr, bead_imgs[j.color_i], alloc.get_width() * j.pos[0], alloc.get_height() * j.pos[1],
+                alloc.get_width() / (bead_imgs[j.color_i]->get_width() - .5) * inv_num_cells,
+                alloc.get_height() / (bead_imgs[j.color_i]->get_height() - .5) * .5);
             draw_img(cr, bead_s_img, alloc.get_width() * j.pos[0], alloc.get_height() * j.pos[1],
                 alloc.get_width() / (bead_s_img->get_width() - .5) * inv_num_cells,
                 alloc.get_height() / (bead_s_img->get_height() - .5) * .5);

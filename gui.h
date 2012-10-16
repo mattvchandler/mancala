@@ -19,9 +19,9 @@ class Mancala_bead
 {
 public:
     Mancala_bead(const std::vector<double> & Pos = std::vector<double>({0.0, 0.0}),
-        const std::vector<double> & Color = std::vector<double>({0.0, 0.0, 0.0}));
+        const int Color_i = 0);
     std::vector<double> pos;
-    std::vector<double> color;
+    int color_i;
 };
 
 class Mancala_bead_bowl
@@ -45,6 +45,7 @@ public:
     Mancala_draw(Mancala_win * Win);
     void gui_move(const int i, const Mancala_draw_player p);
     void set_gui_bowls();
+    static const int num_colors = 6;
 protected:
     bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr);
     bool mouse_down(GdkEventButton * event);
@@ -58,8 +59,8 @@ private:
     Glib::RefPtr<Gdk::Pixbuf> bg_bowl;
     Glib::RefPtr<Gdk::Pixbuf> bg_board;
     Glib::RefPtr<Gdk::Pixbuf> hint_img;
-    Glib::RefPtr<Gdk::Pixbuf> bead_img;
     Glib::RefPtr<Gdk::Pixbuf> bead_s_img;
+    std::vector<Glib::RefPtr<Gdk::Pixbuf>> bead_imgs;
 
     std::vector<Mancala_bead_bowl> top_row;
     std::vector<Mancala_bead_bowl> bottom_row;
