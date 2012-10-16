@@ -469,18 +469,6 @@ void Mancala_win::update_board()
         player_label.set_text("Player 1");
     else
         player_label.set_text("Player 2");
-    /*
-    for(int i = 0; i < b.num_bowls; ++i)
-    {
-        if((size_t)b.bowls[b.p1_start + i].count != draw.bottom_row[i].beads.size())
-            std::cout<<"mismatch: bottom, cell "<<i<<" b: "<<b.bowls[b.p1_start + i].count<<" gui: "<<draw.bottom_row[i].beads.size()<<std::endl;
-        if((size_t)b.bowls[b.bowls[b.p1_start + i].across].count != draw.top_row[i].beads.size())
-            std::cout<<"mismatch: top, cell "<<i<<" b: "<<b.bowls[b.bowls[b.p1_start + i].across].count<<" gui: "<<draw.top_row[i].beads.size()<<std::endl;
-    }
-    if((size_t)b.bowls[b.p1_store].count != draw.r_store.beads.size())
-        std::cout<<"mismatch: r_store b: "<<b.bowls[b.p1_store].count<<" gui: "<<draw.r_store.beads.size()<<std::endl;
-    if((size_t)b.bowls[b.p2_store].count != draw.l_store.beads.size())
-        std::cout<<"mismatch: l_store b: "<<b.bowls[b.p2_store].count<<" gui: "<<draw.l_store.beads.size()<<std::endl;
-    */
+
     draw.queue_draw();
 }
