@@ -29,10 +29,10 @@ class Mancala_bead_bowl
 public:
     Mancala_bead_bowl(const std::vector<double> Ul = std::vector<double>({0.0, 0.0}),
         const int Num = 1, const double Width = 1.0, const double Height = 1.0);
+    void add_beads(const std::vector<Mancala_bead> new_beads);
 
     std::vector<Mancala_bead> beads;
     std::vector<double> ul;
-    int num;
     float width, height;
     Mancala_bead_bowl * next;
     Mancala_bead_bowl * across;

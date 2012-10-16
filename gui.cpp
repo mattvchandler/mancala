@@ -33,9 +33,9 @@ Mancala_bead::Mancala_bead(const std::vector<double> & Pos, const int Color_i):
 
 Mancala_bead_bowl::Mancala_bead_bowl(const std::vector<double> Ul, const int Num, const double Width,
     const double Height):
-    ul(Ul), num(Num), width(Width), height(Height), next(NULL), across(NULL)
+    ul(Ul), width(Width), height(Height), next(NULL), across(NULL)
 {
-    for(int i = 0; i < num; ++i)
+    for(int i = 0; i < Num; ++i)
     {
         auto pos = rand_pos(ul, width, height);
         beads.push_back(Mancala_bead(pos, rand() % Mancala_draw::num_colors));
@@ -120,27 +120,20 @@ void Mancala_draw::gui_move(const int i, const Mancala_draw_player p)
             curr = curr->next;
         auto pos = rand_pos(curr->ul, curr->width, curr->height);
         curr->beads.push_back(Mancala_bead(pos, hand->beads.back().color_i));
-        ++curr->num;
         hand->beads.pop_back();
     }
-    hand->num = 0;
 
-    if(curr->num == 1 && curr->across != NULL && curr->across->num > 0)
+    if(curr->beads.size() == 1 && curr->across != NULL && curr->across->beads.size() > 0)
     {
         auto pos = rand_pos(store->ul, store->width, store->height);
         store->beads.push_back(Mancala_bead(pos, curr->beads[0].color_i));
-        ++store->num;
         curr->beads.clear();
-        curr->num = 0;
         for(auto & i: curr->across->beads)
         {
             auto pos = rand_pos(store->ul, store->width, store->height);
             store->beads.push_back(Mancala_bead(pos, i.color_i));
-            ++store->num;
         }
-
         curr->across->beads.clear();
-        curr->across->num = 0;
     }
 }
 
@@ -424,16 +417,18 @@ void Mancala_win::update_board()
         player_label.set_text("Player 1");
     else
         player_label.set_text("Player 2");
-    /*for(int i = 0; i < b.num_bowls; ++i)
+    /*
+    for(int i = 0; i < b.num_bowls; ++i)
     {
-        if(b.bowls[b.p1_start + i].count != draw.bottom_row[i].num)
-            std::cout<<"mismatch: bottom, cell "<<i<<" b: "<<b.bowls[b.p1_start + i].count<<" gui: "<<draw.bottom_row[i].num<<std::endl;
-        if(b.bowls[b.bowls[b.p1_start + i].across].count != draw.top_row[i].num)
-            std::cout<<"mismatch: top, cell "<<i<<" b: "<<b.bowls[b.bowls[b.p1_start + i].across].count<<" gui: "<<draw.top_row[i].num<<std::endl;
+        if((size_t)b.bowls[b.p1_start + i].count != draw.bottom_row[i].beads.size())
+            std::cout<<"mismatch: bottom, cell "<<i<<" b: "<<b.bowls[b.p1_start + i].count<<" gui: "<<draw.bottom_row[i].beads.size()<<std::endl;
+        if((size_t)b.bowls[b.bowls[b.p1_start + i].across].count != draw.top_row[i].beads.size())
+            std::cout<<"mismatch: top, cell "<<i<<" b: "<<b.bowls[b.bowls[b.p1_start + i].across].count<<" gui: "<<draw.top_row[i].beads.size()<<std::endl;
     }
-    if(b.bowls[b.p1_store].count != draw.r_store.num)
-        std::cout<<"mismatch: r_store b: "<<b.bowls[b.p1_store].count<<" gui: "<<draw.r_store.num<<std::endl;
-    if(b.bowls[b.p2_store].count != draw.l_store.num)
-        std::cout<<"mismatch: l_store b: "<<b.bowls[b.p2_store].count<<" gui: "<<draw.l_store.num<<std::endl;*/
+    if((size_t)b.bowls[b.p1_store].count != draw.r_store.beads.size())
+        std::cout<<"mismatch: r_store b: "<<b.bowls[b.p1_store].count<<" gui: "<<draw.r_store.beads.size()<<std::endl;
+    if((size_t)b.bowls[b.p2_store].count != draw.l_store.beads.size())
+        std::cout<<"mismatch: l_store b: "<<b.bowls[b.p2_store].count<<" gui: "<<draw.l_store.beads.size()<<std::endl;
+    */
     draw.queue_draw();
 }
