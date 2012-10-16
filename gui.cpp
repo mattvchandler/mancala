@@ -35,11 +35,65 @@ Mancala_bead_bowl::Mancala_bead_bowl(const std::vector<double> Ul, const int Num
     const double Height):
     ul(Ul), width(Width), height(Height), next(NULL), across(NULL)
 {
+    beads = std::vector<Mancala_bead>(Num);
+
+    if(!beads.empty())
+        redist_beads();
     for(int i = 0; i < Num; ++i)
+        beads[i].color_i = rand() % Mancala_draw::num_colors;
+}
+
+void Mancala_bead_bowl::add_bead(const Mancala_bead & new_bead)
+{
+    beads.push_back(new_bead);
+
+    if(beads.size() <= 4)
+        redist_beads();
+    else
+        beads.back().pos = rand_pos(ul, width, height);
+}
+
+void Mancala_bead_bowl::redist_beads()
+{
+    // center if only one bead
+    if(beads.size() == 1)
     {
-        auto pos = rand_pos(ul, width, height);
-        beads.push_back(Mancala_bead(pos, rand() % Mancala_draw::num_colors));
+        beads[0].pos = ul;
+        return;
     }
+
+    // for 2-4, use jittered grid dist
+    int num_dist_beads = std::min((int)beads.size(), 4);
+    std::vector<std::vector<double>> grid_pos(num_dist_beads, std::vector<double>(4));
+
+    switch(num_dist_beads)
+    {
+    case 2:
+        grid_pos[0] = {ul[0], ul[1] - height * .1, height * .1, width};
+        grid_pos[1] = {ul[0], ul[1] + height * .1, height * .1, width};
+        break;
+    case 3:
+        grid_pos[0] = {ul[0] + width * .05, ul[1] - height * .1, height * .1, width * .1};
+        grid_pos[1] = {ul[0] + width * .1, ul[1] + height * .1, height * .1, width * .1};
+        grid_pos[2] = {ul[0] - width * .1, ul[1] + height * .1, height * .1, width * .1};
+        break;
+    case 4:
+    default:
+        grid_pos[0] = {ul[0] - width * .1, ul[1] - height * .1, height * .1, width * .1};
+        grid_pos[1] = {ul[0] + width * .1, ul[1] - height * .1, height * .1, width * .1};
+        grid_pos[2] = {ul[0] + width * .1, ul[1] + height * .1, height * .1, width * .1};
+        grid_pos[3] = {ul[0] - width * .1, ul[1] + height * .1, height * .1, width * .1};
+        break;
+    }
+
+    for(int i = 0; i < num_dist_beads; ++i)
+            beads[i].pos = rand_pos({grid_pos[i][0], grid_pos[i][1]}, grid_pos[i][2], grid_pos[i][3]);
+
+    // for >4 use random dist
+    if(beads.size() > 4)
+        for(size_t i = 4; i < beads.size(); ++i)
+            beads[i].pos = rand_pos(ul, width, height);
+
 }
 
 Mancala_draw::Mancala_draw(Mancala_win * Win): win(Win)
@@ -118,8 +172,7 @@ void Mancala_draw::gui_move(const int i, const Mancala_draw_player p)
         curr = curr->next;
         if(curr == wrong_store)
             curr = curr->next;
-        auto pos = rand_pos(curr->ul, curr->width, curr->height);
-        curr->beads.push_back(Mancala_bead(pos, hand->beads.back().color_i));
+        curr->add_bead(hand->beads.back());
         hand->beads.pop_back();
     }
 
@@ -130,8 +183,7 @@ void Mancala_draw::gui_move(const int i, const Mancala_draw_player p)
         curr->beads.clear();
         for(auto & i: curr->across->beads)
         {
-            auto pos = rand_pos(store->ul, store->width, store->height);
-            store->beads.push_back(Mancala_bead(pos, i.color_i));
+            store->add_bead(i);
         }
         curr->across->beads.clear();
     }
@@ -217,12 +269,12 @@ bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
     // draw bowls
     for(int i = 0; i < win->b.num_bowls; ++i)
     {
-        //upper row bgs
+        // upper row bgs
         draw_img(cr, bg_bowl, alloc.get_width() * (i + 1) * inv_num_cells, 0,
             alloc.get_width() / (bg_bowl->get_width() - .5) * inv_num_cells,
             alloc.get_height() / (bg_bowl->get_height() - .5) * .5);
 
-        //upper row beads
+        // upper row beads
         for(auto & j: top_row[i].beads)
         {
             draw_img(cr, bead_imgs[j.color_i], alloc.get_width() * j.pos[0], alloc.get_height() * j.pos[1],
@@ -233,7 +285,7 @@ bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
                 alloc.get_height() / (bead_s_img->get_height() - .5) * .5);
         }
 
-        //upper row txt
+        // upper row txt
         draw_num(cr, font, win->b.bowls[win->b.p1_start + win->b.bowls[i].across].count,
             alloc.get_width() * (2 * i + 3) * .5 * inv_num_cells, alloc.get_height() * .25);
 
@@ -250,7 +302,7 @@ bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
             alloc.get_width() / (bg_bowl->get_width() - .5) * inv_num_cells,
             alloc.get_height() / (bg_bowl->get_height() - .5) * .5);
 
-        //lower row beads
+        // lower row beads
         for(auto & j: bottom_row[i].beads)
         {
             draw_img(cr, bead_imgs[j.color_i], alloc.get_width() * j.pos[0], alloc.get_height() * j.pos[1],
@@ -261,7 +313,7 @@ bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
                 alloc.get_height() / (bead_s_img->get_height() - .5) * .5);
         }
 
-        //lower row txt
+        // lower row txt
         draw_num(cr, font, win->b.bowls[win->b.p1_start + i].count, alloc.get_width() * (2 * i + 3) * .5 * inv_num_cells,
             alloc.get_height() * .75);
     }
@@ -378,12 +430,12 @@ void Mancala_win::move(const int i)
         if(abs(b.bowls[b.p1_store].count - b.bowls[b.p2_store].count) >= 10)
             msg += "\nFATALITY";
 
-        //create and show a dialog announcing the winner
+        // create and show a dialog announcing the winner
         Gtk::MessageDialog dlg(*this, "Game Over");
         dlg.set_secondary_text(msg);
         dlg.run();
 
-        //make the game unplayable
+        // make the game unplayable
         hint_b.set_state(Gtk::STATE_INSENSITIVE);
     }
 
