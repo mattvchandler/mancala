@@ -3,6 +3,8 @@
 // Copyright Matthew Chandler 2012
 
 #ifndef __MANCALA_GUI_H__
+#define __MANCALA_GUI_H__
+
 #include <vector>
 
 #include <gtkmm/box.h>
