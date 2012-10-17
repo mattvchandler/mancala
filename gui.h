@@ -11,6 +11,7 @@
 #include <gtkmm/button.h>
 #include <gtkmm/drawingarea.h>
 #include <gtkmm/label.h>
+#include <gtkmm/uimanager.h>
 #include <gtkmm/window.h>
 
 #include "mancala.h"
@@ -95,14 +96,11 @@ protected:
 
     // containers
     Gtk::Box main_box;
-    Gtk::Box hint_box;
-    Gtk::Box new_game_box;
-    // hint button
-    Gtk::Button hint_b;
-    // new game button
-    Gtk::Button new_game_b;
     // Identify who's turn it is
     Gtk::Label player_label;
+    // Menu and toolbar
+    Glib::RefPtr<Gtk::UIManager> uiman;
+    Glib::RefPtr<Gtk::ActionGroup> actgrp;
     // Drawing area
     Mancala_draw draw;
 
@@ -114,6 +112,7 @@ private:
     int player;
     bool show_hint;
     int hint_i;
+    bool game_over;
 };
 
 #define __MANCALA_GUI_H__

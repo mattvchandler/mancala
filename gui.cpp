@@ -7,6 +7,7 @@
 #include <gdkmm/general.h>
 #include <glibmm/fileutils.h>
 #include <gtkmm/messagedialog.h>
+#include <gtkmm/stock.h>
 
 #include "gui.h"
 
@@ -116,11 +117,11 @@ Mancala_draw::Mancala_draw(Mancala_win * Win): win(Win)
     }
     catch(const Glib::FileError& ex)
     {
-        std::cerr<<"FileError: "<<ex.what()<<std::endl;
+        std::cerr<<"File Error: "<<ex.what()<<std::endl;
     }
     catch(const Gdk::PixbufError& ex)
     {
-        std::cerr<<"PixbufError: "<< ex.what()<<std::endl;
+        std::cerr<<"Pixbuf Error: "<< ex.what()<<std::endl;
     }
 
     set_gui_bowls();
@@ -343,34 +344,70 @@ bool Mancala_draw::mouse_down(GdkEventButton * event)
 
 Mancala_win::Mancala_win():
     main_box(Gtk::ORIENTATION_VERTICAL),
-    hint_box(Gtk::ORIENTATION_HORIZONTAL),
-    new_game_box(Gtk::ORIENTATION_HORIZONTAL),
-    hint_b("Hint"),
-    new_game_b("New Game"),
     draw(this),
     player(1),
-    show_hint(false)
+    show_hint(false),
+    game_over(false)
 {
     // set window properties
     set_border_width(10);
     set_default_size(800,400);
     set_title("Mancala");
 
+    // build menu and toolbar
+    actgrp = Gtk::ActionGroup::create();
+    actgrp->add(Gtk::Action::create("Game", "Game"));
+    actgrp->add(Gtk::Action::create("Game_newgame", Gtk::Stock::NEW, "_New Game", "Give up and start a new game"),
+        sigc::mem_fun(*this, &Mancala_win::new_game));
+    actgrp->add(Gtk::Action::create("Game_hint", Gtk::Stock::HELP, "_Hint", "Get a hint. May be misleading"),
+        sigc::mem_fun(*this, &Mancala_win::hint));
+    actgrp->add(Gtk::Action::create("Game_quit", Gtk::Stock::QUIT, "_Quit", "Quit"),
+        sigc::mem_fun(*this, &Mancala_win::hide));
+
+    uiman = Gtk::UIManager::create();
+    uiman->insert_action_group(actgrp);
+    add_accel_group(uiman->get_accel_group());
+
+    Glib::ustring ui_str =
+    "<ui>"
+    "    <menubar name='MenuBar'>"
+    "        <menu action='Game'>"
+    "            <menuitem action='Game_newgame'/>"
+    "            <menuitem action='Game_hint'/>"
+    "            <separator/>"
+    "            <menuitem action='Game_quit'/>"
+    "        </menu>"
+    "    </menubar>"
+    "    <toolbar name='ToolBar'>"
+    "        <toolitem action='Game_newgame'/>"
+    "        <toolitem action='Game_hint'/>"
+    "    </toolbar>"
+    "</ui>";
+
+    try
+    {
+        uiman->add_ui_from_string(ui_str);
+    }
+    catch(const Glib::Error& ex)
+    {
+        std::cerr<<"Menu Error: "<<ex.what()<<std::endl;
+    }
+
     // add widgets to contatiners
     add(main_box);
-    main_box.pack_start(player_label, Gtk::PACK_SHRINK);
+
+    Gtk::Widget * menu = uiman->get_widget("/MenuBar");
+    Gtk::Widget * toolbar = uiman->get_widget("/ToolBar");
+
+    if(menu)
+        main_box.pack_start(*menu, Gtk::PACK_SHRINK);
+    if(toolbar)
+        main_box.pack_start(*toolbar, Gtk::PACK_SHRINK);
+
 
     main_box.pack_start(draw);
 
-    main_box.pack_end(new_game_box, Gtk::PACK_SHRINK);
-    new_game_box.pack_start(new_game_b, Gtk::PACK_EXPAND_PADDING);
-
-    main_box.pack_end(hint_box, Gtk::PACK_SHRINK);
-    hint_box.pack_start(hint_b, Gtk::PACK_EXPAND_PADDING);
-
-    hint_b.signal_clicked().connect(sigc::mem_fun(*this, &Mancala_win::hint));
-
-    new_game_b.signal_clicked().connect(sigc::mem_fun(*this, &Mancala_win::new_game));
+    main_box.pack_end(player_label, Gtk::PACK_SHRINK);
 
     // set all labels for number of seeds
     update_board();
@@ -409,6 +446,11 @@ void Mancala_win::move(const int i)
     // check to see if the game is over
     if(b.finished())
     {
+        // deactivate hint feature
+        game_over = true;
+        actgrp->get_action("Game_hint")->set_sensitive(false);
+
+        // create and show a dialog announcing the winner
         Glib::ustring msg;
         // check for a tie
         if(b.bowls[b.p1_store].count == b.bowls[b.p2_store].count)
@@ -430,21 +472,19 @@ void Mancala_win::move(const int i)
         if(abs(b.bowls[b.p1_store].count - b.bowls[b.p2_store].count) >= 10)
             msg += "\nFATALITY";
 
-        // create and show a dialog announcing the winner
         Gtk::MessageDialog dlg(*this, "Game Over");
         dlg.set_secondary_text(msg);
         dlg.run();
 
-        // make the game unplayable
-        hint_b.set_state(Gtk::STATE_INSENSITIVE);
     }
-
     show_hint = false;
 }
 
 // get a hint, will highlight a bowl
 void Mancala_win::hint()
 {
+    if(game_over)
+        return;
     // use AI function to find best move
     hint_i = choosemove(b);
     show_hint = true;
@@ -454,7 +494,10 @@ void Mancala_win::hint()
 // start a new game
 void Mancala_win::new_game()
 {
-    hint_b.set_state(Gtk::STATE_NORMAL);
+    // Reactivate hint feature
+    game_over = false;
+    actgrp->get_action("Game_hint")->set_sensitive(true);
+
     b = Board();
     draw.set_gui_bowls();
     show_hint = false;
