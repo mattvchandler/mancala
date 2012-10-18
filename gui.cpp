@@ -350,7 +350,6 @@ Mancala_win::Mancala_win():
     game_over(false)
 {
     // set window properties
-    set_border_width(10);
     set_default_size(800,400);
     set_title("Mancala");
 
