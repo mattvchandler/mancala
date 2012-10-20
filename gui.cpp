@@ -162,7 +162,7 @@ void Mancala_draw::set_gui_bowls()
     }
 }
 
-void Mancala_draw::gui_move(const int i, const Mancala_draw_player p)
+void Mancala_draw::gui_move(const int i, const Mancala_player p)
 {
     Mancala_bead_bowl * hand = (p == MANCALA_P1)? &bottom_row[i] : &top_row[top_row.size() - i - 1];
     Mancala_bead_bowl * curr = hand;
@@ -270,6 +270,14 @@ bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
     // draw bowls
     for(int i = 0; i < win->b.num_bowls; ++i)
     {
+        // draw upper row hint
+        if(win->player == MANCALA_P2 && win->show_hint && win->hint_i == i)
+        {
+            draw_img(cr, hint_img, alloc.get_width() * (i + 1) * inv_num_cells, 0.0,
+                alloc.get_width() / (hint_img->get_width() - .5) * inv_num_cells,
+                alloc.get_height() / (hint_img->get_height() - .5) * .5);
+        }
+
         // upper row bgs
         draw_img(cr, bg_bowl, alloc.get_width() * (i + 1) * inv_num_cells, 0,
             alloc.get_width() / (bg_bowl->get_width() - .5) * inv_num_cells,
@@ -290,8 +298,8 @@ bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
         draw_num(cr, font, win->b.bowls[win->b.p1_start + win->b.bowls[i].across].count,
             alloc.get_width() * (2 * i + 3) * .5 * inv_num_cells, alloc.get_height() * .25);
 
-        // draw hint
-        if(win->show_hint && win->hint_i == i)
+        // draw lower row hint
+        if(win->player == MANCALA_P1 && win->show_hint && win->hint_i == i)
         {
             draw_img(cr, hint_img, alloc.get_width() * (i + 1) * inv_num_cells, .5 * alloc.get_height(),
                 alloc.get_width() / (hint_img->get_width() - .5) * inv_num_cells,
@@ -331,12 +339,10 @@ bool Mancala_draw::mouse_down(GdkEventButton * event)
 
     if(grid_x > 0 && grid_x < win->b.num_bowls + 1 && !win->b.finished())
     {
-        if(win->player == 1 && grid_y == 1)
+        if((win->player == MANCALA_P1 && grid_y == 1) || (win->player == MANCALA_P2 && grid_y == 0))
         {
             win->move(grid_x - 1);
         }
-
-        if(win->player == 2 && grid_y == 0);
     }
 
     return true;
@@ -345,9 +351,11 @@ bool Mancala_draw::mouse_down(GdkEventButton * event)
 Mancala_win::Mancala_win():
     main_box(Gtk::ORIENTATION_VERTICAL),
     draw(this),
-    player(1),
+    player(MANCALA_P1),
     show_hint(false),
-    game_over(false)
+    game_over(false),
+    p1_ai(false),
+    p2_ai(true)
 {
     // set window properties
     set_default_size(800,400);
@@ -358,10 +366,11 @@ Mancala_win::Mancala_win():
     actgrp->add(Gtk::Action::create("Game", "Game"));
     actgrp->add(Gtk::Action::create("Game_newgame", Gtk::Stock::NEW, "_New Game", "Give up and start a new game"),
         sigc::mem_fun(*this, &Mancala_win::new_game));
-    actgrp->add(Gtk::Action::create("Game_hint", Gtk::Stock::HELP, "_Hint", "Get a hint. May be misleading"),
+    actgrp->add(Gtk::Action::create("Game_hint", Gtk::Stock::HELP, "Hint", "Get a hint. May be misleading"),
         sigc::mem_fun(*this, &Mancala_win::hint));
     actgrp->add(Gtk::Action::create("Game_quit", Gtk::Stock::QUIT, "_Quit", "Quit"),
         sigc::mem_fun(*this, &Mancala_win::hide));
+    actgrp->add(Gtk::Action::create("Players", "Players"));
 
     uiman = Gtk::UIManager::create();
     uiman->insert_action_group(actgrp);
@@ -369,18 +378,20 @@ Mancala_win::Mancala_win():
 
     Glib::ustring ui_str =
     "<ui>"
-    "    <menubar name='MenuBar'>"
-    "        <menu action='Game'>"
-    "            <menuitem action='Game_newgame'/>"
-    "            <menuitem action='Game_hint'/>"
-    "            <separator/>"
-    "            <menuitem action='Game_quit'/>"
-    "        </menu>"
-    "    </menubar>"
-    "    <toolbar name='ToolBar'>"
-    "        <toolitem action='Game_newgame'/>"
-    "        <toolitem action='Game_hint'/>"
-    "    </toolbar>"
+    "   <menubar name='MenuBar'>"
+    "       <menu action='Game'>"
+    "           <menuitem action='Game_newgame'/>"
+    "           <menuitem action='Game_hint'/>"
+    "           <separator/>"
+    "           <menuitem action='Game_quit'/>"
+    "       </menu>"
+    "       <menu action='Players'>"
+    "       </menu>"
+    "   </menubar>"
+    "   <toolbar name='ToolBar'>"
+    "       <toolitem action='Game_newgame'/>"
+    "       <toolitem action='Game_hint'/>"
+    "   </toolbar>"
     "</ui>";
 
     try
@@ -417,6 +428,7 @@ Mancala_win::Mancala_win():
 // make a move (called by button signals)
 void Mancala_win::move(const int i)
 {
+    /*
     if(b.bowls[b.p1_start + i].count <= 0)
         return;
     bool p1_extra_move = b.move(i);
@@ -439,6 +451,32 @@ void Mancala_win::move(const int i)
 
         b.swapsides();
     }
+    */
+    bool extra_move;
+    if(player == MANCALA_P1)
+    {
+        if(b.bowls[b.p1_start + i].count <= 0)
+            return;
+        extra_move = b.move(i);
+        draw.gui_move(i, MANCALA_P1);
+        if(!extra_move)
+        {
+            player = MANCALA_P2;
+        }
+    }
+    else
+    {
+        if(b.bowls[b.bowls[b.p1_start + i].across].count <= 0)
+            return;
+        b.swapsides();
+        extra_move = b.move(b.num_bowls - i - 1);
+        draw.gui_move(b.num_bowls - i - 1, MANCALA_P2);
+        if(!extra_move)
+        {
+            player = MANCALA_P1;
+        }
+        b.swapsides();
+    }
 
     update_board();
 
@@ -451,21 +489,15 @@ void Mancala_win::move(const int i)
 
         // create and show a dialog announcing the winner
         Glib::ustring msg;
+
         // check for a tie
         if(b.bowls[b.p1_store].count == b.bowls[b.p2_store].count)
             msg = "Tie";
-
-        // determine the current player, and then see if they won or lost
-        else if(player == 1)
-            if(b.bowls[b.p1_store].count > b.bowls[b.p2_store].count)
-                msg = "Player 1 wins";
-            else
-                msg = "Player 2 wins";
         else
             if(b.bowls[b.p1_store].count > b.bowls[b.p2_store].count)
-                msg = "Player 2 wins";
-            else
                 msg = "Player 1 wins";
+            else
+                msg = "Player 2 wins";
 
         // was the win full of win?
         if(abs(b.bowls[b.p1_store].count - b.bowls[b.p2_store].count) >= 10)
@@ -485,7 +517,17 @@ void Mancala_win::hint()
     if(game_over)
         return;
     // use AI function to find best move
+    if(player == MANCALA_P2)
+        b.swapsides();
+
     hint_i = choosemove(b);
+
+    if(player == MANCALA_P2)
+    {
+        b.swapsides();
+        hint_i = b.num_bowls - hint_i - 1;
+    }
+
     show_hint = true;
     update_board();
 }
@@ -497,6 +539,7 @@ void Mancala_win::new_game()
     game_over = false;
     actgrp->get_action("Game_hint")->set_sensitive(true);
 
+    player == MANCALA_P1;
     b = Board();
     draw.set_gui_bowls();
     show_hint = false;
@@ -507,7 +550,7 @@ void Mancala_win::new_game()
 void Mancala_win::update_board()
 {
     // Show who's turn it is TODO: ugly
-    if(player == 1)
+    if(player == MANCALA_P1)
         player_label.set_text("Player 1");
     else
         player_label.set_text("Player 2");

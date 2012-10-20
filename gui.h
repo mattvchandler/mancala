@@ -42,12 +42,12 @@ public:
     Mancala_bead_bowl * across;
 };
 
-enum Mancala_draw_player {MANCALA_P1, MANCALA_P2};
+enum Mancala_player {MANCALA_P1, MANCALA_P2};
 class Mancala_draw: public Gtk::DrawingArea
 {
 public:
     Mancala_draw(Mancala_win * Win);
-    void gui_move(const int i, const Mancala_draw_player p);
+    void gui_move(const int i, const Mancala_player p);
     void set_gui_bowls();
     static const int num_colors = 6;
 protected:
@@ -109,10 +109,11 @@ private:
     void update_board();
 
     // state vars
-    int player;
+    Mancala_player player;
     bool show_hint;
     int hint_i;
     bool game_over;
+    bool p1_ai, p2_ai;
 };
 
 #define __MANCALA_GUI_H__
