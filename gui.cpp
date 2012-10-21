@@ -6,6 +6,7 @@
 
 #include <gdkmm/general.h>
 #include <glibmm/fileutils.h>
+#include <glibmm/main.h>
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/stock.h>
 
@@ -332,19 +333,19 @@ bool Mancala_draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 
 bool Mancala_draw::mouse_down(GdkEventButton * event)
 {
+    if(win->moving.test_and_set())
+        return true;
+
     Gtk::Allocation alloc = get_allocation();
 
     int grid_x = (int)((win->b.num_bowls + 2) * event->x / alloc.get_width());
     int grid_y = (event->y / alloc.get_height() <= .5)? 0 : 1;
 
-    if(grid_x > 0 && grid_x < win->b.num_bowls + 1 && !win->b.finished())
-    {
-        if((win->player == MANCALA_P1 && grid_y == 1) || (win->player == MANCALA_P2 && grid_y == 0))
-        {
+    if(grid_x > 0 && grid_x < win->b.num_bowls + 1 && !win->game_over)
+        if((!win->p1_ai && win->player == MANCALA_P1 && grid_y == 1) || (!win->p2_ai && win->player == MANCALA_P2 && grid_y == 0))
             win->move(grid_x - 1);
-        }
-    }
 
+    win->moving.clear();
     return true;
 }
 
@@ -357,6 +358,8 @@ Mancala_win::Mancala_win():
     p1_ai(false),
     p2_ai(true)
 {
+    moving.test_and_set();
+
     // set window properties
     set_default_size(800,400);
     set_title("Mancala");
@@ -414,44 +417,22 @@ Mancala_win::Mancala_win():
     if(toolbar)
         main_box.pack_start(*toolbar, Gtk::PACK_SHRINK);
 
-
     main_box.pack_start(draw);
-
     main_box.pack_end(player_label, Gtk::PACK_SHRINK);
+
+    // set timer to make AI moves when able. Check every 50ms
+    Glib::signal_timeout().connect(sigc::mem_fun(*this, &Mancala_win::ai_timer), 50);
 
     // set all labels for number of seeds
     update_board();
 
     show_all_children();
+    moving.clear();
 }
 
 // make a move (called by button signals)
 void Mancala_win::move(const int i)
 {
-    /*
-    if(b.bowls[b.p1_start + i].count <= 0)
-        return;
-    bool p1_extra_move = b.move(i);
-    draw.gui_move(i, MANCALA_P1);
-    if(!p1_extra_move)
-    {
-        b.swapsides();
-
-        int ai_move = 0;
-        bool p2_extra_move = false;
-        do
-        {
-            if(b.finished())
-                break;
-            ai_move = choosemove(b);
-            p2_extra_move = b.move(ai_move);
-            draw.gui_move(ai_move, MANCALA_P2);
-        }
-        while(p2_extra_move);
-
-        b.swapsides();
-    }
-    */
     bool extra_move;
     if(player == MANCALA_P1)
     {
@@ -460,9 +441,7 @@ void Mancala_win::move(const int i)
         extra_move = b.move(i);
         draw.gui_move(i, MANCALA_P1);
         if(!extra_move)
-        {
             player = MANCALA_P2;
-        }
     }
     else
     {
@@ -472,48 +451,99 @@ void Mancala_win::move(const int i)
         extra_move = b.move(b.num_bowls - i - 1);
         draw.gui_move(b.num_bowls - i - 1, MANCALA_P2);
         if(!extra_move)
-        {
             player = MANCALA_P1;
-        }
         b.swapsides();
     }
 
+    // check to see if the game is over
+    if(b.finished())
+        disp_winner();
+    show_hint = false;
+
     update_board();
+}
+
+bool Mancala_win::ai_timer()
+{
+    if(moving.test_and_set())
+        return true;
+    if(!game_over)
+    {
+        if((player == MANCALA_P1 && p1_ai) || (player == MANCALA_P2 && p2_ai))
+            ai_move();
+    }
+    moving.clear();
+    return true;
+}
+
+// Have the AI make a move
+void Mancala_win::ai_move()
+{
+    if(player == MANCALA_P2)
+        b.swapsides();
+    bool ai_extra_move = false;
+    do
+    {
+        if(b.finished())
+            break;
+        int ai_move = choosemove(b);
+        ai_extra_move = b.move(ai_move);
+        if(player == MANCALA_P1)
+            draw.gui_move(ai_move, MANCALA_P1);
+        else
+            draw.gui_move(ai_move, MANCALA_P2);
+    }
+    while(ai_extra_move);
+
+    if(player == MANCALA_P2)
+    {
+        player = MANCALA_P1;
+        b.swapsides();
+    }
+    else
+        player = MANCALA_P2;
 
     // check to see if the game is over
     if(b.finished())
-    {
-        // deactivate hint feature
-        game_over = true;
-        actgrp->get_action("Game_hint")->set_sensitive(false);
-
-        // create and show a dialog announcing the winner
-        Glib::ustring msg;
-
-        // check for a tie
-        if(b.bowls[b.p1_store].count == b.bowls[b.p2_store].count)
-            msg = "Tie";
-        else
-            if(b.bowls[b.p1_store].count > b.bowls[b.p2_store].count)
-                msg = "Player 1 wins";
-            else
-                msg = "Player 2 wins";
-
-        // was the win full of win?
-        if(abs(b.bowls[b.p1_store].count - b.bowls[b.p2_store].count) >= 10)
-            msg += "\nFATALITY";
-
-        Gtk::MessageDialog dlg(*this, "Game Over");
-        dlg.set_secondary_text(msg);
-        dlg.run();
-
-    }
+        disp_winner();
     show_hint = false;
+
+    update_board();
+}
+
+// display the winner, end the game
+void Mancala_win::disp_winner()
+{
+    // deactivate hint feature
+    game_over = true;
+    actgrp->get_action("Game_hint")->set_sensitive(false);
+
+    // create and show a dialog announcing the winner
+    Glib::ustring msg;
+
+    // check for a tie
+    if(b.bowls[b.p1_store].count == b.bowls[b.p2_store].count)
+        msg = "Tie";
+    else
+        if(b.bowls[b.p1_store].count > b.bowls[b.p2_store].count)
+            msg = "Player 1 wins";
+        else
+            msg = "Player 2 wins";
+
+    // was the win full of win?
+    if(abs(b.bowls[b.p1_store].count - b.bowls[b.p2_store].count) >= 10)
+        msg += "\nFATALITY";
+
+    Gtk::MessageDialog dlg(*this, "Game Over");
+    dlg.set_secondary_text(msg);
+    dlg.run();
 }
 
 // get a hint, will highlight a bowl
 void Mancala_win::hint()
 {
+    if(moving.test_and_set())
+        return;
     if(game_over)
         return;
     // use AI function to find best move
@@ -530,20 +560,24 @@ void Mancala_win::hint()
 
     show_hint = true;
     update_board();
+    moving.clear();
 }
 
 // start a new game
 void Mancala_win::new_game()
 {
+    if(moving.test_and_set())
+        return;
     // Reactivate hint feature
     game_over = false;
     actgrp->get_action("Game_hint")->set_sensitive(true);
 
-    player == MANCALA_P1;
+    player = MANCALA_P1;
     b = Board();
     draw.set_gui_bowls();
     show_hint = false;
     update_board();
+    moving.clear();
 }
 
 // update the numbers for each bowl / store

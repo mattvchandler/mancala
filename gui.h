@@ -5,6 +5,7 @@
 #ifndef __MANCALA_GUI_H__
 #define __MANCALA_GUI_H__
 
+#include <atomic>
 #include <vector>
 
 #include <gtkmm/box.h>
@@ -83,10 +84,16 @@ private:
     // the actual mancala board (must be initialized before draw)
     Board b;
 protected:
-    // signal handlers
 
     // make a move (called by button signals)
     void move(const int i);
+
+    // AI move functions
+    bool ai_timer();
+    void ai_move();
+
+    // display the winner, end the game
+    void disp_winner();
 
     // get a hint, will highlight a bowl
     void hint();
@@ -114,6 +121,7 @@ private:
     int hint_i;
     bool game_over;
     bool p1_ai, p2_ai;
+    std::atomic_flag moving;
 };
 
 #define __MANCALA_GUI_H__
