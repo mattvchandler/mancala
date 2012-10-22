@@ -374,6 +374,10 @@ Mancala_win::Mancala_win():
     actgrp->add(Gtk::Action::create("Game_quit", Gtk::Stock::QUIT, "_Quit", "Quit"),
         sigc::mem_fun(*this, &Mancala_win::hide));
     actgrp->add(Gtk::Action::create("Players", "Players"));
+    p1_ai_menu = Gtk::ToggleAction::create("Players_1_ai", "Player 1 AI", "Toggle Player 1 AI", p1_ai);
+    p2_ai_menu = Gtk::ToggleAction::create("Players_2_ai", "Player 2 AI", "Toggle Player 2 AI", p2_ai);
+    actgrp->add(p1_ai_menu, sigc::mem_fun(*this, &Mancala_win::ai_menu));
+    actgrp->add(p2_ai_menu, sigc::mem_fun(*this, &Mancala_win::ai_menu));
 
     uiman = Gtk::UIManager::create();
     uiman->insert_action_group(actgrp);
@@ -389,6 +393,8 @@ Mancala_win::Mancala_win():
     "           <menuitem action='Game_quit'/>"
     "       </menu>"
     "       <menu action='Players'>"
+    "           <menuitem action='Players_1_ai'/>"
+    "           <menuitem action='Players_2_ai'/>"
     "       </menu>"
     "   </menubar>"
     "   <toolbar name='ToolBar'>"
@@ -590,4 +596,11 @@ void Mancala_win::update_board()
         player_label.set_text("Player 2");
 
     draw.queue_draw();
+}
+
+// AI menu callback
+void Mancala_win::ai_menu()
+{
+    p1_ai = p1_ai_menu->get_active();
+    p2_ai = p2_ai_menu->get_active();
 }

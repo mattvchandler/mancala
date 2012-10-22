@@ -12,6 +12,7 @@
 #include <gtkmm/button.h>
 #include <gtkmm/drawingarea.h>
 #include <gtkmm/label.h>
+#include <gtkmm/toggleaction.h>
 #include <gtkmm/uimanager.h>
 #include <gtkmm/window.h>
 
@@ -79,7 +80,6 @@ public:
     Mancala_win();
 
     friend class Mancala_draw;
-
 private:
     // the actual mancala board (must be initialized before draw)
     Board b;
@@ -101,6 +101,9 @@ protected:
     // reset the game
     void new_game();
 
+    // ai menu callback
+    void ai_menu();
+
     // containers
     Gtk::Box main_box;
     // Identify who's turn it is
@@ -110,6 +113,9 @@ protected:
     Glib::RefPtr<Gtk::ActionGroup> actgrp;
     // Drawing area
     Mancala_draw draw;
+
+    // AI menu items
+    Glib::RefPtr<Gtk::ToggleAction> p1_ai_menu, p2_ai_menu;
 
 private:
     // update the numbers for each bowl / store
