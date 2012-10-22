@@ -10,8 +10,10 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
+#include <gtkmm/checkbutton.h>
 #include <gtkmm/drawingarea.h>
 #include <gtkmm/label.h>
+#include <gtkmm/spinbutton.h>
 #include <gtkmm/toggleaction.h>
 #include <gtkmm/uimanager.h>
 #include <gtkmm/window.h>
@@ -74,12 +76,37 @@ private:
     Mancala_bead_bowl r_store;
 };
 
+// settings window
+class Mancala_settings_win: public Gtk::Window
+{
+public:
+    Mancala_settings_win(Mancala_win * Win);
+protected:
+    // callback
+    void ok_button_func();
+    void open();
+    void close();
+
+    // containers
+    Gtk::Box main_box;
+
+    // widgets
+    Gtk::CheckButton p1_ai_check, p2_ai_check;
+    Gtk::SpinButton board_size, board_seeds;
+    Gtk::Label board_size_label, board_seeds_label;
+    Gtk::Button ok_button, cancel_button;
+private:
+    Mancala_win * win;
+
+};
+
 class Mancala_win: public Gtk::Window
 {
 public:
     Mancala_win();
 
     friend class Mancala_draw;
+    friend class Mancala_settings_win;
 private:
     // the actual mancala board (must be initialized before draw)
     Board b;
@@ -102,7 +129,8 @@ protected:
     void new_game();
 
     // ai menu callback
-    void ai_menu();
+    void p1_ai_menu_f();
+    void p2_ai_menu_f();
 
     // containers
     Gtk::Box main_box;
@@ -116,6 +144,9 @@ protected:
 
     // AI menu items
     Glib::RefPtr<Gtk::ToggleAction> p1_ai_menu, p2_ai_menu;
+
+    // settings window
+    Mancala_settings_win settings_win;
 
 private:
     // update the numbers for each bowl / store

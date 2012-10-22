@@ -349,9 +349,61 @@ bool Mancala_draw::mouse_down(GdkEventButton * event)
     return true;
 }
 
+Mancala_settings_win::Mancala_settings_win(Mancala_win * Win):
+    main_box(Gtk::ORIENTATION_VERTICAL),
+    p1_ai_check("Player 1 AI"),
+    p2_ai_check("Player 2 AI"),
+    board_size_label("Board size"),
+    board_seeds_label("Number of seeds per bowl"),
+    ok_button(Gtk::Stock::OK),
+    cancel_button(Gtk::Stock::CANCEL),
+    win(Win)
+{
+    set_title("Mancala Board Settings");
+    add(main_box);
+
+    main_box.pack_start(p1_ai_check);
+    main_box.pack_start(p2_ai_check);
+    main_box.pack_start(board_size);
+    main_box.pack_start(board_size_label);
+    main_box.pack_start(board_seeds);
+    main_box.pack_start(board_seeds_label);
+    main_box.pack_start(ok_button);
+    main_box.pack_start(cancel_button);
+
+    show_all_children();
+
+    // set signal handlers
+    signal_show().connect(sigc::mem_fun(*this, &Mancala_settings_win::open));
+    signal_hide().connect(sigc::mem_fun(*this, &Mancala_settings_win::close));
+    ok_button.signal_clicked().connect(sigc::mem_fun(*this, &Mancala_settings_win::ok_button_func));
+    cancel_button.signal_clicked().connect(sigc::mem_fun(*this, &Mancala_settings_win::hide));
+}
+
+void Mancala_settings_win::ok_button_func()
+{
+    win->p1_ai = p1_ai_check.get_active();
+    win->p2_ai = p2_ai_check.get_active();
+    win->new_game();
+    hide();
+}
+
+void Mancala_settings_win::open()
+{
+    p1_ai_check.set_active(win->p1_ai);
+    p2_ai_check.set_active(win->p2_ai);
+    win->set_sensitive(false);
+}
+
+void Mancala_settings_win::close()
+{
+    win->set_sensitive(true);
+}
+
 Mancala_win::Mancala_win():
     main_box(Gtk::ORIENTATION_VERTICAL),
     draw(this),
+    settings_win(this),
     player(MANCALA_P1),
     show_hint(false),
     game_over(false),
@@ -371,13 +423,15 @@ Mancala_win::Mancala_win():
         sigc::mem_fun(*this, &Mancala_win::new_game));
     actgrp->add(Gtk::Action::create("Game_hint", Gtk::Stock::HELP, "Hint", "Get a hint. May be misleading"),
         sigc::mem_fun(*this, &Mancala_win::hint));
+    actgrp->add(Gtk::Action::create("Game_set", Gtk::Stock::PREFERENCES, "_Settings", "Game settings"),
+        sigc::mem_fun(settings_win, &Mancala_settings_win::show));
     actgrp->add(Gtk::Action::create("Game_quit", Gtk::Stock::QUIT, "_Quit", "Quit"),
         sigc::mem_fun(*this, &Mancala_win::hide));
     actgrp->add(Gtk::Action::create("Players", "Players"));
     p1_ai_menu = Gtk::ToggleAction::create("Players_1_ai", "Player 1 AI", "Toggle Player 1 AI", p1_ai);
     p2_ai_menu = Gtk::ToggleAction::create("Players_2_ai", "Player 2 AI", "Toggle Player 2 AI", p2_ai);
-    actgrp->add(p1_ai_menu, sigc::mem_fun(*this, &Mancala_win::ai_menu));
-    actgrp->add(p2_ai_menu, sigc::mem_fun(*this, &Mancala_win::ai_menu));
+    actgrp->add(p1_ai_menu, sigc::mem_fun(*this, &Mancala_win::p1_ai_menu_f));
+    actgrp->add(p2_ai_menu, sigc::mem_fun(*this, &Mancala_win::p2_ai_menu_f));
 
     uiman = Gtk::UIManager::create();
     uiman->insert_action_group(actgrp);
@@ -389,6 +443,7 @@ Mancala_win::Mancala_win():
     "       <menu action='Game'>"
     "           <menuitem action='Game_newgame'/>"
     "           <menuitem action='Game_hint'/>"
+    "           <menuitem action='Game_set'/>"
     "           <separator/>"
     "           <menuitem action='Game_quit'/>"
     "       </menu>"
@@ -400,6 +455,7 @@ Mancala_win::Mancala_win():
     "   <toolbar name='ToolBar'>"
     "       <toolitem action='Game_newgame'/>"
     "       <toolitem action='Game_hint'/>"
+    "       <toolitem action='Game_set'/>"
     "   </toolbar>"
     "</ui>";
 
@@ -595,12 +651,19 @@ void Mancala_win::update_board()
     else
         player_label.set_text("Player 2");
 
+    p1_ai_menu->set_active(p1_ai);
+    p2_ai_menu->set_active(p2_ai);
+
     draw.queue_draw();
 }
 
 // AI menu callback
-void Mancala_win::ai_menu()
+void Mancala_win::p1_ai_menu_f()
 {
     p1_ai = p1_ai_menu->get_active();
+}
+
+void Mancala_win::p2_ai_menu_f()
+{
     p2_ai = p2_ai_menu->get_active();
 }
