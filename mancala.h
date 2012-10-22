@@ -21,7 +21,7 @@ public:
 class Board
 {
 public:
-    Board(const int Num_bowls = 6, const int Num_seeds = 4);
+    Board(const int Num_bowls = 6, const int Num_seeds = 4, const int Ai_depth = 10);
     // perform a move
     // returns true if the move earns an extra turn
     bool move(int bowl);
@@ -36,6 +36,7 @@ public:
     int evaluate() const;
 
     int num_bowls, num_seeds;
+    int ai_depth;
     
     friend int choosemove(const Board b);
     friend int choosemove_alphabeta(const Board b, int depth, PLAYER player, int alpha, int beta);

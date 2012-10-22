@@ -41,8 +41,8 @@
 //
 // If we wanted to get really fancy, we could do 3D graphics with particle physics for the seeds.
 
-Board::Board(const int Num_bowls, const int Num_seeds):
-num_bowls(Num_bowls), num_seeds(Num_seeds)
+Board::Board(const int Num_bowls, const int Num_seeds, const int Ai_depth):
+    num_bowls(Num_bowls), num_seeds(Num_seeds), ai_depth(Ai_depth)
 {
     bowls.resize(2 * num_bowls + 2);
     p1_start = 0;
@@ -214,11 +214,11 @@ int choosemove(const Board b) // purposely doing pass by value here as to not co
         Board sub_b = b;
         int score = 0;
         if(sub_b.move(i))
-            score = choosemove_alphabeta(sub_b, 10, PLAYER_MAX, std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
+            score = choosemove_alphabeta(sub_b, b.ai_depth, PLAYER_MAX, std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
         else
         {
             sub_b.swapsides();
-            score = choosemove_alphabeta(sub_b, 10, PLAYER_MIN, std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
+            score = choosemove_alphabeta(sub_b, b.ai_depth, PLAYER_MIN, std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
         }
         // std::cout<<"choose: "<<i<<" "<<score<<" "<<-sub_b.evaluate()<<std::endl;
         if(score > best)

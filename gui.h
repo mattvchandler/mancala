@@ -92,8 +92,8 @@ protected:
 
     // widgets
     Gtk::CheckButton p1_ai_check, p2_ai_check;
-    Gtk::SpinButton board_size, board_seeds;
-    Gtk::Label board_size_label, board_seeds_label;
+    Gtk::SpinButton board_size, board_seeds, ai_depth;
+    Gtk::Label board_size_label, board_seeds_label, ai_depth_label;
     Gtk::Button ok_button, cancel_button;
 private:
     Mancala_win * win;
@@ -158,8 +158,9 @@ private:
     int hint_i;
     bool game_over;
     bool p1_ai, p2_ai;
+    int num_bowls, num_seeds;
+    int ai_depth;
     std::atomic_flag moving;
 };
 
-#define __MANCALA_GUI_H__
 #endif // __MANCALA_GUI_H__

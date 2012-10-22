@@ -353,8 +353,12 @@ Mancala_settings_win::Mancala_settings_win(Mancala_win * Win):
     main_box(Gtk::ORIENTATION_VERTICAL),
     p1_ai_check("Player 1 AI"),
     p2_ai_check("Player 2 AI"),
+    board_size(Gtk::Adjustment::create(6.0, 1.0, 10.0)),
+    board_seeds(Gtk::Adjustment::create(4.0, 1.0, 20.0)),
+    ai_depth(Gtk::Adjustment::create(4.0, 1.0, 10.0)),
     board_size_label("Board size"),
     board_seeds_label("Number of seeds per bowl"),
+    ai_depth_label("AI look-ahead steps"),
     ok_button(Gtk::Stock::OK),
     cancel_button(Gtk::Stock::CANCEL),
     win(Win)
@@ -368,6 +372,8 @@ Mancala_settings_win::Mancala_settings_win(Mancala_win * Win):
     main_box.pack_start(board_size_label);
     main_box.pack_start(board_seeds);
     main_box.pack_start(board_seeds_label);
+    main_box.pack_start(ai_depth);
+    main_box.pack_start(ai_depth_label);
     main_box.pack_start(ok_button);
     main_box.pack_start(cancel_button);
 
@@ -384,6 +390,9 @@ void Mancala_settings_win::ok_button_func()
 {
     win->p1_ai = p1_ai_check.get_active();
     win->p2_ai = p2_ai_check.get_active();
+    win->num_bowls = (int)board_size.get_value();
+    win->num_seeds = (int)board_seeds.get_value();
+    win->ai_depth = (int)ai_depth.get_value();
     win->new_game();
     hide();
 }
@@ -635,7 +644,7 @@ void Mancala_win::new_game()
     actgrp->get_action("Game_hint")->set_sensitive(true);
 
     player = MANCALA_P1;
-    b = Board();
+    b = Board(num_bowls, num_seeds, ai_depth);
     draw.set_gui_bowls();
     show_hint = false;
     update_board();
