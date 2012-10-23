@@ -1,6 +1,6 @@
 TARGET := mancala
 C_SOURCES :=
-CXX_SOURCES := appstart.cpp gui.cpp mancala.cpp
+CXX_SOURCES := appstart.cpp board.cpp draw.cpp gui.cpp
 SOURCES := $(C_SOURCES) $(CXX_SOURCES)
 C_OBJECTS := ${C_SOURCES:.c=.o}
 CXX_OBJECTS := ${CXX_SOURCES:.cpp=.o}

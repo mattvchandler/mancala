@@ -10,7 +10,6 @@
 #include <gtkmm/application.h>
 
 #include "gui.h"
-#include "mancala.h"
 
 int main(int argc, char * argv[])
 {
@@ -20,7 +19,7 @@ int main(int argc, char * argv[])
     // set up and launch a GTK window
     Glib::RefPtr<Gtk::Application> app = Gtk::Application::create(argc, argv, "mancala.mancala");
 
-    Mancala_win m_win;
+    Mancala::Win m_win;
 
     return app->run(m_win);
 }
