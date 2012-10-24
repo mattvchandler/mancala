@@ -80,20 +80,23 @@ Simple_board::Simple_board(const Mancala::Board & b): num_bowls(b.num_bowls), bo
 bool Simple_board::move(const Mancala::Player p, const int i)
 {
     // get important indexes
-    int hand = (p == Mancala::PLAYER_1)? i: num_bowls + 1 + i;
-    int curr = hand;
+    int curr = (p == Mancala::PLAYER_1)? i: num_bowls + 1 + i;
     int store = (p == Mancala::PLAYER_1)? num_bowls: 2 * num_bowls + 1;
     int wrong_store = (p == Mancala::PLAYER_1)? 2 * num_bowls + 1: num_bowls;
 
+    // take beads from start and put into hand
+    int hand = bowls[curr].count;
+    bowls[curr].count = 0;
+
     // place each bead from the starting bowl
-    while(bowls[hand].count > 0)
+    while(hand > 0)
     {
         curr = bowls[curr].next_i;
         // skip opponent's store
         if(curr == wrong_store)
             curr = bowls[curr].next_i;
         ++bowls[curr].count;
-        --bowls[hand].count;
+        --hand;
     }
 
     // extra move when ending in our store
@@ -184,6 +187,8 @@ int choosemove_alphabeta(const Simple_board & b, const int depth, const Mancala:
         for(int i = 0; i < b.num_bowls; ++i)
         {
             if(b.bowls[b.num_bowls + 1 + i].count == 0)
+
+
                 continue;
             Simple_board sub_b = b;
             int score = 0;
@@ -356,20 +361,23 @@ namespace Mancala
     bool Board::move(const Mancala::Player p, const int i)
     {
         // get important pointers
-        Bowl * hand = (p == PLAYER_1)? &bottom_row[i] : &top_row[i];
-        Bowl * curr = hand;
+        Bowl * curr  = (p == PLAYER_1)? &bottom_row[i]: &top_row[i];
         Bowl * store = (p == PLAYER_1)? &r_store: &l_store;
         Bowl * wrong_store = (p == PLAYER_1)? &l_store: &r_store;
 
+        // take beads from start and put into hand
+        Bowl hand = *curr;
+        curr->beads.clear();
+
         // place each bead from the starting bowl
-        while(hand->beads.size() > 0)
+        while(hand.beads.size() > 0)
         {
             curr = curr->next;
             // skip opponent's store
             if(curr == wrong_store)
                 curr = curr->next;
-            curr->add_bead(hand->beads.back());
-            hand->beads.pop_back();
+            curr->add_bead(hand.beads.back());
+            hand.beads.pop_back();
         }
 
         // extra move when ending in our store
