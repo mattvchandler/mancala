@@ -139,6 +139,18 @@ namespace Mancala
         // set window properties
         set_default_size(800,400);
         set_title("Mancala");
+        try
+        {
+            set_default_icon_from_file("img/icon.svg");
+        }
+        catch(const Glib::FileError& ex)
+        {
+            std::cerr<<"File Error: "<<ex.what()<<std::endl;
+        }
+        catch(const Gdk::PixbufError& ex)
+        {
+            std::cerr<<"Pixbuf Error: "<< ex.what()<<std::endl;
+        }
 
         // build menu and toolbar
         actgrp = Gtk::ActionGroup::create();
