@@ -16,6 +16,16 @@ namespace Mancala
 {
     Settings_win::Settings_win(Win * Win):
         main_box(Gtk::ORIENTATION_VERTICAL),
+        ai_box(Gtk::ORIENTATION_HORIZONTAL),
+        ai_check_box(Gtk::ORIENTATION_VERTICAL),
+        ai_depth_box(Gtk::ORIENTATION_VERTICAL),
+        board_box(Gtk::ORIENTATION_HORIZONTAL),
+        l_board_box(Gtk::ORIENTATION_VERTICAL),
+        r_board_box(Gtk::ORIENTATION_VERTICAL),
+        button_box_o(Gtk::ORIENTATION_HORIZONTAL),
+        button_box(Gtk::ORIENTATION_HORIZONTAL),
+        main_sep(Gtk::ORIENTATION_HORIZONTAL),
+        ai_sep(Gtk::ORIENTATION_VERTICAL),
         p1_ai_check("Player 1 AI"),
         p2_ai_check("Player 2 AI"),
         board_size(Gtk::Adjustment::create(1.0, 1.0, 10.0)),
@@ -23,30 +33,47 @@ namespace Mancala
         ai_depth(Gtk::Adjustment::create(1.0, 1.0, 10.0)),
         board_size_label("Board size"),
         board_seeds_label("Seeds per bowl"),
-        ai_depth_label("AI look-ahead steps"),
+        ai_depth_label("AI look-ahead"),
         ok_button(Gtk::Stock::OK),
         cancel_button(Gtk::Stock::CANCEL),
         win(Win)
     {
-        set_title("Mancala Board Settings");
+        set_default_size(300, 150);
+        set_title("Mancala Settings");
 
         // layot widgets
         add(main_box);
 
-        main_box.pack_start(p1_ai_check);
-        main_box.pack_start(p2_ai_check);
-        main_box.pack_start(board_size);
-        main_box.pack_start(board_size_label);
-        main_box.pack_start(board_seeds);
-        main_box.pack_start(board_seeds_label);
-        main_box.pack_start(ai_depth);
-        main_box.pack_start(ai_depth_label);
-        main_box.pack_start(ok_button);
-        main_box.pack_start(cancel_button);
+        main_box.pack_start(ai_box);
+        ai_box.pack_start(ai_check_box, Gtk::PACK_EXPAND_PADDING);
+        ai_check_box.pack_start(p1_ai_check);
+        ai_check_box.pack_start(p2_ai_check);
+        ai_box.pack_start(ai_sep);
+        ai_box.pack_start(ai_depth_box, Gtk::PACK_EXPAND_PADDING);
+        ai_depth_box.pack_start(ai_depth_label);
+        ai_depth_box.pack_start(ai_depth);
 
+        main_box.pack_start(main_sep);
+
+        main_box.pack_start(board_box);
+        board_box.pack_start(l_board_box, Gtk::PACK_EXPAND_PADDING);
+        l_board_box.pack_start(board_size_label);
+        l_board_box.pack_start(board_size);
+        board_box.pack_start(r_board_box, Gtk::PACK_EXPAND_PADDING);
+        r_board_box.pack_start(board_seeds_label);
+        r_board_box.pack_start(board_seeds);
+
+        main_box.pack_end(button_box_o, Gtk::PACK_SHRINK);
+        button_box_o.pack_start(button_box, Gtk::PACK_EXPAND_PADDING);
+        button_box.pack_start(ok_button);
+        button_box.pack_start(cancel_button);
+
+        set_focus(ok_button);
         show_all_children();
 
         // set signal handlers
+        add_events(Gdk::KEY_PRESS_MASK);
+        signal_key_press_event().connect(sigc::mem_fun(*this, &Settings_win::key_down));
         signal_show().connect(sigc::mem_fun(*this, &Settings_win::open));
         signal_hide().connect(sigc::mem_fun(*this, &Settings_win::close));
         ok_button.signal_clicked().connect(sigc::mem_fun(*this, &Settings_win::ok_button_func));
@@ -87,6 +114,14 @@ namespace Mancala
         win->set_sensitive(true);
     }
 
+    // callback for esc key
+    bool Settings_win::key_down(GdkEventKey * event)
+    {
+        if(event->keyval == GDK_KEY_Escape)
+            hide();
+        return true;
+    }
+
     Win::Win():
         main_box(Gtk::ORIENTATION_VERTICAL),
         settings_win(this),
@@ -96,7 +131,7 @@ namespace Mancala
         p2_ai(true),
         num_bowls(6),
         num_seeds(4),
-        ai_depth(10),
+        ai_depth(4),
         draw(num_bowls, num_seeds, ai_depth)
     {
         moving.test_and_set();

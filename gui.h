@@ -12,6 +12,7 @@
 #include <gtkmm/button.h>
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/label.h>
+#include <gtkmm/separator.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/toggleaction.h>
 #include <gtkmm/uimanager.h>
@@ -37,9 +38,22 @@ namespace Mancala
         void open();
         // callback for settings window close
         void close();
+        // callback for esc key
+        bool key_down(GdkEventKey * event);
 
         // containers
         Gtk::Box main_box;
+        Gtk::Box ai_box;
+        Gtk::Box ai_check_box;
+        Gtk::Box ai_depth_box;
+        Gtk::Box board_box;
+        Gtk::Box l_board_box;
+        Gtk::Box r_board_box;
+        Gtk::Box button_box_o;
+        Gtk::Box button_box;
+
+        Gtk::Separator main_sep;
+        Gtk::Separator ai_sep;
 
         // widgets
         Gtk::CheckButton p1_ai_check, p2_ai_check;
@@ -48,7 +62,6 @@ namespace Mancala
         Gtk::Button ok_button, cancel_button;
     private:
         Win * win;
-
     };
 
     class Win: public Gtk::Window
