@@ -5,6 +5,7 @@
 #ifndef __MANCALA_GUI_H__
 #define __MANCALA_GUI_H__
 
+#include <atomic>
 #include <vector>
 
 #include <gtkmm/box.h>
@@ -23,7 +24,6 @@
 
 namespace Mancala
 {
-
     class Win; // predeclared to avoid circular dependency
 
     // settings window
@@ -71,13 +71,14 @@ namespace Mancala
         bool mouse_down(GdkEventButton * event);
         // AI move functions
         bool ai_timer();
-        void ai_move();
+        void ai_move(int i);
 
         // display the winner, end the game
         void disp_winner();
 
         // get a hint, will highlight a bowl
         void hint();
+        void hint_done(int i);
 
         // reset the game
         void new_game();
@@ -107,9 +108,14 @@ namespace Mancala
         // state vars
         Player player;
         bool game_over;
+        sigc::connection hint_sig;
+        sigc::connection ai_sig;
+
         bool p1_ai, p2_ai;
         int num_bowls, num_seeds;
         int ai_depth;
+
+        std::atomic_flag update_f;
 
         // Drawing area
         Draw draw;

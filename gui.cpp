@@ -238,19 +238,19 @@ namespace Mancala
                 if(!p1_ai && player == PLAYER_1 && grid_y == 1 && draw.b.bottom_row[grid_x - 1].beads.size() > 0)
                 {
                     draw.show_hint = false;
+                    ai_sig.disconnect();
+                    hint_sig.disconnect();
                     if(!draw.b.move(PLAYER_1, grid_x - 1))
                         player = PLAYER_2;
                 }
                 else if(!p2_ai && player == PLAYER_2 && grid_y == 0 && draw.b.top_row[grid_x - 1].beads.size() > 0)
                 {
                     draw.show_hint = false;
+                    ai_sig.disconnect();
+                    hint_sig.disconnect();
                     if(!draw.b.move(PLAYER_2, grid_x - 1))
                         player = PLAYER_1;
                 }
-
-                // is the game over?
-                if(draw.b.finished())
-                    disp_winner();
 
                 update_board();
             }
@@ -261,21 +261,27 @@ namespace Mancala
     // check to see if AI player can move. executed on a timer
     bool Win::ai_timer()
     {
-        if(!game_over)
+        if(update_f.test_and_set())
+            update_board();
+        else if(!game_over && !ai_sig.connected())
         {
             if((player == PLAYER_1 && p1_ai) || (player == PLAYER_2 && p2_ai))
-                ai_move();
+            {
+                draw.show_hint = false;
+                hint_sig.disconnect();
+                ai_sig = draw.b.signal_choosemove().connect(sigc::mem_fun(*this, &Win::ai_move));
+                draw.b.choosemove_noblock(player);
+            }
         }
         return true;
     }
 
     // Have the AI make a move
-    void Win::ai_move()
+    void Win::ai_move(int i)
     {
         bool ai_extra_move = false;
 
-        int ai_move = draw.b.choosemove(player);
-        ai_extra_move = draw.b.move(player, ai_move);
+        ai_extra_move = draw.b.move(player, i);
 
         if(!ai_extra_move)
         {
@@ -285,13 +291,8 @@ namespace Mancala
                 player = PLAYER_1;
         }
 
-        // check to see if the game is over
-        if(draw.b.finished())
-            disp_winner();
-
-        draw.show_hint = false;
-
-        update_board();
+        update_f.test_and_set();
+        ai_sig.disconnect();
     }
 
     // display the winner, end the game
@@ -322,16 +323,24 @@ namespace Mancala
         dlg.run();
     }
 
-    // get a hint, will highlight a bowl
+    // asynchronously get a hint, will highlight a bowl
     void Win::hint()
     {
-        if(game_over)
+        if(hint_sig.connected() || game_over || (player == PLAYER_1 && p1_ai) || (player == PLAYER_2 && p2_ai))
             return;
+        ai_sig.disconnect();
+        hint_sig = draw.b.signal_choosemove().connect(sigc::mem_fun(*this, &Win::hint_done));
+        draw.b.choosemove_noblock(player);
+    }
 
-        draw.hint_i = draw.b.choosemove(player);
+    // catch the return value of the hint
+    void Win::hint_done(int i)
+    {
+        draw.hint_i = i;
         draw.show_hint = true;
         draw.hint_player = player;
-        update_board();
+        hint_sig.disconnect();
+        update_f.test_and_set();
     }
 
     // start a new game
@@ -344,6 +353,8 @@ namespace Mancala
         player = PLAYER_1;
         draw.b = Board(num_bowls, num_seeds, ai_depth);
         draw.show_hint = false;
+        ai_sig.disconnect();
+        hint_sig.disconnect();
         update_board();
     }
 
@@ -362,16 +373,26 @@ namespace Mancala
 
         // call for a redraw
         draw.queue_draw();
+
+        // check to see if the game is over
+        if(!game_over && draw.b.finished())
+            disp_winner();
+
+        update_f.clear();
     }
 
     // AI menu callbacks
     void Win::p1_ai_menu_f()
     {
         p1_ai = p1_ai_menu->get_active();
+        ai_sig.disconnect();
+        hint_sig.disconnect();
     }
 
     void Win::p2_ai_menu_f()
     {
         p2_ai = p2_ai_menu->get_active();
+        ai_sig.disconnect();
+        hint_sig.disconnect();
     }
 }

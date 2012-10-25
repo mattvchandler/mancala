@@ -7,6 +7,8 @@
 
 #include <vector>
 
+#include <sigc++/sigc++.h>
+
 namespace Mancala
 {
     enum Player {PLAYER_1, PLAYER_2};
@@ -71,6 +73,13 @@ namespace Mancala
 
         // ai method to choose the best move based on evaluate()
         int choosemove(const Mancala::Player p) const;
+        // non-blocking version
+        // emits signal with int when complete
+        void choosemove_noblock(const Mancala::Player p) const;
+
+        // signal for choosemove_noblock
+        typedef sigc::signal<void, int> signal_choosemove_t;
+        signal_choosemove_t signal_choosemove();
 
         int num_bowls;
         int num_beads;
@@ -82,6 +91,8 @@ namespace Mancala
         std::vector<Bowl> bottom_row;
         Bowl l_store;
         Bowl r_store;
+
+        signal_choosemove_t signal_choosemove_sig;
     };
 }
 
