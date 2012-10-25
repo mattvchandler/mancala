@@ -15,15 +15,12 @@
 namespace Mancala
 {
     Settings_win::Settings_win(Win * Win):
-        main_box(Gtk::ORIENTATION_VERTICAL),
         ai_box(Gtk::ORIENTATION_HORIZONTAL),
         ai_check_box(Gtk::ORIENTATION_VERTICAL),
         ai_depth_box(Gtk::ORIENTATION_VERTICAL),
         board_box(Gtk::ORIENTATION_HORIZONTAL),
         l_board_box(Gtk::ORIENTATION_VERTICAL),
         r_board_box(Gtk::ORIENTATION_VERTICAL),
-        button_box_o(Gtk::ORIENTATION_HORIZONTAL),
-        button_box(Gtk::ORIENTATION_HORIZONTAL),
         main_sep(Gtk::ORIENTATION_HORIZONTAL),
         ai_sep(Gtk::ORIENTATION_VERTICAL),
         p1_ai_check("Player 1 AI"),
@@ -34,17 +31,15 @@ namespace Mancala
         board_size_label("Board size"),
         board_seeds_label("Seeds per bowl"),
         ai_depth_label("AI look-ahead"),
-        ok_button(Gtk::Stock::OK),
-        cancel_button(Gtk::Stock::CANCEL),
         win(Win)
     {
         set_default_size(300, 150);
         set_title("Mancala Settings");
+        set_transient_for(*win);
+        set_modal(true);
 
         // layot widgets
-        add(main_box);
-
-        main_box.pack_start(ai_box);
+        get_content_area()->pack_start(ai_box);
         ai_box.pack_start(ai_check_box, Gtk::PACK_EXPAND_PADDING);
         ai_check_box.pack_start(p1_ai_check);
         ai_check_box.pack_start(p2_ai_check);
@@ -53,9 +48,9 @@ namespace Mancala
         ai_depth_box.pack_start(ai_depth_label);
         ai_depth_box.pack_start(ai_depth);
 
-        main_box.pack_start(main_sep);
+        get_content_area()->pack_start(main_sep);
 
-        main_box.pack_start(board_box);
+        get_content_area()->pack_start(board_box);
         board_box.pack_start(l_board_box, Gtk::PACK_EXPAND_PADDING);
         l_board_box.pack_start(board_size_label);
         l_board_box.pack_start(board_size);
@@ -63,33 +58,30 @@ namespace Mancala
         r_board_box.pack_start(board_seeds_label);
         r_board_box.pack_start(board_seeds);
 
-        main_box.pack_end(button_box_o, Gtk::PACK_SHRINK);
-        button_box_o.pack_start(button_box, Gtk::PACK_EXPAND_PADDING);
-        button_box.pack_start(ok_button);
-        button_box.pack_start(cancel_button);
+        // set_focus(ok_button);
+        add_button(Gtk::Stock::OK, 1);
+        add_button(Gtk::Stock::CANCEL, 0);
 
-        set_focus(ok_button);
         show_all_children();
 
         // set signal handlers
-        add_events(Gdk::KEY_PRESS_MASK);
-        signal_key_press_event().connect(sigc::mem_fun(*this, &Settings_win::key_down));
+        signal_response().connect(sigc::mem_fun(*this, &Settings_win::button_func));
         signal_show().connect(sigc::mem_fun(*this, &Settings_win::open));
-        signal_hide().connect(sigc::mem_fun(*this, &Settings_win::close));
-        ok_button.signal_clicked().connect(sigc::mem_fun(*this, &Settings_win::ok_button_func));
-        cancel_button.signal_clicked().connect(sigc::mem_fun(*this, &Settings_win::hide));
     }
 
     // callback for settings window okay button
-    void Settings_win::ok_button_func()
+    void Settings_win::button_func(int response_id)
     {
-        // update state vars with new values
-        win->p1_ai = p1_ai_check.get_active();
-        win->p2_ai = p2_ai_check.get_active();
-        win->num_bowls = (int)board_size.get_value();
-        win->num_seeds = (int)board_seeds.get_value();
-        win->ai_depth = (int)ai_depth.get_value();
-        win->new_game();
+        if(response_id == 1) // OK button
+        {
+            // update state vars with new values
+            win->p1_ai = p1_ai_check.get_active();
+            win->p2_ai = p2_ai_check.get_active();
+            win->num_bowls = (int)board_size.get_value();
+            win->num_seeds = (int)board_seeds.get_value();
+            win->ai_depth = (int)ai_depth.get_value();
+            win->new_game();
+        }
         hide();
     }
 
@@ -103,23 +95,6 @@ namespace Mancala
         // set checkbox values
         p1_ai_check.set_active(win->p1_ai);
         p2_ai_check.set_active(win->p2_ai);
-
-        // disavle main window
-        win->set_sensitive(false);
-    }
-
-    // callback for settings window close
-    void Settings_win::close()
-    {
-        win->set_sensitive(true);
-    }
-
-    // callback for esc key
-    bool Settings_win::key_down(GdkEventKey * event)
-    {
-        if(event->keyval == GDK_KEY_Escape)
-            hide();
-        return true;
     }
 
     Win::Win():

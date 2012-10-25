@@ -11,6 +11,7 @@
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
 #include <gtkmm/checkbutton.h>
+#include <gtkmm/dialog.h>
 #include <gtkmm/label.h>
 #include <gtkmm/separator.h>
 #include <gtkmm/spinbutton.h>
@@ -27,30 +28,23 @@ namespace Mancala
     class Win; // predeclared to avoid circular dependency
 
     // settings window
-    class Settings_win: public Gtk::Window
+    class Settings_win: public Gtk::Dialog
     {
     public:
         Settings_win(Win * Win);
     protected:
         // callback for settings window okay button
-        void ok_button_func();
+        void button_func(int response_id);
         // callback for settings window open
         void open();
-        // callback for settings window close
-        void close();
-        // callback for esc key
-        bool key_down(GdkEventKey * event);
 
         // containers
-        Gtk::Box main_box;
         Gtk::Box ai_box;
         Gtk::Box ai_check_box;
         Gtk::Box ai_depth_box;
         Gtk::Box board_box;
         Gtk::Box l_board_box;
         Gtk::Box r_board_box;
-        Gtk::Box button_box_o;
-        Gtk::Box button_box;
 
         Gtk::Separator main_sep;
         Gtk::Separator ai_sep;
@@ -59,7 +53,6 @@ namespace Mancala
         Gtk::CheckButton p1_ai_check, p2_ai_check;
         Gtk::SpinButton board_size, board_seeds, ai_depth;
         Gtk::Label board_size_label, board_seeds_label, ai_depth_label;
-        Gtk::Button ok_button, cancel_button;
     private:
         Win * win;
     };
