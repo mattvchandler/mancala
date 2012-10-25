@@ -10,16 +10,24 @@ INCLUDE_DIRS :=
 LIBRARY_DIRS :=
 LIBRARIES :=
 
+REL_FLAGS := -O2 -fomit-frame-pointer
+DBG_FLAGS := -g -DDEBUG
 CPPFLAGS += $(foreach includedir,$(INCLUDE_DIRS),-I$(includedir))
 CFLAGS   +=
-CXXFLAGS += -O2 -Wall -std=c++0x `pkg-config --cflags gtkmm-3.0`
+CXXFLAGS += -Wall -std=c++0x `pkg-config --cflags gtkmm-3.0`
 LDFLAGS  += $(foreach librarydir,$(LIBRARY_DIRS),-L$(librarydir))
 LDFLAGS  += $(foreach library,$(LIBRARIES),-l$(library)) `pkg-config --libs gtkmm-3.0`
 
 CC := gcc
 CXX := g++
 
-all: $(TARGET)
+all: release
+
+release: CXXFLAGS += $(REL_FLAGS)
+release: $(TARGET)
+
+debug: CXXFLAGS += $(DBG_FLAGS)
+debug: $(TARGET)
 
 $(TARGET): $(OBJECTS)
 	$(CXX) -o $@ $^ $(LDFLAGS)
