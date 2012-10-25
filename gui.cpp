@@ -3,6 +3,7 @@
 // Copyright Matthew Chandler 2012
 
 #include <iostream>
+#include <sstream>
 
 #include <gdkmm/general.h>
 #include <glibmm/fileutils.h>
@@ -18,6 +19,7 @@ namespace Mancala
         ai_box(Gtk::ORIENTATION_HORIZONTAL),
         ai_check_box(Gtk::ORIENTATION_VERTICAL),
         ai_depth_box(Gtk::ORIENTATION_VERTICAL),
+        ai_cycles_box(Gtk::ORIENTATION_HORIZONTAL),
         board_box(Gtk::ORIENTATION_HORIZONTAL),
         l_board_box(Gtk::ORIENTATION_VERTICAL),
         r_board_box(Gtk::ORIENTATION_VERTICAL),
@@ -27,7 +29,7 @@ namespace Mancala
         p2_ai_check("Player 2 AI"),
         board_size(Gtk::Adjustment::create(1.0, 1.0, 10.0)),
         board_seeds(Gtk::Adjustment::create(1.0, 1.0, 20.0)),
-        ai_depth(Gtk::Adjustment::create(1.0, 1.0, 10.0)),
+        ai_depth(Gtk::Adjustment::create(1.0, 0.0, 10.0)),
         board_size_label("Board size"),
         board_seeds_label("Seeds per bowl"),
         ai_depth_label("AI look-ahead"),
@@ -48,6 +50,9 @@ namespace Mancala
         ai_depth_box.pack_start(ai_depth_label);
         ai_depth_box.pack_start(ai_depth);
 
+        get_content_area()->pack_start(ai_cycles_box, Gtk::PACK_EXPAND_PADDING);
+        ai_cycles_box.pack_start(ai_cycles);
+
         get_content_area()->pack_start(main_sep);
 
         get_content_area()->pack_start(board_box);
@@ -67,6 +72,8 @@ namespace Mancala
         // set signal handlers
         signal_response().connect(sigc::mem_fun(*this, &Settings_win::button_func));
         signal_show().connect(sigc::mem_fun(*this, &Settings_win::open));
+        ai_depth.signal_value_changed().connect(sigc::mem_fun(*this, &Settings_win::ai_cycles_func));
+        board_size.signal_value_changed().connect(sigc::mem_fun(*this, &Settings_win::ai_cycles_func));
     }
 
     // callback for settings window okay button
@@ -95,6 +102,18 @@ namespace Mancala
         // set checkbox values
         p1_ai_check.set_active(win->p1_ai);
         p2_ai_check.set_active(win->p2_ai);
+        ai_cycles_func();
+    }
+
+    // update # of ai cylces
+    void Settings_win::ai_cycles_func()
+    {
+        double num_cycles = pow(board_size.get_value(), ai_depth.get_value() + 1.0);
+        std::ostringstream cycle_str;
+        cycle_str<<"AI search space: "<<num_cycles<<" evals";
+        if(num_cycles > 1e9)
+            cycle_str<<" - Not Reccomended";
+        ai_cycles.set_text(cycle_str.str());
     }
 
     Win::Win():

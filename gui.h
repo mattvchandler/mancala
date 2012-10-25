@@ -37,11 +37,14 @@ namespace Mancala
         void button_func(int response_id);
         // callback for settings window open
         void open();
+        // update # of ai cylces
+        void ai_cycles_func();
 
         // containers
         Gtk::Box ai_box;
         Gtk::Box ai_check_box;
         Gtk::Box ai_depth_box;
+        Gtk::Box ai_cycles_box;
         Gtk::Box board_box;
         Gtk::Box l_board_box;
         Gtk::Box r_board_box;
@@ -53,6 +56,7 @@ namespace Mancala
         Gtk::CheckButton p1_ai_check, p2_ai_check;
         Gtk::SpinButton board_size, board_seeds, ai_depth;
         Gtk::Label board_size_label, board_seeds_label, ai_depth_label;
+        Gtk::Label ai_cycles;
     private:
         Win * win;
     };
