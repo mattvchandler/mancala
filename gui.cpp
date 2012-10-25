@@ -334,13 +334,18 @@ namespace Mancala
     // get a hint, will highlight a bowl
     void Win::hint()
     {
+        if(moving.test_and_set())
+            return;
+
         if(game_over)
             return;
 
         draw.hint_i = draw.b.choosemove(player);
         draw.show_hint = true;
-        draw.hint_player =player;
+        draw.hint_player = player;
         update_board();
+
+        moving.clear();
     }
 
     // start a new game
