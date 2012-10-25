@@ -128,8 +128,6 @@ namespace Mancala
         ai_depth(4),
         draw(num_bowls, num_seeds, ai_depth)
     {
-        moving.test_and_set();
-
         // set window properties
         set_default_size(800,400);
         set_title("Mancala");
@@ -221,14 +219,11 @@ namespace Mancala
         update_board();
 
         show_all_children();
-        moving.clear();
     }
 
     // mouse click in drawing area callback
     bool Win::mouse_down(GdkEventButton * event)
     {
-        if(moving.test_and_set())
-            return true;
         if(!game_over)
         {
             Gtk::Allocation alloc = draw.get_allocation();
@@ -260,21 +255,17 @@ namespace Mancala
                 update_board();
             }
         }
-        moving.clear();
         return true;
     }
 
     // check to see if AI player can move. executed on a timer
     bool Win::ai_timer()
     {
-        if(moving.test_and_set())
-            return true;
         if(!game_over)
         {
             if((player == PLAYER_1 && p1_ai) || (player == PLAYER_2 && p2_ai))
                 ai_move();
         }
-        moving.clear();
         return true;
     }
 
@@ -334,9 +325,6 @@ namespace Mancala
     // get a hint, will highlight a bowl
     void Win::hint()
     {
-        if(moving.test_and_set())
-            return;
-
         if(game_over)
             return;
 
@@ -344,8 +332,6 @@ namespace Mancala
         draw.show_hint = true;
         draw.hint_player = player;
         update_board();
-
-        moving.clear();
     }
 
     // start a new game

@@ -5,7 +5,6 @@
 #ifndef __MANCALA_GUI_H__
 #define __MANCALA_GUI_H__
 
-#include <atomic>
 #include <vector>
 
 #include <gtkmm/box.h>
@@ -114,8 +113,6 @@ namespace Mancala
 
         // Drawing area
         Draw draw;
-
-        std::atomic_flag moving;
     };
 }
 #endif // __MANCALA_GUI_H__
