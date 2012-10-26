@@ -137,10 +137,10 @@ int Simple_board::evaluate() const
 int choosemove_alphabeta(const Simple_board & b, const int depth, const Mancala::Player p,
     int alpha, int beta)
 {
-    if(depth == 0)
-        return b.evaluate();
     if(p == Mancala::PLAYER_1)
     {
+        if(depth == 0)
+            return b.evaluate();
         // move toward closest win, avoid loss as long as possible
         if(b.finished())
         {
@@ -172,6 +172,8 @@ int choosemove_alphabeta(const Simple_board & b, const int depth, const Mancala:
     }
     else
     {
+        if(depth == 0)
+            return -b.evaluate();
         // move toward closest win, avoid loss as long as possible
         if(b.finished())
         {
