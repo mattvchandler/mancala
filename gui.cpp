@@ -263,36 +263,44 @@ namespace Mancala
     {
         if(update_f.test_and_set())
             update_board();
-        else if(!game_over && !ai_sig.connected())
+        else
         {
-            if((player == PLAYER_1 && p1_ai) || (player == PLAYER_2 && p2_ai))
+            update_f.clear();
+            if(!game_over && !ai_sig.connected())
             {
-                draw.show_hint = false;
-                hint_sig.disconnect();
-                ai_sig = draw.b.signal_choosemove().connect(sigc::mem_fun(*this, &Win::ai_move));
-                draw.b.choosemove_noblock(player);
+                if((player == PLAYER_1 && p1_ai) || (player == PLAYER_2 && p2_ai))
+                {
+                    draw.show_hint = false;
+                    hint_sig.disconnect();
+                    ai_sig = draw.b.signal_choosemove().connect(sigc::mem_fun(*this, &Win::ai_move));
+                    ai_thread_id = draw.b.choosemove_noblock(player);
+                }
             }
         }
         return true;
     }
 
     // Have the AI make a move
-    void Win::ai_move(int i)
+    void Win::ai_move(int i, std::thread::id id)
     {
-        bool ai_extra_move = false;
-
-        ai_extra_move = draw.b.move(player, i);
-
-        if(!ai_extra_move)
+        // did we get the last thread we sent off?
+        if(id == ai_thread_id)
         {
-            if(player == PLAYER_1)
-                player = PLAYER_2;
-            else
-                player = PLAYER_1;
+            bool ai_extra_move = false;
+    
+            ai_extra_move = draw.b.move(player, i);
+    
+            if(!ai_extra_move)
+            {
+                if(player == PLAYER_1)
+                    player = PLAYER_2;
+                else
+                    player = PLAYER_1;
+            }
+    
+            update_f.test_and_set();
+            ai_sig.disconnect();
         }
-
-        update_f.test_and_set();
-        ai_sig.disconnect();
     }
 
     // display the winner, end the game
@@ -330,17 +338,21 @@ namespace Mancala
             return;
         ai_sig.disconnect();
         hint_sig = draw.b.signal_choosemove().connect(sigc::mem_fun(*this, &Win::hint_done));
-        draw.b.choosemove_noblock(player);
+        ai_thread_id = draw.b.choosemove_noblock(player);
     }
 
     // catch the return value of the hint
-    void Win::hint_done(int i)
+    void Win::hint_done(int i, std::thread::id id)
     {
-        draw.hint_i = i;
-        draw.show_hint = true;
-        draw.hint_player = player;
-        hint_sig.disconnect();
-        update_f.test_and_set();
+        // did we get the last thread we sent off?
+        if(id == ai_thread_id)
+        {
+            draw.hint_i = i;
+            draw.show_hint = true;
+            draw.hint_player = player;
+            update_f.test_and_set();
+            hint_sig.disconnect();
+        }
     }
 
     // start a new game

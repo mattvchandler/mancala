@@ -6,6 +6,7 @@
 #define __MANCALA_GUI_H__
 
 #include <atomic>
+#include <thread>
 #include <vector>
 
 #include <gtkmm/box.h>
@@ -71,14 +72,14 @@ namespace Mancala
         bool mouse_down(GdkEventButton * event);
         // AI move functions
         bool ai_timer();
-        void ai_move(int i);
+        void ai_move(int i, std::thread::id id);
 
         // display the winner, end the game
         void disp_winner();
 
         // get a hint, will highlight a bowl
         void hint();
-        void hint_done(int i);
+        void hint_done(int i, std::thread::id id);
 
         // reset the game
         void new_game();
@@ -115,7 +116,12 @@ namespace Mancala
         int num_bowls, num_seeds;
         int ai_depth;
 
+        // flag set when update_board needs called
         std::atomic_flag update_f;
+
+        // id of the thread running the ai search.
+        // makes sure we get the result one back
+        std::thread::id ai_thread_id;
 
         // Drawing area
         Draw draw;

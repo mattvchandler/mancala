@@ -3,8 +3,6 @@
 // Copyright Matthew Chandler 2012
 
 #include <limits>
-#include <mutex>
-#include <thread>
 #include <cmath>
 #include <cstdlib>
 
@@ -189,8 +187,6 @@ int choosemove_alphabeta(const Simple_board & b, const int depth, const Mancala:
         for(int i = 0; i < b.num_bowls; ++i)
         {
             if(b.bowls[b.num_bowls + 1 + i].count == 0)
-
-
                 continue;
             Simple_board sub_b = b;
             int score = 0;
@@ -207,15 +203,12 @@ int choosemove_alphabeta(const Simple_board & b, const int depth, const Mancala:
     }
 }
 
-std::mutex choosemove_mutex;
 void choosemove_thread_func(const Mancala::Board & b, const Mancala::Player p)
 {
-    // using a mutex to prevent simultaneous searches, which may eat the CPU.
-    choosemove_mutex.lock();
     int move = b.choosemove(p);
     // emit signal
-    b.signal_choosemove_sig.emit(move);
-    choosemove_mutex.unlock();
+    std::thread::id id = std::this_thread::get_id();
+    b.signal_choosemove_sig.emit(move, id);
 }
 
 namespace Mancala
@@ -508,11 +501,12 @@ namespace Mancala
         return best_i[rand() % best_i.size()];
     }
 
-    void Board::choosemove_noblock(const Mancala::Player p) const
+    std::thread::id Board::choosemove_noblock(const Mancala::Player p) const
     {
         std::thread choosemove_thread(choosemove_thread_func, std::cref(*this), p);
+        std::thread::id id = choosemove_thread.get_id();
         choosemove_thread.detach();
-        return;
+        return id;
     }
 
     Board::signal_choosemove_t Board::signal_choosemove()
