@@ -2,6 +2,9 @@
 // Mancala board representation
 // Copyright Matthew Chandler 2012
 
+#ifdef DEBUG
+#include <iostream>
+#endif
 #include <limits>
 #include <cmath>
 #include <cstdlib>
@@ -48,6 +51,11 @@ public:
     bool finished() const;
     // heuristics to evaluate the board status
     int evaluate() const;
+
+#ifdef DEBUG
+    // board print function for debugging AI
+    void debug_print() const;
+#endif
 
     // board layout: <bottom row><r_store><top_row><l_store>
     int num_bowls;
@@ -139,6 +147,19 @@ bool Simple_board::finished() const
     return p1 == 0 || p2 == 0;
 }
 
+#ifdef DEBUG
+// board print function for debugging AI
+void Simple_board::debug_print() const
+{
+    for(int i = 0; i < num_bowls; ++i)
+        std::cout<<bowls[2* num_bowls - i].count<<" ";
+    std::cout<<std::endl;
+    for(int i = 0; i < num_bowls; ++i)
+        std::cout<<bowls[i].count<<" ";
+    std::cout<<std::endl<<bowls[num_bowls* 2 + 1].count<<" | "<<bowls[num_bowls].count<<std::endl;
+}
+#endif
+
 // heuristics to evaluate the board status
 // only needs to evaluate for p1
 int Simple_board::evaluate() const
@@ -151,6 +172,10 @@ int Simple_board::evaluate() const
 int choosemove_alphabeta(const Simple_board & b, const int depth, const Mancala::Player p,
     int alpha, int beta)
 {
+#ifdef DEBUG
+    b.debug_print();
+    std::cout<<std::endl;
+#endif
     if(p == Mancala::PLAYER_1)
     {
         if(depth == 0)
@@ -171,6 +196,9 @@ int choosemove_alphabeta(const Simple_board & b, const int depth, const Mancala:
         {
             if(b.bowls[i].count == 0)
                 continue;
+#ifdef DEBUG
+            std::cout<<"p1 move "<<i<<" depth "<<depth<<std::endl;
+#endif
             Simple_board sub_b = b;
             int score = 0;
             if(sub_b.move(Mancala::PLAYER_1, i)) // do we get another move?
@@ -204,6 +232,9 @@ int choosemove_alphabeta(const Simple_board & b, const int depth, const Mancala:
         {
             if(b.bowls[b.num_bowls + 1 + i].count == 0)
                 continue;
+#ifdef DEBUG
+            std::cout<<"p2 move "<<i<<" depth "<<depth<<std::endl;
+#endif
             Simple_board sub_b = b;
             int score = 0;
             if(sub_b.move(Mancala::PLAYER_2, i)) // do we get another move?
@@ -479,6 +510,9 @@ namespace Mancala
             {
                 if(bottom_row[i].beads.size() == 0)
                     continue;
+#ifdef DEBUG
+                std::cout<<"p1 outer move "<<i<<std::endl;
+#endif
                 // create a stripped down board object to try moves on more quickly
                 Simple_board sub_b = *this;
                 score = 0;
@@ -493,7 +527,9 @@ namespace Mancala
                     score = choosemove_alphabeta(sub_b, ai_depth, PLAYER_2, std::numeric_limits<int>::min(),
                         std::numeric_limits<int>::max());
                 }
-
+#ifdef DEBUG
+                std::cout<<"p1 outer move "<<i<<" score: "<<score<<std::endl;
+#endif
                 // keep track of the move(s) with the best score
                 if(score > best)
                 {
@@ -511,6 +547,9 @@ namespace Mancala
             {
                 if(top_row[i].beads.size() == 0)
                     continue;
+#ifdef DEBUG
+                std::cout<<"p2 outer move "<<i<<std::endl;
+#endif
                 // create a stripped down board object to try moves on more quickly
                 Board sub_b = *this;
                 score = 0;
@@ -525,7 +564,9 @@ namespace Mancala
                     score = -choosemove_alphabeta(sub_b, ai_depth, PLAYER_1, std::numeric_limits<int>::min(),
                         std::numeric_limits<int>::max());
                 }
-
+#ifdef DEBUG
+                std::cout<<"p1 outer move "<<i<<" score: "<<score<<std::endl;
+#endif
                 // keep track of the move(s) with the best score
                 if(score > best)
                 {
@@ -537,6 +578,12 @@ namespace Mancala
                     best_i.push_back(i);
             }
         }
+#ifdef DEBUG
+        std::cout<<"top scoring moves"<<std::endl;
+        for(auto &i: best_i)
+            std::cout<<i<<" ";
+        std::cout<<std::endl;
+#endif
         return best_i[rand() % best_i.size()];
     }
 
