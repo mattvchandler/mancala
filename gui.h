@@ -32,7 +32,7 @@ namespace Mancala
     {
     public:
         Settings_win(Win * Win);
-    protected:
+
         // callback for settings window okay button
         void button_func(int response_id);
         // callback for settings window open
@@ -67,7 +67,7 @@ namespace Mancala
         Win();
 
         friend class Settings_win;
-    protected:
+
         // mouse click in drawing area callback
         bool mouse_down(GdkEventButton * event);
         // AI move functions

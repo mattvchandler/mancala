@@ -79,6 +79,7 @@ Simple_board::Simple_board(const Mancala::Board & b): num_bowls(b.num_bowls), bo
 // returns true if the move earns an extra turn
 bool Simple_board::move(const Mancala::Player p, const int i)
 {
+    bool extra_move = false;
     // get important indexes
     int curr = (p == Mancala::PLAYER_1)? i: num_bowls + 1 + i;
     int store = (p == Mancala::PLAYER_1)? num_bowls: 2 * num_bowls + 1;
@@ -101,16 +102,29 @@ bool Simple_board::move(const Mancala::Player p, const int i)
 
     // extra move when ending in our store
     if(curr == store)
-        return true;
-
-    // collect last bead, and all beads across from it if we land in an empty bowl
-    if(bowls[curr].count == 1 && bowls[bowls[curr].across_i].count > 0)
+        extra_move = true;
     {
-        bowls[store].count += bowls[bowls[curr].across_i].count + 1;
-        bowls[curr].count = 0;
-        bowls[bowls[curr].across_i].count = 0;
+        // collect last bead, and all beads across from it if we land in an empty bowl
+        if(bowls[curr].count == 1 && bowls[bowls[curr].across_i].count > 0)
+        {
+            bowls[store].count += bowls[bowls[curr].across_i].count + 1;
+            bowls[curr].count = 0;
+            bowls[bowls[curr].across_i].count = 0;
+        }
     }
-    return false;
+
+    // when game is finished, move all remaining beads to other player's store
+    if(finished())
+    {
+        for(int i = 0; i < num_bowls; ++i)
+        {
+            bowls[wrong_store].count += bowls[i].count + bowls[num_bowls + 1 + i].count;
+            bowls[i].count = 0;
+            bowls[num_bowls + 1 + i].count = 0;
+        }
+    }
+
+    return extra_move;
 }
 
 // is the game over
@@ -368,6 +382,7 @@ namespace Mancala
     // returns true if the move earns an extra turn
     bool Board::move(const Mancala::Player p, const int i)
     {
+        bool extra_move = false;
         // get important pointers
         Bowl * curr  = (p == PLAYER_1)? &bottom_row[i]: &top_row[i];
         Bowl * store = (p == PLAYER_1)? &r_store: &l_store;
@@ -390,19 +405,41 @@ namespace Mancala
 
         // extra move when ending in our store
         if(curr == store)
-            return true;
-
-        // collect last bead, and all beads across from it if we land in an empty bowl
-        if(curr->beads.size() == 1 && curr->across->beads.size() > 0)
+            extra_move = true;
+        else
         {
-            auto pos = rand_pos(store->ul, store->width, store->height);
-            store->beads.emplace_back(pos, curr->beads.front().color_i);
-            curr->beads.clear();
-            for(auto & i: curr->across->beads)
-                store->add_bead(i);
-            curr->across->beads.clear();
+            // collect last bead, and all beads across from it if we land in an empty bowl
+            if(curr->beads.size() == 1 && curr->across->beads.size() > 0)
+            {
+                auto pos = rand_pos(store->ul, store->width, store->height);
+                store->beads.emplace_back(pos, curr->beads.front().color_i);
+                curr->beads.clear();
+                for(auto & i: curr->across->beads)
+                    store->add_bead(i);
+                curr->across->beads.clear();
+            }
         }
-        return false;
+        // when game is finished, move all remaining beads to other player's store
+        if(finished())
+        {
+            for(auto &i: top_row)
+            {
+                while(!i.beads.empty())
+                {
+                    wrong_store->add_bead(i.beads.back());
+                    i.beads.pop_back();
+                }
+            }
+            for(auto &i: bottom_row)
+            {
+                while(!i.beads.empty())
+                {
+                    wrong_store->add_bead(i.beads.back());
+                    i.beads.pop_back();
+                }
+            }
+        }
+        return extra_move;
     }
 
     // is the game over
