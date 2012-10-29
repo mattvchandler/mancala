@@ -68,9 +68,10 @@ Simple_board::Simple_board(const Mancala::Board & b): num_bowls(b.num_bowls), bo
     for(int i = 0; i < num_bowls; ++i)
     {
         bowls[i].count = b.bottom_row[i].beads.size();
-        bowls[num_bowls + 1 + i].count = b.top_row[i].beads.size();
-        bowls[i].across_i = num_bowls + 1 + i;
-        bowls[num_bowls + 1 + i].across_i = i;
+        bowls[2 * num_bowls - i].count = b.top_row[i].beads.size();
+
+        bowls[i].across_i = 2 * num_bowls - i;
+        bowls[2 * num_bowls - i].across_i = i;
     }
 
     bowls[num_bowls].count = b.r_store.beads.size();
@@ -79,8 +80,7 @@ Simple_board::Simple_board(const Mancala::Board & b): num_bowls(b.num_bowls), bo
     for(size_t i = 0; i < bowls.size() - 1; ++i)
         bowls[i].next_i = i + 1;
 
-    bowls.back().next_i = 0;
-
+    bowls[2 * num_bowls + 1].next_i = 0;
 }
 
 // perform a move
@@ -89,7 +89,7 @@ bool Simple_board::move(const Mancala::Player p, const int i)
 {
     bool extra_move = false;
     // get important indexes
-    int curr = (p == Mancala::PLAYER_1)? i: num_bowls + 1 + i;
+    int curr = (p == Mancala::PLAYER_1)? i: 2 * num_bowls - i;
     int store = (p == Mancala::PLAYER_1)? num_bowls: 2 * num_bowls + 1;
     int wrong_store = (p == Mancala::PLAYER_1)? 2 * num_bowls + 1: num_bowls;
 
@@ -111,6 +111,7 @@ bool Simple_board::move(const Mancala::Player p, const int i)
     // extra move when ending in our store
     if(curr == store)
         extra_move = true;
+    else
     {
         // collect last bead, and all beads across from it if we land in an empty bowl
         if(bowls[curr].count == 1 && bowls[bowls[curr].across_i].count > 0)
@@ -152,7 +153,7 @@ bool Simple_board::finished() const
 void Simple_board::debug_print() const
 {
     for(int i = 0; i < num_bowls; ++i)
-        std::cout<<bowls[2* num_bowls - i].count<<" ";
+        std::cout<<bowls[2 * num_bowls - i].count<<" ";
     std::cout<<std::endl;
     for(int i = 0; i < num_bowls; ++i)
         std::cout<<bowls[i].count<<" ";
@@ -215,7 +216,7 @@ int choosemove_alphabeta(const Simple_board & b, const int depth, const Mancala:
     else
     {
         if(depth == 0)
-            return -b.evaluate();
+            return b.evaluate();
         // move toward closest win, avoid loss as long as possible
         if(b.finished())
         {
@@ -230,7 +231,7 @@ int choosemove_alphabeta(const Simple_board & b, const int depth, const Mancala:
         // recursively try each possible move
         for(int i = 0; i < b.num_bowls; ++i)
         {
-            if(b.bowls[b.num_bowls + 1 + i].count == 0)
+            if(b.bowls[2 * b.num_bowls - i].count == 0)
                 continue;
 #ifdef DEBUG
             std::cout<<"p2 move "<<i<<" depth "<<depth<<std::endl;
@@ -551,7 +552,7 @@ namespace Mancala
                 std::cout<<"p2 outer move "<<i<<std::endl;
 #endif
                 // create a stripped down board object to try moves on more quickly
-                Board sub_b = *this;
+                Simple_board sub_b = *this;
                 score = 0;
                 // try each move
                 if(sub_b.move(PLAYER_2, i))
