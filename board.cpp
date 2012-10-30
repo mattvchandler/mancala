@@ -165,7 +165,12 @@ void Simple_board::debug_print() const
 // only needs to evaluate for p1
 int Simple_board::evaluate() const
 {
-    return bowls[num_bowls].count - bowls.back().count;
+    // assume that p2 gets all of the beads at the end
+    int board_count = 0;
+    for(int i = 0; i < num_bowls; ++i)
+        board_count += bowls[i].count + bowls[i + num_bowls + 1].count;
+
+    return bowls[num_bowls].count - bowls.back().count - board_count;
 }
 
 // helper recursive function for choosemove
@@ -490,11 +495,15 @@ namespace Mancala
     // heuristics to evaluate the board status
     int Board::evaluate(const Mancala::Player p) const
     {
-        // simple - will probably need improvement
+        // assume that opposite player gets all of the beads at the end
+        int board_count = 0;
+        for(size_t i = 0; i < top_row.size(); ++i)
+            board_count += top_row[i].beads.size() + bottom_row[i].beads.size();
+
         if(p == PLAYER_1)
-            return r_store.beads.size() -l_store.beads.size();
+            return r_store.beads.size() - l_store.beads.size() - board_count;
         else
-            return l_store.beads.size() -r_store.beads.size();
+            return l_store.beads.size() - r_store.beads.size() - board_count;
     }
 
     // ai method to choose the best move based on evaluate()
