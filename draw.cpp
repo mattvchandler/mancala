@@ -15,11 +15,12 @@
 
 namespace Mancala
 {
-    Draw::Draw(const int Num_bowls, const int Num_beads, const int Ai_depth):
+    Draw::Draw(const int Num_bowls, const int Num_beads, const int Ai_depth,
+            const bool Extra_rule, const bool Capture_rule, const bool Collect_rule):
         hint_player(Mancala::PLAYER_1),
         show_hint(false),
         hint_i(0),
-        b(Num_bowls, Num_beads, Ai_depth)
+        b(Num_bowls, Num_beads, Ai_depth, Extra_rule, Capture_rule, Collect_rule)
     {
         // signal on mouse click
         add_events(Gdk::BUTTON_PRESS_MASK);

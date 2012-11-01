@@ -55,7 +55,8 @@ namespace Mancala
     class Board
     {
     public:
-        Board(const int Num_bowls = 6, const int Num_beads = 4, const int Ai_depth = 10);
+        Board(const int Num_bowls = 6, const int Num_beads = 4, const int Ai_depth = 10,
+            const bool Extra_rule = true, const bool Capture_rule = true, const bool Collect_rule = true);
         Board(const Board & b);
         Board & operator=(const Board & b);
     public:
@@ -87,6 +88,9 @@ namespace Mancala
         int num_beads;
         // maximum depth for ai lookahead (choosemove)
         int ai_depth;
+
+        // disable / enable rules
+        bool extra_rule, capture_rule, collect_rule;
 
         // board layout vars
         std::vector<Bowl> top_row;
