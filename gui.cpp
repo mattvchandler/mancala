@@ -40,7 +40,7 @@ namespace Mancala
         set_transient_for(*win);
         set_modal(true);
 
-        // layot widgets
+        // layout widgets
         get_content_area()->pack_start(ai_box);
         ai_box.pack_start(ai_check_box, Gtk::PACK_EXPAND_PADDING);
         ai_check_box.pack_start(p1_ai_check);
@@ -105,14 +105,14 @@ namespace Mancala
         ai_cycles_func();
     }
 
-    // update # of ai cylces
+    // update # of ai cycles
     void Settings_win::ai_cycles_func()
     {
         double num_cycles = pow(board_size.get_value(), ai_depth.get_value() + 1.0);
         std::ostringstream cycle_str;
         cycle_str<<"AI search space: "<<num_cycles<<" evals";
         if(num_cycles > 1e9)
-            cycle_str<<" - Not Reccomended";
+            cycle_str<<" - Not Recommended";
         ai_cycles.set_text(cycle_str.str());
     }
 
@@ -196,7 +196,7 @@ namespace Mancala
             std::cerr<<"Menu Error: "<<ex.what()<<std::endl;
         }
 
-        // add widgets to contatiners
+        // add widgets to containers
         add(main_box);
 
         Gtk::Widget * menu = uiman->get_widget("/MenuBar");
@@ -258,7 +258,7 @@ namespace Mancala
         return true;
     }
 
-    // check to see if AI player can move. executed on a timer
+    // check to see if AI player can move. Executed on a timer
     bool Win::ai_timer()
     {
         if(update_f.test_and_set())

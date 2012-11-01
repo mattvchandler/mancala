@@ -33,11 +33,11 @@ namespace Mancala
     public:
         Settings_win(Win * Win);
 
-        // callback for settings window okay button
+        // callback for settings window OK button
         void button_func(int response_id);
         // callback for settings window open
         void open();
-        // update # of ai cylces
+        // update # of ai cycles
         void ai_cycles_func();
 
         // containers

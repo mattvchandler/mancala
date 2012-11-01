@@ -381,7 +381,7 @@ namespace Mancala
         int num_cells = num_bowls + 2;
         double inv_num_cells = 1.0 / num_cells;
 
-        // set stores as empty, and set upp coords
+        // set stores as empty, and set up coords
         l_store = Bowl(0, {0.0, .25}, inv_num_cells, 1.0);
         r_store = Bowl(0, {1.0 - inv_num_cells, .25}, inv_num_cells, 1.0);
 
@@ -513,7 +513,7 @@ namespace Mancala
         std::vector<int> best_i;
         int score = 0;
 
-        // loop over availible moves
+        // loop over available moves
         if(p == PLAYER_1)
         {
             for(size_t i = 0; i < bottom_row.size(); ++i)
