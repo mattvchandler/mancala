@@ -41,19 +41,21 @@ namespace Mancala
         void ai_cycles_func();
 
         // containers
-        Gtk::Box ai_box;
-        Gtk::Box ai_check_box;
-        Gtk::Box ai_depth_box;
-        Gtk::Box ai_cycles_box;
-        Gtk::Box board_box;
-        Gtk::Box l_board_box;
-        Gtk::Box r_board_box;
+        Gtk::HBox ai_box;
+        Gtk::VBox ai_check_box;
+        Gtk::VBox ai_depth_box;
+        Gtk::HBox ai_cycles_box;
+        Gtk::HBox board_box;
+        Gtk::VBox l_board_box;
+        Gtk::VBox r_board_box;
+        Gtk::HBox rule_box;
 
-        Gtk::Separator main_sep;
-        Gtk::Separator ai_sep;
+        Gtk::HSeparator main_1_sep, main_2_sep;
+        Gtk::VSeparator ai_sep;
 
         // widgets
         Gtk::CheckButton p1_ai_check, p2_ai_check;
+        Gtk::CheckButton extra_rule_check, capture_rule_check, collect_rule_check;
         Gtk::SpinButton board_size, board_seeds, ai_depth;
         Gtk::Label board_size_label, board_seeds_label, ai_depth_label;
         Gtk::Label ai_cycles;
@@ -115,6 +117,7 @@ namespace Mancala
         bool p1_ai, p2_ai;
         int num_bowls, num_seeds;
         int ai_depth;
+        bool extra_rule, capture_rule, collect_rule;
 
         // flag set when update_board needs called
         std::atomic_flag update_f;

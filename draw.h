@@ -15,7 +15,8 @@ namespace Mancala
     class Draw: public Gtk::DrawingArea
     {
     public:
-        Draw(const int Num_bowls = 6, const int Num_beads = 4, const int Ai_depth = 10);
+        Draw(const int Num_bowls = 6, const int Num_beads = 4, const int Ai_depth = 10,
+            const bool Extra_rule = true, const bool Capture_rule = true, const bool Collect_rule = true);
 
         // main drawing routine
         bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr);

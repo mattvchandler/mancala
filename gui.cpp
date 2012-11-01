@@ -16,17 +16,11 @@
 namespace Mancala
 {
     Settings_win::Settings_win(Win * Win):
-        ai_box(Gtk::ORIENTATION_HORIZONTAL),
-        ai_check_box(Gtk::ORIENTATION_VERTICAL),
-        ai_depth_box(Gtk::ORIENTATION_VERTICAL),
-        ai_cycles_box(Gtk::ORIENTATION_HORIZONTAL),
-        board_box(Gtk::ORIENTATION_HORIZONTAL),
-        l_board_box(Gtk::ORIENTATION_VERTICAL),
-        r_board_box(Gtk::ORIENTATION_VERTICAL),
-        main_sep(Gtk::ORIENTATION_HORIZONTAL),
-        ai_sep(Gtk::ORIENTATION_VERTICAL),
         p1_ai_check("Player 1 AI"),
         p2_ai_check("Player 2 AI"),
+        extra_rule_check("Extra move"),
+        capture_rule_check("Capture beads"),
+        collect_rule_check("Collect beads at end"),
         board_size(Gtk::Adjustment::create(1.0, 1.0, 10.0)),
         board_seeds(Gtk::Adjustment::create(1.0, 1.0, 20.0)),
         ai_depth(Gtk::Adjustment::create(1.0, 0.0, 10.0)),
@@ -53,7 +47,7 @@ namespace Mancala
         get_content_area()->pack_start(ai_cycles_box, Gtk::PACK_EXPAND_PADDING);
         ai_cycles_box.pack_start(ai_cycles);
 
-        get_content_area()->pack_start(main_sep);
+        get_content_area()->pack_start(main_1_sep);
 
         get_content_area()->pack_start(board_box);
         board_box.pack_start(l_board_box, Gtk::PACK_EXPAND_PADDING);
@@ -63,7 +57,21 @@ namespace Mancala
         r_board_box.pack_start(board_seeds_label);
         r_board_box.pack_start(board_seeds);
 
-        // set_focus(ok_button);
+        get_content_area()->pack_start(main_2_sep);
+
+        get_content_area()->pack_start(rule_box);
+        rule_box.pack_start(extra_rule_check);
+        rule_box.pack_start(capture_rule_check);
+        rule_box.pack_start(collect_rule_check);
+
+        // set tooltips
+        ai_depth.set_tooltip_text("How many steps the AI looks ahead.\nMore steps will make the AI more difficult, but will make it take more time");
+        ai_cycles.set_tooltip_text("Worse case number of AI look-ahead computations given board size and look-ahead");
+        extra_rule_check.set_tooltip_text("Get an extra move when last bead placed in store");
+        capture_rule_check.set_tooltip_text("When landing in an empty bowl, capture all beads across from it");
+        collect_rule_check.set_tooltip_text("When the last move is made, the player not moving will receive all remaining beads");
+
+        // pack the buttons
         add_button(Gtk::Stock::OK, 1);
         add_button(Gtk::Stock::CANCEL, 0);
 
@@ -87,6 +95,9 @@ namespace Mancala
             win->num_bowls = (int)board_size.get_value();
             win->num_seeds = (int)board_seeds.get_value();
             win->ai_depth = (int)ai_depth.get_value();
+            win->extra_rule = extra_rule_check.get_active();
+            win->capture_rule = capture_rule_check.get_active();
+            win->collect_rule = collect_rule_check.get_active();
             win->new_game();
         }
         hide();
@@ -102,6 +113,9 @@ namespace Mancala
         // set checkbox values
         p1_ai_check.set_active(win->p1_ai);
         p2_ai_check.set_active(win->p2_ai);
+        extra_rule_check.set_active(win->extra_rule);
+        capture_rule_check.set_active(win->capture_rule);
+        collect_rule_check.set_active(win->collect_rule);
         ai_cycles_func();
     }
 
@@ -126,7 +140,10 @@ namespace Mancala
         num_bowls(6),
         num_seeds(4),
         ai_depth(4),
-        draw(num_bowls, num_seeds, ai_depth)
+        extra_rule(true),
+        capture_rule(true),
+        collect_rule(true),
+        draw(num_bowls, num_seeds, ai_depth, extra_rule, capture_rule, collect_rule)
     {
         // set window properties
         set_default_size(800,400);
@@ -363,7 +380,7 @@ namespace Mancala
         actgrp->get_action("Game_hint")->set_sensitive(true);
 
         player = PLAYER_1;
-        draw.b = Board(num_bowls, num_seeds, ai_depth);
+        draw.b = Board(num_bowls, num_seeds, ai_depth, extra_rule, capture_rule, collect_rule);
         draw.show_hint = false;
         ai_sig.disconnect();
         hint_sig.disconnect();

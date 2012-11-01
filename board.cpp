@@ -60,9 +60,11 @@ public:
     // board layout: <bottom row><r_store><top_row><l_store>
     int num_bowls;
     std::vector<Simple_bowl> bowls;
+    bool extra_rule, capture_rule, collect_rule;
 };
 
-Simple_board::Simple_board(const Mancala::Board & b): num_bowls(b.num_bowls), bowls(2 * b.num_bowls + 2)
+Simple_board::Simple_board(const Mancala::Board & b): num_bowls(b.num_bowls), bowls(2 * b.num_bowls + 2),
+    extra_rule(b.extra_rule), capture_rule(b.capture_rule), collect_rule(b.collect_rule)
 {
     // copy bead counts from Board obj, set indexes
     for(int i = 0; i < num_bowls; ++i)
@@ -109,9 +111,9 @@ bool Simple_board::move(const Mancala::Player p, const int i)
     }
 
     // extra move when ending in our store
-    if(curr == store)
+    if(extra_rule && curr == store)
         extra_move = true;
-    else
+    else if(capture_rule)
     {
         // collect last bead, and all beads across from it if we land in an empty bowl
         if(bowls[curr].count == 1 && bowls[bowls[curr].across_i].count > 0)
@@ -123,7 +125,7 @@ bool Simple_board::move(const Mancala::Player p, const int i)
     }
 
     // when game is finished, move all remaining beads to other player's store
-    if(finished())
+    if(collect_rule && finished())
     {
         for(int i = 0; i < num_bowls; ++i)
         {
@@ -167,8 +169,9 @@ int Simple_board::evaluate() const
 {
     // assume that p2 gets all of the beads at the end
     int board_count = 0;
-    for(int i = 0; i < num_bowls; ++i)
-        board_count += bowls[i].count + bowls[i + num_bowls + 1].count;
+    if(collect_rule)
+        for(int i = 0; i < num_bowls; ++i)
+            board_count += bowls[i].count + bowls[i + num_bowls + 1].count;
 
     return bowls[num_bowls].count - bowls.back().count - board_count;
 }
@@ -285,35 +288,6 @@ namespace Mancala
             i.color_i = rand() % Mancala::NUM_COLORS;
     }
 
-    Board::Board(const Board & b):
-        num_bowls(b.num_bowls),
-        num_beads(b.num_beads),
-        ai_depth(b.ai_depth),
-        top_row(b.top_row),
-        bottom_row(b.bottom_row),
-        l_store(b.l_store),
-        r_store(b.r_store)
-    {
-        set_bowls();
-    }
-
-    Board & Board::operator=(const Board & b)
-    {
-        if(this != &b)
-        {
-            num_bowls = b.num_bowls;
-            num_beads = b.num_beads;
-            ai_depth = b.ai_depth;
-            top_row = b.top_row;
-            bottom_row = b.bottom_row;
-            l_store = b.l_store;
-            r_store = b.r_store;
-
-            set_bowls();
-        }
-        return *this;
-    }
-
     // add a new bead
     void Bowl::add_bead(const Mancala::Bead & new_bead)
     {
@@ -369,10 +343,51 @@ namespace Mancala
                 beads[i].pos = rand_pos(ul, width, height);
     }
 
-    Board::Board(const int Num_bowls, const int Num_beads, const int Ai_depth):
-        num_bowls(Num_bowls), num_beads(Num_beads), ai_depth(Ai_depth)
+    Board::Board(const int Num_bowls, const int Num_beads, const int Ai_depth,
+        const bool Extra_rule, const bool Capture_rule, const bool Collect_rule):
+        num_bowls(Num_bowls),
+        num_beads(Num_beads),
+        ai_depth(Ai_depth),
+        extra_rule(Extra_rule),
+        capture_rule(Capture_rule),
+        collect_rule(Collect_rule)
     {
         set_bowls();
+    }
+
+    Board::Board(const Board & b):
+        num_bowls(b.num_bowls),
+        num_beads(b.num_beads),
+        ai_depth(b.ai_depth),
+        extra_rule(b.extra_rule),
+        capture_rule(b.capture_rule),
+        collect_rule(b.collect_rule),
+        top_row(b.top_row),
+        bottom_row(b.bottom_row),
+        l_store(b.l_store),
+        r_store(b.r_store)
+    {
+        set_bowls();
+    }
+
+    Board & Board::operator=(const Board & b)
+    {
+        if(this != &b)
+        {
+            num_bowls = b.num_bowls;
+            num_beads = b.num_beads;
+            ai_depth = b.ai_depth;
+            extra_rule = b.extra_rule;
+            capture_rule = b.capture_rule;
+            collect_rule = b.collect_rule;
+            top_row = b.top_row;
+            bottom_row = b.bottom_row;
+            l_store = b.l_store;
+            r_store = b.r_store;
+
+            set_bowls();
+        }
+        return *this;
     }
 
     // set up bowls
@@ -441,9 +456,9 @@ namespace Mancala
         }
 
         // extra move when ending in our store
-        if(curr == store)
+        if(extra_rule && curr == store)
             extra_move = true;
-        else
+        else if(capture_rule)
         {
             // collect last bead, and all beads across from it if we land in an empty bowl
             if(curr->beads.size() == 1 && curr->across->beads.size() > 0)
@@ -457,7 +472,7 @@ namespace Mancala
             }
         }
         // when game is finished, move all remaining beads to other player's store
-        if(finished())
+        if(collect_rule && finished())
         {
             for(auto &i: top_row)
             {
@@ -497,8 +512,9 @@ namespace Mancala
     {
         // assume that opposite player gets all of the beads at the end
         int board_count = 0;
-        for(size_t i = 0; i < top_row.size(); ++i)
-            board_count += top_row[i].beads.size() + bottom_row[i].beads.size();
+        if(collect_rule)
+            for(size_t i = 0; i < top_row.size(); ++i)
+                board_count += top_row[i].beads.size() + bottom_row[i].beads.size();
 
         if(p == PLAYER_1)
             return r_store.beads.size() - l_store.beads.size() - board_count;
