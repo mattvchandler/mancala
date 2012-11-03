@@ -3,64 +3,131 @@
 // Copyright Matthew Chandler 2012
 
 #ifndef __MANCALA_GUI_H__
-#include <memory>
+#define __MANCALA_GUI_H__
+
+#include <atomic>
+#include <thread>
 #include <vector>
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/dialog.h>
 #include <gtkmm/label.h>
+#include <gtkmm/separator.h>
+#include <gtkmm/spinbutton.h>
+#include <gtkmm/toggleaction.h>
+#include <gtkmm/uimanager.h>
 #include <gtkmm/window.h>
 
-#include "mancala.h"
+#include "board.h"
+#include "draw.h"
 
-class Mancala_win: public Gtk::Window
+namespace Mancala
 {
-public:
-    Mancala_win();
+    class Win; // predeclared to avoid circular dependency
 
-protected:
-    // signal handlers
+    // settings window
+    class Settings_win: public Gtk::Dialog
+    {
+    public:
+        Settings_win(Win * Win);
 
-    // make a move (called by button signals)
-    void move(const int i);
+        // callback for settings window OK button
+        void button_func(int response_id);
+        // callback for settings window open
+        void open();
+        // update # of ai cycles
+        void ai_cycles_func();
 
-    // get a hint, will highlight a bowl
-    void hint();
+        // containers
+        Gtk::HBox ai_box;
+        Gtk::VBox ai_check_box;
+        Gtk::VBox ai_depth_box;
+        Gtk::HBox ai_cycles_box;
+        Gtk::HBox board_box;
+        Gtk::VBox l_board_box;
+        Gtk::VBox r_board_box;
+        Gtk::HBox rule_box;
 
-    // reset the game
-    void new_game();
+        Gtk::HSeparator main_1_sep, main_2_sep;
+        Gtk::VSeparator ai_sep;
 
-    // containers
-    Gtk::Box main_box;
-    Gtk::Box board_box;
-    Gtk::Box sub_board_box;
-    Gtk::Box top_row_box;
-    Gtk::Box bottom_row_box;
-    Gtk::Box hint_box;
-    Gtk::Box new_game_box;
-    // stores
-    Gtk::Label l_store, r_store;
-    // bowls
-    std::vector<std::unique_ptr<Gtk::Label>> top_row_bowls;
-    std::vector<std::unique_ptr<Gtk::Button>> bottom_row_bowls;
-    // hint button
-    Gtk::Button hint_b;
-    // new game button
-    Gtk::Button new_game_b;
+        // widgets
+        Gtk::CheckButton p1_ai_check, p2_ai_check;
+        Gtk::CheckButton extra_rule_check, capture_rule_check, collect_rule_check;
+        Gtk::SpinButton board_size, board_seeds, ai_depth;
+        Gtk::Label board_size_label, board_seeds_label, ai_depth_label;
+        Gtk::Label ai_cycles;
+    private:
+        Win * win;
+    };
 
-    // Identify who's turn it is
-    Gtk::Label player_label;
+    class Win: public Gtk::Window
+    {
+    public:
+        Win();
 
-private:
-    // update the numbers for each bowl / store
-    void update_board();
+        friend class Settings_win;
 
-    //state vars
-    int player;
+        // mouse click in drawing area callback
+        bool mouse_down(GdkEventButton * event);
+        // AI move functions
+        bool ai_timer();
+        void ai_move(int i, std::thread::id id);
 
-    // the actual mancala board
-    Board b;
-};
+        // display the winner, end the game
+        void disp_winner();
 
-#define __MANCALA_GUI_H__
+        // get a hint, will highlight a bowl
+        void hint();
+        void hint_done(int i, std::thread::id id);
+
+        // reset the game
+        void new_game();
+
+        // ai menu callback
+        void p1_ai_menu_f();
+        void p2_ai_menu_f();
+
+        // containers
+        Gtk::Box main_box;
+        // Identify who's turn it is
+        Gtk::Label player_label;
+        // Menu and toolbar
+        Glib::RefPtr<Gtk::UIManager> uiman;
+        Glib::RefPtr<Gtk::ActionGroup> actgrp;
+
+        // AI menu items
+        Glib::RefPtr<Gtk::ToggleAction> p1_ai_menu, p2_ai_menu;
+
+        // settings window
+        Settings_win settings_win;
+
+    private:
+        // update the numbers for each bowl / store
+        void update_board();
+
+        // state vars
+        Player player;
+        bool game_over;
+        sigc::connection hint_sig;
+        sigc::connection ai_sig;
+
+        bool p1_ai, p2_ai;
+        int num_bowls, num_seeds;
+        int ai_depth;
+        bool extra_rule, capture_rule, collect_rule;
+
+        // flag set when update_board needs called
+        std::atomic_flag update_f;
+
+        // id of the thread running the ai search.
+        // makes sure we get the result one back
+        std::thread::id ai_thread_id;
+
+        // Drawing area
+        Draw draw;
+    };
+}
 #endif // __MANCALA_GUI_H__
