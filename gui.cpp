@@ -229,8 +229,8 @@ namespace Mancala
 
         // set callback for mouse click in drawing area
         draw.signal_button_press_event().connect(sigc::mem_fun(*this, &Win::mouse_down));
-        // set timer to make AI moves when able. Check every 50ms
-        Glib::signal_timeout().connect(sigc::mem_fun(*this, &Win::ai_timer), 50);
+        // set timer to make AI moves when able. Check every 500ms
+        Glib::signal_timeout().connect(sigc::mem_fun(*this, &Win::ai_timer), 500);
 
         // set all labels for number of seeds
         update_board();
