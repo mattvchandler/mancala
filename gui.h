@@ -14,6 +14,7 @@
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/dialog.h>
 #include <gtkmm/label.h>
+#include <gtkmm/radioaction.h>
 #include <gtkmm/separator.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/toggleaction.h>
@@ -86,9 +87,13 @@ namespace Mancala
         // reset the game
         void new_game();
 
-        // ai menu callback
+        // ai menu callbacks
         void p1_ai_menu_f();
         void p2_ai_menu_f();
+
+        // GUI menu callbacks
+        void full_gui_f();
+        void simple_gui_f();
 
         // containers
         Gtk::Box main_box;
@@ -100,6 +105,9 @@ namespace Mancala
 
         // AI menu items
         Glib::RefPtr<Gtk::ToggleAction> p1_ai_menu, p2_ai_menu;
+
+        // GUI selection menu item
+        Glib::RefPtr<Gtk::RadioAction> full_gui_menu, simple_gui_menu;
 
         // settings window
         Settings_win settings_win;
@@ -118,6 +126,7 @@ namespace Mancala
         int num_bowls, num_seeds;
         int ai_depth;
         bool extra_rule, capture_rule, collect_rule;
+        bool full_gui;
 
         // flag set when update_board needs called
         std::atomic_flag update_f;

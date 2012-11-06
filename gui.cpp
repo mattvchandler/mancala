@@ -143,6 +143,7 @@ namespace Mancala
         extra_rule(true),
         capture_rule(true),
         collect_rule(true),
+        full_gui(true),
         draw(num_bowls, num_seeds, ai_depth, extra_rule, capture_rule, collect_rule)
     {
         // set window properties
@@ -172,11 +173,19 @@ namespace Mancala
             sigc::mem_fun(settings_win, &Settings_win::show));
         actgrp->add(Gtk::Action::create("Game_quit", Gtk::Stock::QUIT, "_Quit", "Quit"),
             sigc::mem_fun(*this, &Win::hide));
+
         actgrp->add(Gtk::Action::create("Players", "Players"));
         p1_ai_menu = Gtk::ToggleAction::create("Players_1_ai", "Player 1 AI", "Toggle Player 1 AI", p1_ai);
         p2_ai_menu = Gtk::ToggleAction::create("Players_2_ai", "Player 2 AI", "Toggle Player 2 AI", p2_ai);
         actgrp->add(p1_ai_menu, sigc::mem_fun(*this, &Win::p1_ai_menu_f));
         actgrp->add(p2_ai_menu, sigc::mem_fun(*this, &Win::p2_ai_menu_f));
+
+        actgrp->add(Gtk::Action::create("Display", "Display"));
+        Gtk::RadioAction::Group gui_radio_group;
+        full_gui_menu = Gtk::RadioAction::create(gui_radio_group, "full_gui", "Full GUI");
+        actgrp->add(full_gui_menu, sigc::mem_fun(*this, &Win::full_gui_f));
+        simple_gui_menu = Gtk::RadioAction::create(gui_radio_group, "simple_gui", "Simple GUI");
+        actgrp->add(simple_gui_menu, sigc::mem_fun(*this, &Win::simple_gui_f));
 
         uiman = Gtk::UIManager::create();
         uiman->insert_action_group(actgrp);
@@ -195,6 +204,10 @@ namespace Mancala
         "       <menu action='Players'>"
         "           <menuitem action='Players_1_ai'/>"
         "           <menuitem action='Players_2_ai'/>"
+        "       </menu>"
+        "       <menu action='Display'>"
+        "           <menuitem action='full_gui'/>"
+        "           <menuitem action='simple_gui'/>"
         "       </menu>"
         "   </menubar>"
         "   <toolbar name='ToolBar'>"
@@ -423,5 +436,16 @@ namespace Mancala
         p2_ai = p2_ai_menu->get_active();
         ai_sig.disconnect();
         hint_sig.disconnect();
+    }
+
+    // GUI menu callbacks
+    void Win::full_gui_f()
+    {
+
+    }
+
+    void Win::simple_gui_f()
+    {
+
     }
 }
