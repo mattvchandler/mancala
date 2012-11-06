@@ -131,7 +131,6 @@ namespace Mancala
     }
 
     Win::Win():
-        main_box(Gtk::ORIENTATION_VERTICAL),
         settings_win(this),
         player(PLAYER_1),
         game_over(false),
@@ -183,9 +182,9 @@ namespace Mancala
         actgrp->add(Gtk::Action::create("Display", "Display"));
         Gtk::RadioAction::Group gui_radio_group;
         full_gui_menu = Gtk::RadioAction::create(gui_radio_group, "full_gui", "Full GUI");
-        actgrp->add(full_gui_menu, sigc::mem_fun(*this, &Win::full_gui_f));
+        actgrp->add(full_gui_menu, sigc::mem_fun(*this, &Win::gui_f));
         simple_gui_menu = Gtk::RadioAction::create(gui_radio_group, "simple_gui", "Simple GUI");
-        actgrp->add(simple_gui_menu, sigc::mem_fun(*this, &Win::simple_gui_f));
+        actgrp->add(simple_gui_menu, sigc::mem_fun(*this, &Win::gui_f));
 
         uiman = Gtk::UIManager::create();
         uiman->insert_action_group(actgrp);
@@ -233,12 +232,48 @@ namespace Mancala
         Gtk::Widget * toolbar = uiman->get_widget("/ToolBar");
 
         if(menu)
+        {
             main_box.pack_start(*menu, Gtk::PACK_SHRINK);
+            menu->show();
+        }
         if(toolbar)
+        {
             main_box.pack_start(*toolbar, Gtk::PACK_SHRINK);
+            toolbar->show();
+        }
 
         main_box.pack_start(draw);
+        draw.show();
         main_box.pack_end(player_label, Gtk::PACK_SHRINK);
+
+        // set up simple gui elements
+        main_box.pack_start(simple_gui_box);
+        simple_gui_box.pack_start(simple_l_store);
+        simple_gui_box.pack_end(simple_r_store);
+        simple_gui_box.pack_start(simple_sub_board_box);
+        simple_sub_board_box.pack_start(simple_top_row_box);
+        simple_sub_board_box.pack_start(simple_bottom_row_box);
+
+        // create and store widgets for the bowls
+        // bind events to each button
+        for(int i = 0; i < num_bowls; ++i)
+        {
+            simple_top_row_bowls.push_back(std::unique_ptr<Gtk::Button>(new Gtk::Button));
+            simple_top_row_box.pack_start(*simple_top_row_bowls[i]);
+            simple_top_row_bowls.back()->signal_clicked().connect(sigc::bind<Player, int>
+                (sigc::mem_fun(*this, &Win::simple_button_click), PLAYER_2, i));
+
+            simple_bottom_row_bowls.push_back(std::unique_ptr<Gtk::Button>(new Gtk::Button));
+            simple_bottom_row_box.pack_start(*simple_bottom_row_bowls[i]);
+            simple_bottom_row_bowls.back()->signal_clicked().connect(sigc::bind<Player, int>
+                (sigc::mem_fun(*this, &Win::simple_button_click), PLAYER_1, i));
+        }
+
+        simple_gui_box.show_all_children();
+        simple_gui_box.show();
+
+        player_label.show();
+        main_box.show();
 
         // set callback for mouse click in drawing area
         draw.signal_button_press_event().connect(sigc::mem_fun(*this, &Win::mouse_down));
@@ -247,8 +282,6 @@ namespace Mancala
 
         // set all labels for number of seeds
         update_board();
-
-        show_all_children();
     }
 
     // mouse click in drawing area callback
@@ -333,6 +366,32 @@ namespace Mancala
         }
     }
 
+    // simple gui button click
+    void Win::simple_button_click(const Player p, const int i)
+    {
+        if(!game_over)
+        {
+            // determine if move is legal, and make the move
+            if(!p1_ai && player == PLAYER_1 && p == PLAYER_1 && draw.b.bottom_row[i].beads.size() > 0)
+            {
+                draw.show_hint = false;
+                ai_sig.disconnect();
+                hint_sig.disconnect();
+                if(!draw.b.move(PLAYER_1, i))
+                    player = PLAYER_2;
+            }
+            else if(!p2_ai && player == PLAYER_2 && p == PLAYER_2 && draw.b.top_row[i].beads.size() > 0)
+            {
+                draw.show_hint = false;
+                ai_sig.disconnect();
+                hint_sig.disconnect();
+                if(!draw.b.move(PLAYER_2, i))
+                    player = PLAYER_1;
+            }
+
+            update_board();
+        }
+    }
     // display the winner, end the game
     void Win::disp_winner()
     {
@@ -382,6 +441,7 @@ namespace Mancala
             draw.hint_player = player;
             update_f.test_and_set();
             hint_sig.disconnect();
+            // TODO: simple hint highlighting
         }
     }
 
@@ -394,6 +454,8 @@ namespace Mancala
 
         player = PLAYER_1;
         draw.b = Board(num_bowls, num_seeds, ai_depth, extra_rule, capture_rule, collect_rule);
+        // TODO:rebuild simple_gui
+
         draw.show_hint = false;
         ai_sig.disconnect();
         hint_sig.disconnect();
@@ -403,7 +465,7 @@ namespace Mancala
     // update the numbers for each bowl / store
     void Win::update_board()
     {
-        // Show who's turn it is TODO: ugly
+        // Show whose turn it is
         if(player == PLAYER_1)
             player_label.set_text("Player 1");
         else
@@ -414,7 +476,12 @@ namespace Mancala
         p2_ai_menu->set_active(p2_ai);
 
         // call for a redraw
-        draw.queue_draw();
+        if(full_gui)
+            draw.queue_draw();
+        else
+        {
+            // TODO:update labels and buttons for simple gui
+        }
 
         // check to see if the game is over
         if(!game_over && draw.b.finished())
@@ -438,14 +505,24 @@ namespace Mancala
         hint_sig.disconnect();
     }
 
-    // GUI menu callbacks
-    void Win::full_gui_f()
+    // GUI menu callback
+    void Win::gui_f()
     {
-
-    }
-
-    void Win::simple_gui_f()
-    {
-
+        if(full_gui_menu->get_active() && !full_gui)
+        {
+            full_gui = true;
+            draw.show();
+            simple_gui_box.hide();
+            resize(800,400);
+            update_board();
+        }
+        else if(simple_gui_menu->get_active() && full_gui)
+        {
+            full_gui = false;
+            draw.hide();
+            simple_gui_box.show();
+            resize(200,150);
+            update_board();
+        }
     }
 }

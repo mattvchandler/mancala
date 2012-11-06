@@ -6,6 +6,7 @@
 #define __MANCALA_GUI_H__
 
 #include <atomic>
+#include <memory>
 #include <thread>
 #include <vector>
 
@@ -76,6 +77,8 @@ namespace Mancala
         // AI move functions
         bool ai_timer();
         void ai_move(int i, std::thread::id id);
+        // simple gui button click
+        void simple_button_click(const Player p, const int i);
 
         // display the winner, end the game
         void disp_winner();
@@ -92,11 +95,20 @@ namespace Mancala
         void p2_ai_menu_f();
 
         // GUI menu callbacks
-        void full_gui_f();
-        void simple_gui_f();
+        void gui_f();
 
         // containers
-        Gtk::Box main_box;
+        Gtk::VBox main_box;
+
+        // simple gui elements
+        Gtk::HBox simple_gui_box;
+        Gtk::VBox simple_sub_board_box;
+        Gtk::HBox simple_top_row_box;
+        Gtk::HBox simple_bottom_row_box;
+        Gtk::Label simple_l_store, simple_r_store;
+        std::vector<std::unique_ptr<Gtk::Button>> simple_top_row_bowls;
+        std::vector<std::unique_ptr<Gtk::Button>> simple_bottom_row_bowls;
+
         // Identify who's turn it is
         Gtk::Label player_label;
         // Menu and toolbar
