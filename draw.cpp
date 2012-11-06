@@ -13,6 +13,31 @@
 
 #include "draw.h"
 
+// pixel data to be used as fallback image
+const int fallback_h = 16;
+const int fallback_w = 16;
+unsigned char fallback_data[fallback_h * fallback_w * 4];
+
+Glib::RefPtr<Gdk::Pixbuf> pixbuf_create_from_file_fallback(const char * filename, const Glib::RefPtr<Gdk::Pixbuf> & fallback)
+{
+    Glib::RefPtr<Gdk::Pixbuf> ret;
+    try
+    {
+        ret = Gdk::Pixbuf::create_from_file(filename);
+    }
+    catch(const Glib::FileError& ex)
+    {
+        std::cerr<<"File Error: "<<ex.what()<<std::endl;
+        ret = fallback;
+    }
+    catch(const Gdk::PixbufError& ex)
+    {
+        std::cerr<<"Pixbuf Error: "<< ex.what()<<std::endl;
+        ret = fallback;
+    }
+    return ret;
+}
+
 namespace Mancala
 {
     Draw::Draw(const int Num_bowls, const int Num_beads, const int Ai_depth,
@@ -25,29 +50,33 @@ namespace Mancala
         // signal on mouse click
         add_events(Gdk::BUTTON_PRESS_MASK);
 
+        // create a fallback image to be used in place of missing files
+        // it is a black and magenta checkerboard
+        for(int row = 0; row < fallback_h; ++row)
+        {
+            for(int col = 0; col < fallback_w; ++col)
+            {
+                int i = (row * fallback_w + col) * 4;
+                fallback_data[i] = fallback_data[i + 2] = ((row & 1) == (col & 1))? 0 : 255;
+                fallback_data[i + 1] = 0;
+                fallback_data[i + 3] = 192;
+            }
+        }
+        Glib::RefPtr<Gdk::Pixbuf> fallback_img = Gdk::Pixbuf::create_from_data(fallback_data, Gdk::COLORSPACE_RGB,
+            true, 8, fallback_w, fallback_h, fallback_w * 4);
+
         // load images from disk
-        try
-        {
-            bg_store = Gdk::Pixbuf::create_from_file("img/bg_store.png");
-            bg_bowl = Gdk::Pixbuf::create_from_file("img/bg_bowl.png");
-            bg_board = Gdk::Pixbuf::create_from_file("img/bg_board.png");
-            hint_img = Gdk::Pixbuf::create_from_file("img/hint.png");
-            bead_s_img = Gdk::Pixbuf::create_from_file("img/bead_s.png");
-            bead_imgs.push_back(Gdk::Pixbuf::create_from_file("img/bead_red.png"));
-            bead_imgs.push_back(Gdk::Pixbuf::create_from_file("img/bead_green.png"));
-            bead_imgs.push_back(Gdk::Pixbuf::create_from_file("img/bead_blue.png"));
-            bead_imgs.push_back(Gdk::Pixbuf::create_from_file("img/bead_yellow.png"));
-            bead_imgs.push_back(Gdk::Pixbuf::create_from_file("img/bead_magenta.png"));
-            bead_imgs.push_back(Gdk::Pixbuf::create_from_file("img/bead_cyan.png"));
-        }
-        catch(const Glib::FileError& ex)
-        {
-            std::cerr<<"File Error: "<<ex.what()<<std::endl;
-        }
-        catch(const Gdk::PixbufError& ex)
-        {
-            std::cerr<<"Pixbuf Error: "<< ex.what()<<std::endl;
-        }
+        bg_store = pixbuf_create_from_file_fallback("img/bg_store.png", fallback_img);
+        bg_bowl = pixbuf_create_from_file_fallback("img/bg_bowl.png", fallback_img);
+        bg_board = pixbuf_create_from_file_fallback("img/bg_board.png", fallback_img);
+        hint_img = pixbuf_create_from_file_fallback("img/hint.png", fallback_img);
+        bead_s_img = pixbuf_create_from_file_fallback("img/bead_s.png", fallback_img);
+        bead_imgs.push_back(pixbuf_create_from_file_fallback("img/bead_red.png", fallback_img));
+        bead_imgs.push_back(pixbuf_create_from_file_fallback("img/bead_green.png", fallback_img));
+        bead_imgs.push_back(pixbuf_create_from_file_fallback("img/bead_blue.png", fallback_img));
+        bead_imgs.push_back(pixbuf_create_from_file_fallback("img/bead_yellow.png", fallback_img));
+        bead_imgs.push_back(pixbuf_create_from_file_fallback("img/bead_magenta.png", fallback_img));
+        bead_imgs.push_back(pixbuf_create_from_file_fallback("img/bead_cyan.png", fallback_img));
     }
 
     // helper function to draw an image
