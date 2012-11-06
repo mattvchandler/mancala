@@ -244,7 +244,6 @@ namespace Mancala
 
         main_box.pack_start(draw);
         draw.show();
-        main_box.pack_end(player_label, Gtk::PACK_SHRINK);
 
         // set up simple gui elements
         main_box.pack_start(simple_gui_box);
@@ -270,8 +269,8 @@ namespace Mancala
         }
 
         simple_gui_box.show_all_children();
-        simple_gui_box.show();
 
+        main_box.pack_end(player_label, Gtk::PACK_SHRINK);
         player_label.show();
         main_box.show();
 
@@ -314,7 +313,6 @@ namespace Mancala
                     if(!draw.b.move(PLAYER_2, grid_x - 1))
                         player = PLAYER_1;
                 }
-
                 update_board();
             }
         }
@@ -388,10 +386,10 @@ namespace Mancala
                 if(!draw.b.move(PLAYER_2, i))
                     player = PLAYER_1;
             }
-
             update_board();
         }
     }
+
     // display the winner, end the game
     void Win::disp_winner()
     {
@@ -441,7 +439,6 @@ namespace Mancala
             draw.hint_player = player;
             update_f.test_and_set();
             hint_sig.disconnect();
-            // TODO: simple hint highlighting
         }
     }
 
@@ -454,7 +451,33 @@ namespace Mancala
 
         player = PLAYER_1;
         draw.b = Board(num_bowls, num_seeds, ai_depth, extra_rule, capture_rule, collect_rule);
-        // TODO:rebuild simple_gui
+
+        // rebuild simple_gui
+        for(size_t i = 0; i < simple_top_row_bowls.size(); ++i)
+        {
+            simple_top_row_box.remove(*simple_top_row_bowls[i]);
+            simple_bottom_row_box.remove(*simple_bottom_row_bowls[i]);
+        }
+
+        simple_top_row_bowls.clear();
+        simple_bottom_row_bowls.clear();
+
+        // create and store widgets for the bowls
+        // bind events to each button
+        for(int i = 0; i < num_bowls; ++i)
+        {
+            simple_top_row_bowls.push_back(std::unique_ptr<Gtk::Button>(new Gtk::Button));
+            simple_top_row_box.pack_start(*simple_top_row_bowls[i]);
+            simple_top_row_bowls.back()->signal_clicked().connect(sigc::bind<Player, int>
+                (sigc::mem_fun(*this, &Win::simple_button_click), PLAYER_2, i));
+
+            simple_bottom_row_bowls.push_back(std::unique_ptr<Gtk::Button>(new Gtk::Button));
+            simple_bottom_row_box.pack_start(*simple_bottom_row_bowls[i]);
+            simple_bottom_row_bowls.back()->signal_clicked().connect(sigc::bind<Player, int>
+                (sigc::mem_fun(*this, &Win::simple_button_click), PLAYER_1, i));
+        }
+
+        simple_gui_box.show_all_children();
 
         draw.show_hint = false;
         ai_sig.disconnect();
@@ -480,7 +503,36 @@ namespace Mancala
             draw.queue_draw();
         else
         {
-            // TODO:update labels and buttons for simple gui
+            // update labels and buttons for simple gui
+            std::ostringstream l_store_str, r_store_str;
+            l_store_str<<draw.b.l_store.beads.size();
+            simple_l_store.set_text(l_store_str.str());
+
+            r_store_str<<draw.b.r_store.beads.size();
+            simple_r_store.set_text(r_store_str.str());
+
+            for(int i = 0; i < num_bowls; ++i)
+            {
+                std::ostringstream top_count_str, bottom_count_str;
+                top_count_str<<draw.b.top_row[i].beads.size();
+                simple_top_row_bowls[i]->set_label(top_count_str.str());
+
+                bottom_count_str<<draw.b.bottom_row[i].beads.size();
+                simple_bottom_row_bowls[i]->set_label(bottom_count_str.str());
+
+                // clear hint highlighting
+                simple_top_row_bowls[i]->drag_unhighlight();
+                simple_bottom_row_bowls[i]->drag_unhighlight();
+            }
+
+            // set hint highlighting
+            if(draw.show_hint)
+            {
+                if(draw.hint_player == PLAYER_1)
+                    simple_bottom_row_bowls[draw.hint_i]->drag_highlight();
+                else
+                    simple_top_row_bowls[draw.hint_i]->drag_highlight();
+            }
         }
 
         // check to see if the game is over
