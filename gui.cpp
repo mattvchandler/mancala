@@ -18,15 +18,17 @@ namespace Mancala
     Settings_win::Settings_win(Win * Win):
         p1_ai_check("Player 1 AI"),
         p2_ai_check("Player 2 AI"),
-        extra_rule_check("Extra move"),
-        capture_rule_check("Capture beads"),
-        collect_rule_check("Collect beads at end"),
         board_size(Gtk::Adjustment::create(1.0, 1.0, 10.0)),
         board_seeds(Gtk::Adjustment::create(1.0, 1.0, 20.0)),
         ai_depth(Gtk::Adjustment::create(1.0, 0.0, 10.0)),
         board_size_label("Board size"),
         board_seeds_label("Seeds per bowl"),
         ai_depth_label("AI look-ahead"),
+        extra_rule_check("Extra move"),
+        capture_rule_check("Capture beads"),
+        collect_rule_check("Collect beads at end"),
+        full_gui_radio("Full GUI"),
+        simple_gui_radio("Simple_GUI"),
         win(Win)
     {
         set_default_size(300, 150);
@@ -60,9 +62,13 @@ namespace Mancala
         get_content_area()->pack_start(main_2_sep);
 
         get_content_area()->pack_start(rule_box);
-        rule_box.pack_start(extra_rule_check);
-        rule_box.pack_start(capture_rule_check);
-        rule_box.pack_start(collect_rule_check);
+        rule_box.pack_start(extra_rule_check, Gtk::PACK_EXPAND_PADDING);
+        rule_box.pack_start(capture_rule_check, Gtk::PACK_EXPAND_PADDING);
+        rule_box.pack_start(collect_rule_check, Gtk::PACK_EXPAND_PADDING);
+
+        get_content_area()->pack_start(gui_box);
+        gui_box.pack_start(full_gui_radio, Gtk::PACK_EXPAND_PADDING);
+        gui_box.pack_start(simple_gui_radio, Gtk::PACK_EXPAND_PADDING);
 
         // set tooltips
         ai_depth.set_tooltip_text("How many steps the AI looks ahead.\nMore steps will make the AI more difficult, but will make it take more time");
@@ -70,10 +76,16 @@ namespace Mancala
         extra_rule_check.set_tooltip_text("Get an extra move when last bead placed in store");
         capture_rule_check.set_tooltip_text("When landing in an empty bowl, capture all beads across from it");
         collect_rule_check.set_tooltip_text("When the last move is made, the player not moving will receive all remaining beads");
+        full_gui_radio.set_tooltip_text("Use a full, graphical GUI");
+        simple_gui_radio.set_tooltip_text("Use a simple, button-based GUI");
 
         // pack the buttons
         add_button(Gtk::Stock::OK, 1);
         add_button(Gtk::Stock::CANCEL, 0);
+
+        // set radio group
+        Gtk::RadioButton::Group group = full_gui_radio.get_group();
+        simple_gui_radio.set_group(group);
 
         show_all_children();
 
@@ -98,6 +110,15 @@ namespace Mancala
             win->extra_rule = extra_rule_check.get_active();
             win->capture_rule = capture_rule_check.get_active();
             win->collect_rule = collect_rule_check.get_active();
+
+            // set gui type by setting menu item
+            // this, in turn, calls its callback function which takes care of
+            // switching modes
+            if(full_gui_radio.get_active())
+                win->full_gui_menu->set_active(true);
+            else
+                win->simple_gui_menu->set_active(true);
+
             win->new_game();
         }
         hide();
@@ -116,6 +137,13 @@ namespace Mancala
         extra_rule_check.set_active(win->extra_rule);
         capture_rule_check.set_active(win->capture_rule);
         collect_rule_check.set_active(win->collect_rule);
+
+        // get gui type
+        if(win->full_gui)
+            full_gui_radio.set_active();
+        else
+            simple_gui_radio.set_active();
+
         ai_cycles_func();
     }
 

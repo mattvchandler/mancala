@@ -16,6 +16,7 @@
 #include <gtkmm/dialog.h>
 #include <gtkmm/label.h>
 #include <gtkmm/radioaction.h>
+#include <gtkmm/radiobutton.h>
 #include <gtkmm/separator.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/toggleaction.h>
@@ -51,16 +52,19 @@ namespace Mancala
         Gtk::VBox l_board_box;
         Gtk::VBox r_board_box;
         Gtk::HBox rule_box;
+        Gtk::HBox gui_box;
 
         Gtk::HSeparator main_1_sep, main_2_sep;
         Gtk::VSeparator ai_sep;
 
         // widgets
         Gtk::CheckButton p1_ai_check, p2_ai_check;
-        Gtk::CheckButton extra_rule_check, capture_rule_check, collect_rule_check;
         Gtk::SpinButton board_size, board_seeds, ai_depth;
         Gtk::Label board_size_label, board_seeds_label, ai_depth_label;
         Gtk::Label ai_cycles;
+        Gtk::CheckButton extra_rule_check, capture_rule_check, collect_rule_check;
+        Gtk::RadioButton full_gui_radio, simple_gui_radio;
+
     private:
         Win * win;
     };
