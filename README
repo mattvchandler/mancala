@@ -1,0 +1,39 @@
+manacala
+
+Gtkmm - based Kalah game. See: http://en.wikipedia.org/wiki/Kalah
+
+BUILDING
+    Dependencies:
+    gtkmm 3
+    GCC version 4.6+
+
+    To build, run make inside the source directory.
+
+Rules of the Game (from wikipedia - see link above)
+
+1   At the beginning of the game, four beads are placed in each bowl.
+2   Each player controls the six bowls and their beads on his side of the board.
+    His score is the number of beads in the store to his right.
+3   Players take turns sowing their beads. On a turn, the player removes all
+    beads from one of the bowls under his control. Moving counter-clockwise, the
+    player drops one bead in each bowl in turn, including the player's own store
+    but not his opponent's.
+4   If the last sown bead lands in the player's store, the player gets an
+    additional move. There is no limit on the number of moves a player can make
+    in his turn.
+5   If the last sown bead lands in an empty bowl owned by the player, and the
+    opposite bowl contains beads, both the last bead and the opposite beads are
+    captured and placed into the player's store.
+6   When one player no longer has any beads in any of his bowls, the game ends.
+    The other player moves all remaining beads to his store, and the player with
+    the most beads in his store wins.
+
+
+To play:
+    Click the bowl you wish to move from. Press the hint button for a hint.
+    Board layout, AI settings, and rules may be changed in the settings dialog.
+    Be warned that setting the board size too large and the AI depth too high
+    will make the AI player and hint feature take a very long time to complete.
+    2 GUI modes are available: a full, graphic-based GUI and a simple 
+    button-based GUI (ideal for work environments). The mode may be changed at
+    any time from the Display menu or chosen from the settings dialog.
