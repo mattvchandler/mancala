@@ -194,7 +194,7 @@ namespace Mancala
         actgrp->add(Gtk::Action::create("Game", "Game"));
         actgrp->add(Gtk::Action::create("Game_newgame", Gtk::Stock::NEW, "_New Game", "Give up and start a new game"),
             sigc::mem_fun(*this, &Win::new_game));
-        actgrp->add(Gtk::Action::create("Game_hint", Gtk::Stock::HELP, "Hint", "Get a hint. May be misleading"),
+        actgrp->add(Gtk::Action::create("Game_hint", Gtk::Stock::HELP, "Hint", "Get a hint."),
             sigc::mem_fun(*this, &Win::hint));
         actgrp->add(Gtk::Action::create("Game_set", Gtk::Stock::PREFERENCES, "_Settings", "Game settings"),
             sigc::mem_fun(settings_win, &Settings_win::show));
@@ -436,10 +436,6 @@ namespace Mancala
                 msg = "Player 1 wins";
             else
                 msg = "Player 2 wins";
-
-        // was the win full of win?
-        if(abs(draw.b.r_store.beads.size() - draw.b.l_store.beads.size()) >= 10)
-            msg += "\nFATALITY";
 
         Gtk::MessageDialog dlg(*this, "Game Over");
         dlg.set_secondary_text(msg);
