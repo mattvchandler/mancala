@@ -113,6 +113,7 @@ bool Simple_board::move(const Mancala::Player p, const int i)
     // extra move when ending in our store
     if(extra_rule && curr == store)
         extra_move = true;
+
     else if(capture_rule)
     {
         // collect last bead, and all beads across from it if we land in an empty bowl
@@ -124,14 +125,31 @@ bool Simple_board::move(const Mancala::Player p, const int i)
         }
     }
 
-    // when game is finished, move all remaining beads to other player's store
-    if(collect_rule && finished())
+    // when one side is empty, move all beads on the other side to that player's store
+    if(collect_rule)
     {
+        int p1 = 0, p2 = 0;
         for(int i = 0; i < num_bowls; ++i)
         {
-            bowls[wrong_store].count += bowls[i].count + bowls[num_bowls + 1 + i].count;
-            bowls[i].count = 0;
-            bowls[num_bowls + 1 + i].count = 0;
+            p1 += bowls[i].count;
+            p2 += bowls[num_bowls + 1 + i].count;
+        }
+
+        if(p1 == 0 && p2 != 0)
+        {
+            for(int i = num_bowls + 1; i < 2 * num_bowls + 1; ++i)
+            {
+                bowls[2 * num_bowls + 1].count += bowls[i].count;
+                bowls[i].count = 0;
+            }
+        }
+        else if(p2 == 0 && p1 !=0)
+        {
+            for(int i = 0; i < num_bowls; ++i)
+            {
+                bowls[num_bowls].count += bowls[i].count;
+                bowls[i].count = 0;
+            }
         }
     }
 
@@ -167,7 +185,7 @@ void Simple_board::debug_print() const
 // only needs to evaluate for p1
 int Simple_board::evaluate() const
 {
-    // assume that p2 gets all of the beads at the end
+    // assume that p2 gets all of the remaining beads at the end
     int board_count = 0;
     if(collect_rule)
         for(int i = 0; i < num_bowls; ++i)
@@ -458,59 +476,69 @@ namespace Mancala
         // extra move when ending in our store
         if(extra_rule && curr == store)
             extra_move = true;
+
         else if(capture_rule)
         {
             // collect last bead, and all beads across from it if we land in an empty bowl
             if(curr->beads.size() == 1 && curr->across->beads.size() > 0)
             {
-                auto pos = rand_pos(store->ul, store->width, store->height);
-                store->beads.emplace_back(pos, curr->beads.front().color_i);
+                store->add_bead(curr->beads.front());
                 curr->beads.clear();
                 for(auto & i: curr->across->beads)
                     store->add_bead(i);
                 curr->across->beads.clear();
             }
         }
-        // when game is finished, move all remaining beads to other player's store
-        if(collect_rule && finished())
+
+        // when one side is empty, move all beads on the other side to that player's store
+        if(collect_rule)
         {
-            for(auto &i: top_row)
+            int p1 = 0, p2 = 0;
+            for(size_t i = 0; i < top_row.size(); ++i)
             {
-                while(!i.beads.empty())
+                p2 += top_row[i].beads.size();
+                p1 += bottom_row[i].beads.size();
+            }
+
+            if(p1 == 0 && p2 != 0)
+            {
+                for(auto & i: top_row)
                 {
-                    wrong_store->add_bead(i.beads.back());
-                    i.beads.pop_back();
+                    for(auto & j: i.beads)
+                        l_store.add_bead(j);
+                    i.beads.clear();
                 }
             }
-            for(auto &i: bottom_row)
+            else if(p2 == 0 && p1 !=0)
             {
-                while(!i.beads.empty())
+                for(auto & i: bottom_row)
                 {
-                    wrong_store->add_bead(i.beads.back());
-                    i.beads.pop_back();
+                    for(auto & j: i.beads)
+                        r_store.add_bead(j);
+                    i.beads.clear();
                 }
             }
         }
+
         return extra_move;
     }
 
     // is the game over
     bool Board::finished() const
     {
-        int p1_side = 0;
-        int p2_side = 0;
+        int p1 = 0, p2 = 0;
         for(size_t i = 0; i < top_row.size(); ++i)
         {
-            p2_side += top_row[i].beads.size();
-            p1_side += bottom_row[i].beads.size();
+            p2 += top_row[i].beads.size();
+            p1 += bottom_row[i].beads.size();
         }
-        return p1_side == 0 || p2_side == 0;
+        return p1 == 0 || p2 == 0;
     }
 
     // heuristics to evaluate the board status
     int Board::evaluate(const Mancala::Player p) const
     {
-        // assume that opposite player gets all of the beads at the end
+        // assume that opposite player gets all of the remaining beads at the end
         int board_count = 0;
         if(collect_rule)
             for(size_t i = 0; i < top_row.size(); ++i)

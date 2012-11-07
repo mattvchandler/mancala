@@ -75,7 +75,7 @@ namespace Mancala
         ai_cycles.set_tooltip_text("Worse case number of AI look-ahead computations given board size and look-ahead");
         extra_rule_check.set_tooltip_text("Get an extra move when last bead placed in store");
         capture_rule_check.set_tooltip_text("When landing in an empty bowl, capture all beads across from it");
-        collect_rule_check.set_tooltip_text("When the last move is made, the player not moving will receive all remaining beads");
+        collect_rule_check.set_tooltip_text("At the end of the game, players collect any beads left on their side");
         full_gui_radio.set_tooltip_text("Use a full, graphical GUI");
         simple_gui_radio.set_tooltip_text("Use a simple, button-based GUI");
 
