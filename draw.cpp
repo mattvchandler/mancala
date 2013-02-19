@@ -107,10 +107,12 @@ namespace Mancala
     }
 
     // main drawing routine
-    bool Draw::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
+    bool Draw::on_expose_event(GdkEventExpose * event)
     {
         int num_cells = b.num_bowls + 2;
         double inv_num_cells = 1.0 / num_cells;
+
+        Cairo::RefPtr<Cairo::Context> cr = get_window()->create_cairo_context();
 
         Gtk::Allocation alloc = get_allocation();
 

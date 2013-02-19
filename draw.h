@@ -19,7 +19,7 @@ namespace Mancala
             const bool Extra_rule = true, const bool Capture_rule = true, const bool Collect_rule = true);
 
         // main drawing routine
-        bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr);
+        bool on_expose_event(GdkEventExpose * event);
 
         // state vars
         Player hint_player;
