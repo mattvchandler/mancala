@@ -5,11 +5,12 @@
 #include <iostream>
 #include <sstream>
 
+#include <gtkmm/messagedialog.h>
+#include <gtkmm/stock.h>
+#include <gtkmm/window.h>
 #include <gdkmm/general.h>
 #include <glibmm/fileutils.h>
 #include <glibmm/main.h>
-#include <gtkmm/messagedialog.h>
-#include <gtkmm/stock.h>
 
 #include "gui.h"
 
@@ -18,9 +19,12 @@ namespace Mancala
     Settings_win::Settings_win(Win * Win):
         p1_ai_check("Player 1 AI"),
         p2_ai_check("Player 2 AI"),
-        board_size(Gtk::Adjustment::create(1.0, 1.0, 10.0)),
-        board_seeds(Gtk::Adjustment::create(1.0, 1.0, 20.0)),
-        ai_depth(Gtk::Adjustment::create(1.0, 0.0, 10.0)),
+        board_size_adj(1.0, 1.0, 10.0),
+        board_seed_adj(1.0, 1.0, 20.0),
+        ai_depth_adj(1.0, 0.0, 10.0),
+        board_size(board_size_adj),
+        board_seeds(board_seed_adj),
+        ai_depth(ai_depth_adj),
         board_size_label("Board size"),
         board_seeds_label("Seeds per bowl"),
         ai_depth_label("AI look-ahead"),
@@ -37,7 +41,7 @@ namespace Mancala
         set_modal(true);
 
         // layout widgets
-        get_content_area()->pack_start(ai_box);
+        get_vbox()->pack_start(ai_box);
         ai_box.pack_start(ai_check_box, Gtk::PACK_EXPAND_PADDING);
         ai_check_box.pack_start(p1_ai_check);
         ai_check_box.pack_start(p2_ai_check);
@@ -46,12 +50,12 @@ namespace Mancala
         ai_depth_box.pack_start(ai_depth_label);
         ai_depth_box.pack_start(ai_depth);
 
-        get_content_area()->pack_start(ai_cycles_box, Gtk::PACK_EXPAND_PADDING);
+        get_vbox()->pack_start(ai_cycles_box, Gtk::PACK_EXPAND_PADDING);
         ai_cycles_box.pack_start(ai_cycles);
 
-        get_content_area()->pack_start(main_1_sep);
+        get_vbox()->pack_start(main_1_sep);
 
-        get_content_area()->pack_start(board_box);
+        get_vbox()->pack_start(board_box);
         board_box.pack_start(l_board_box, Gtk::PACK_EXPAND_PADDING);
         l_board_box.pack_start(board_size_label);
         l_board_box.pack_start(board_size);
@@ -59,14 +63,14 @@ namespace Mancala
         r_board_box.pack_start(board_seeds_label);
         r_board_box.pack_start(board_seeds);
 
-        get_content_area()->pack_start(main_2_sep);
+        get_vbox()->pack_start(main_2_sep);
 
-        get_content_area()->pack_start(rule_box);
+        get_vbox()->pack_start(rule_box);
         rule_box.pack_start(extra_rule_check, Gtk::PACK_EXPAND_PADDING);
         rule_box.pack_start(capture_rule_check, Gtk::PACK_EXPAND_PADDING);
         rule_box.pack_start(collect_rule_check, Gtk::PACK_EXPAND_PADDING);
 
-        get_content_area()->pack_start(gui_box);
+        get_vbox()->pack_start(gui_box);
         gui_box.pack_start(full_gui_radio, Gtk::PACK_EXPAND_PADDING);
         gui_box.pack_start(simple_gui_radio, Gtk::PACK_EXPAND_PADDING);
 

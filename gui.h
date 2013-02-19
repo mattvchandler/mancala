@@ -59,6 +59,7 @@ namespace Mancala
 
         // widgets
         Gtk::CheckButton p1_ai_check, p2_ai_check;
+        Gtk::Adjustment board_size_adj, board_seed_adj, ai_depth_adj;
         Gtk::SpinButton board_size, board_seeds, ai_depth;
         Gtk::Label board_size_label, board_seeds_label, ai_depth_label;
         Gtk::Label ai_cycles;

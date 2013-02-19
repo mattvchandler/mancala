@@ -14,9 +14,9 @@ REL_FLAGS := -O2 -fomit-frame-pointer
 DBG_FLAGS := -g -DDEBUG
 CPPFLAGS += $(foreach includedir,$(INCLUDE_DIRS),-I$(includedir))
 CFLAGS   +=
-CXXFLAGS += -Wall -std=c++0x `pkg-config --cflags gtkmm-3.0`
+CXXFLAGS += -Wall -std=c++11 `pkg-config --cflags gtkmm-2.4`
 LDFLAGS  += $(foreach librarydir,$(LIBRARY_DIRS),-L$(librarydir))
-LDFLAGS  += $(foreach library,$(LIBRARIES),-l$(library)) `pkg-config --libs gtkmm-3.0`
+LDFLAGS  += $(foreach library,$(LIBRARIES),-l$(library)) `pkg-config --libs gtkmm-2.4`
 
 CC := gcc
 CXX := g++

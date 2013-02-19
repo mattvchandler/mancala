@@ -7,6 +7,7 @@
 #include <cmath>
 #include <cstdlib>
 
+#include <gtkmm/window.h>
 #include <gdkmm/general.h>
 #include <glibmm/fileutils.h>
 #include <glibmm/main.h>

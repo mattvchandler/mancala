@@ -7,7 +7,7 @@
 #include <cstdlib>
 #include <ctime>
 
-#include <gtkmm/application.h>
+#include <gtkmm/main.h>
 
 #include "gui.h"
 
@@ -17,9 +17,9 @@ int main(int argc, char * argv[])
     srand(time(0));
 
     // set up and launch a GTK window
-    Glib::RefPtr<Gtk::Application> app = Gtk::Application::create(argc, argv, "mancala.mancala");
-
+    Gtk::Main kit(argc, argv);
     Mancala::Win m_win;
 
-    return app->run(m_win);
+    Gtk::Main::run(m_win);
+    return 0;
 }
