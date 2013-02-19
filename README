@@ -4,7 +4,7 @@ Gtkmm - based Kalah game. See: http://en.wikipedia.org/wiki/Kalah
 
 BUILDING
     Dependencies:
-    gtkmm 3
+    gtkmm 2.4
     GCC version 4.6+
 
     To build, run make inside the source directory.
