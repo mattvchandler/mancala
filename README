@@ -6,8 +6,14 @@ BUILDING
     Dependencies:
     gtkmm 3
     GCC version 4.6+
+    cmake
 
-    To build, run make inside the source directory.
+    To build:
+        create a build directory inside the mancala directory, and change to that directory
+        run 'cmake ..'
+        run 'make' (or whichever build tool cmake is configured to use)
+        to run the executable, run 'build/mancala' from the mancala root directory.
+
 
 Rules of the Game (from wikipedia - see link above)
 
