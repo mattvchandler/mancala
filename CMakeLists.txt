@@ -4,6 +4,7 @@ project(mancala)
 set(CMAKE_CXX_FLAGS "-Wall -std=c++11")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -DDEBUG")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
@@ -20,5 +21,4 @@ add_executable(mancala
     board.cpp
     draw.cpp
     gui.cpp)
-
 target_link_libraries(mancala ${GTKMM_LIBRARIES})
