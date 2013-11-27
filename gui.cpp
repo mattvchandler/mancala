@@ -379,7 +379,7 @@ namespace Mancala
     }
 
     // Have the AI make a move
-    void Win::ai_move(int i, std::thread::id id)
+    void Win::ai_move(int i, boost::thread::id id)
     {
         // did we get the last thread we sent off?
         if(id == ai_thread_id)
@@ -460,7 +460,7 @@ namespace Mancala
     }
 
     // catch the return value of the hint
-    void Win::hint_done(int i, std::thread::id id)
+    void Win::hint_done(int i, boost::thread::id id)
     {
         // did we get the last thread we sent off?
         if(id == ai_thread_id)
