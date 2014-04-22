@@ -9,7 +9,6 @@
 
 #include "board.h"
 
-
 namespace Mancala
 {
     class Draw: public Gtk::DrawingArea
