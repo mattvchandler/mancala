@@ -2,8 +2,8 @@
 // graphics for mancala
 // Copyright Matthew Chandler 2012
 
-#ifndef __MANCALA_DRAW_H__
-#define __MANCALA_DRAW_H__
+#ifndef MANCALA_DRAW_H
+#define MANCALA_DRAW_H
 
 #include <gtkmm/drawingarea.h>
 
@@ -45,4 +45,4 @@ namespace Mancala
         std::vector<Glib::RefPtr<Gdk::Pixbuf>> bead_imgs;
     };
 }
-#endif // __MANCALA_DRAW_H__
+#endif // MANCALA_DRAW_H

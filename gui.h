@@ -2,8 +2,8 @@
 // GUI for mancala game, using gtkmm
 // Copyright Matthew Chandler 2012
 
-#ifndef __MANCALA_GUI_H__
-#define __MANCALA_GUI_H__
+#ifndef MANCALA_GUI_H
+#define MANCALA_GUI_H
 
 #include <atomic>
 #include <memory>
@@ -155,4 +155,4 @@ namespace Mancala
         Draw draw;
     };
 }
-#endif // __MANCALA_GUI_H__
+#endif // MANCALA_GUI_H

@@ -2,8 +2,8 @@
 // Mancala board representation
 // Copyright Matthew Chandler 2012
 
-#ifndef __MANCALA_BOARD_H__
-#define __MANCALA_BOARD_H__
+#ifndef MANCALA_BOARD_H
+#define MANCALA_BOARD_H
 
 #include <thread>
 #include <vector>
@@ -102,4 +102,4 @@ namespace Mancala
     };
 }
 
-#endif // __MANCALA_BOARD_H__
+#endif // MANCALA_BOARD_H
