@@ -376,10 +376,8 @@ namespace Mancala
         // did we get the last thread we sent off?
         if(id == ai_thread_id)
         {
-            bool ai_extra_move = false;
-    
-            ai_extra_move = draw.b.move(player, i);
-    
+            bool ai_extra_move = ai_extra_move = draw.b.move(player, i);
+
             if(!ai_extra_move)
             {
                 if(player == PLAYER_1)
@@ -387,7 +385,7 @@ namespace Mancala
                 else
                     player = PLAYER_1;
             }
-    
+
             update_f.test_and_set();
             ai_sig.disconnect();
         }

@@ -293,12 +293,14 @@ namespace Mancala
         pos(Pos), color_i(Color_i)
     {}
 
-    Bowl::Bowl(const int Count, const std::vector<double> Ul,
+    Bowl::Bowl(const int Count, const std::vector<double> & Ul,
         const double Width, const double Height):
         ul(Ul),
         width(Width),
         height(Height),
-        beads(Count)
+        beads(Count),
+        next(NULL),
+        across(NULL)
     {
         if(!beads.empty())
             redist_beads();

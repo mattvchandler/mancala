@@ -138,7 +138,7 @@ namespace Mancala
         }
 
         // draw # for left store
-        draw_num(cr, font, b.l_store.beads.size(), alloc.get_width() * .5 * inv_num_cells, 
+        draw_num(cr, font, b.l_store.beads.size(), alloc.get_width() * .5 * inv_num_cells,
             alloc.get_height() * .5);
 
         // draw bg for right store

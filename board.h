@@ -32,7 +32,7 @@ namespace Mancala
     class Bowl
     {
     public:
-        Bowl(const int Count = 0, const std::vector<double> Ul = std::vector<double>({0.0, 0.0}),
+        Bowl(const int Count = 0, const std::vector<double> & Ul = std::vector<double>({0.0, 0.0}),
         const double Width = 1.0, const double Height = 1.0);
 
         // add a new bead
