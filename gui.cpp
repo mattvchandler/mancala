@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 
+#include <gtkmm/aboutdialog.h>
 #include <gtkmm/drawingarea.h>
 #include <gdkmm/general.h>
 #include <glibmm/fileutils.h>
@@ -216,6 +217,9 @@ namespace Mancala
         simple_gui_menu = Gtk::RadioAction::create(gui_radio_group, "simple_gui", "Simple GUI");
         actgrp->add(simple_gui_menu, sigc::mem_fun(*this, &Win::gui_f));
 
+        actgrp->add(Gtk::Action::create("Help", "Help"));
+        actgrp->add(Gtk::Action::create("Help_about", "About", "About"), sigc::mem_fun(*this, &Win::about));
+
         uiman = Gtk::UIManager::create();
         uiman->insert_action_group(actgrp);
         add_accel_group(uiman->get_accel_group());
@@ -237,6 +241,9 @@ namespace Mancala
         "       <menu action='Display'>"
         "           <menuitem action='full_gui'/>"
         "           <menuitem action='simple_gui'/>"
+        "       </menu>"
+        "       <menu action='Help'>"
+        "           <menuitem action='Help_about'/>"
         "       </menu>"
         "   </menubar>"
         "   <toolbar name='ToolBar'>"
@@ -600,5 +607,25 @@ namespace Mancala
             resize(200,150);
             update_board();
         }
+    }
+
+    // about menu callback
+    void Win::about()
+    {
+        Gtk::AboutDialog about;
+        about.set_modal(true);
+        about.set_transient_for(*this);
+
+        about.set_program_name(MANCALA_TITLE);
+        about.set_version(VERSION_MAJOR_STR "." VERSION_MINOR_STR);
+        about.set_copyright(u8"© 2014 Matthew Chandler");
+        about.set_comments(MANCALA_SUMMARY);
+        about.set_license_type(Gtk::LICENSE_MIT_X11);
+        about.set_website(MANCALA_WEBSITE);
+        about.set_website_label(MANCALA_TITLE " on Github");
+        about.set_authors({MANCALA_AUTHOR});
+        about.set_artists({MANCALA_AUTHOR});
+        about.set_documenters({MANCALA_AUTHOR});
+        about.run();
     }
 }

@@ -101,6 +101,9 @@ namespace Mancala
         // GUI menu callbacks
         void gui_f();
 
+        // about menu callback
+        void about();
+
         // containers
         Gtk::VBox main_box;
 
