@@ -12,6 +12,7 @@
 #include <glibmm/fileutils.h>
 #include <glibmm/main.h>
 
+#include "config.h"
 #include "draw.h"
 
 // pixel data to be used as fallback image
@@ -67,17 +68,17 @@ namespace Mancala
             true, 8, fallback_w, fallback_h, fallback_w * 4);
 
         // load images from disk
-        bg_store = pixbuf_create_from_file_fallback("img/bg_store.png", fallback_img);
-        bg_bowl = pixbuf_create_from_file_fallback("img/bg_bowl.png", fallback_img);
-        bg_board = pixbuf_create_from_file_fallback("img/bg_board.png", fallback_img);
-        hint_img = pixbuf_create_from_file_fallback("img/hint.png", fallback_img);
-        bead_s_img = pixbuf_create_from_file_fallback("img/bead_s.png", fallback_img);
-        bead_imgs.push_back(pixbuf_create_from_file_fallback("img/bead_red.png", fallback_img));
-        bead_imgs.push_back(pixbuf_create_from_file_fallback("img/bead_green.png", fallback_img));
-        bead_imgs.push_back(pixbuf_create_from_file_fallback("img/bead_blue.png", fallback_img));
-        bead_imgs.push_back(pixbuf_create_from_file_fallback("img/bead_yellow.png", fallback_img));
-        bead_imgs.push_back(pixbuf_create_from_file_fallback("img/bead_magenta.png", fallback_img));
-        bead_imgs.push_back(pixbuf_create_from_file_fallback("img/bead_cyan.png", fallback_img));
+        bg_store = pixbuf_create_from_file_fallback(check_in_pwd("img/bg_store.png").c_str(), fallback_img);
+        bg_bowl = pixbuf_create_from_file_fallback(check_in_pwd("img/bg_bowl.png").c_str(), fallback_img);
+        bg_board = pixbuf_create_from_file_fallback(check_in_pwd("img/bg_board.png").c_str(), fallback_img);
+        hint_img = pixbuf_create_from_file_fallback(check_in_pwd("img/hint.png").c_str(), fallback_img);
+        bead_s_img = pixbuf_create_from_file_fallback(check_in_pwd("img/bead_s.png").c_str(), fallback_img);
+        bead_imgs.push_back(pixbuf_create_from_file_fallback(check_in_pwd("img/bead_red.png").c_str(), fallback_img));
+        bead_imgs.push_back(pixbuf_create_from_file_fallback(check_in_pwd("img/bead_green.png").c_str(), fallback_img));
+        bead_imgs.push_back(pixbuf_create_from_file_fallback(check_in_pwd("img/bead_blue.png").c_str(), fallback_img));
+        bead_imgs.push_back(pixbuf_create_from_file_fallback(check_in_pwd("img/bead_yellow.png").c_str(), fallback_img));
+        bead_imgs.push_back(pixbuf_create_from_file_fallback(check_in_pwd("img/bead_magenta.png").c_str(), fallback_img));
+        bead_imgs.push_back(pixbuf_create_from_file_fallback(check_in_pwd("img/bead_cyan.png").c_str(), fallback_img));
     }
 
     // helper function to draw an image

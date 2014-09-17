@@ -12,6 +12,7 @@
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/stock.h>
 
+#include "config.h"
 #include "gui.h"
 
 namespace Mancala
@@ -176,10 +177,10 @@ namespace Mancala
     {
         // set window properties
         set_default_size(800,400);
-        set_title("Mancala");
+        set_title(MANCALA_TITLE);
         try
         {
-            set_default_icon_from_file("img/icon.svg");
+            set_default_icon_from_file(check_in_pwd("img/icon.svg").c_str());
         }
         catch(const Glib::FileError& ex)
         {
@@ -376,7 +377,7 @@ namespace Mancala
         // did we get the last thread we sent off?
         if(id == ai_thread_id)
         {
-            bool ai_extra_move = ai_extra_move = draw.b.move(player, i);
+            bool ai_extra_move = draw.b.move(player, i);
 
             if(!ai_extra_move)
             {

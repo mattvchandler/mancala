@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Mancala
+GenericName=Mancala
+Exec=@bindir@/mancala
+Terminal=false
+Icon=@datadir@/img/icon.svg
+Type=Application
+Categories=Games;
+Comment=A Kalah game
