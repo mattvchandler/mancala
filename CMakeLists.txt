@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.6)
-project(mancala)
+project(matt-mancala)
 set(VERSION_MAJOR 1)
 set(VERSION_MINOR 0)
 set(VERSION_PATCH 1)
@@ -28,12 +28,12 @@ find_package(Threads)
 
 # configure variables
 set(bindir ${CMAKE_INSTALL_PREFIX}/bin)
-set(datadir ${CMAKE_INSTALL_PREFIX}/share/mancala)
+set(datadir ${CMAKE_INSTALL_PREFIX}/share/matt-mancala)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
     ${PROJECT_BINARY_DIR}/config.h)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/mancala.desktop.in
-    ${PROJECT_BINARY_DIR}/mancala.desktop)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/matt-mancala.desktop.in
+    ${PROJECT_BINARY_DIR}/matt-mancala.desktop)
 
 # directories
 include_directories(${GTKMM_INCLUDE_DIRS}
@@ -55,7 +55,7 @@ target_link_libraries(${PROJECT_NAME}
 
 # install targets
 install(TARGETS "${PROJECT_NAME}" DESTINATION "bin")
-install(FILES "${PROJECT_BINARY_DIR}/mancala.desktop" DESTINATION "share/applications")
+install(FILES "${PROJECT_BINARY_DIR}/matt-mancala.desktop" DESTINATION "share/applications")
 install(FILES
     img/bead_blue.png
     img/bead_cyan.png
@@ -70,7 +70,7 @@ install(FILES
     img/hint.png
     img/icon_128.png
     img/icon.svg
-    DESTINATION "share/mancala/img")
+    DESTINATION "share/matt-mancala/img")
 
 # CPack vars
 set(CPACK_GENERATOR TGZ)
@@ -109,9 +109,9 @@ endif()
 # Windows NSIS specifics:
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     set(CPACK_GENERATOR NSIS;TGZ)
-    set(CPACK_PACKAGE_EXECUTABLES "mancala;Mancala")
+    set(CPACK_PACKAGE_EXECUTABLES "matt-mancala;Mancala")
     set(CPACK_NSIS_DISPLAY_NAME "Mancala")
-    set(CPACK_PACKAGE_INSTALL_DIRECTORY "mancala")
+    set(CPACK_PACKAGE_INSTALL_DIRECTORY "matt-mancala")
     set(CPACK_NSIS_CONTACT "${MANCALA_AUTHOR}")
     set(CPACK_NSIS_HELP_LINK "${MANCALA_WEBSITE}")
     set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/img/icon_128.ico")

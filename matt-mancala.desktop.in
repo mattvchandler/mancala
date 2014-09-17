@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=Mancala
 GenericName=Mancala
-Exec=@bindir@/mancala
+Exec=@bindir@/matt-mancala
 Terminal=false
 Icon=@datadir@/img/icon.svg
 Type=Application
