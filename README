@@ -40,6 +40,6 @@ To play:
     Board layout, AI settings, and rules may be changed in the settings dialog.
     Be warned that setting the board size too large and the AI depth too high
     will make the AI player and hint feature take a very long time to complete.
-    2 GUI modes are available: a full, graphic-based GUI and a simple 
+    2 GUI modes are available: a full, graphic-based GUI and a simple
     button-based GUI (ideal for work environments). The mode may be changed at
     any time from the Display menu or chosen from the settings dialog.
