@@ -1,6 +1,6 @@
 // gui.cpp
 // GUI for mancala game, using gtkmm
-// Copyright Matthew Chandler 2012
+// Copyright Matthew Chandler 2014
 
 #include <iostream>
 #include <sstream>

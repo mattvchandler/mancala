@@ -1,6 +1,6 @@
 // board.cpp
 // Mancala board representation
-// Copyright Matthew Chandler 2012
+// Copyright Matthew Chandler 2014
 
 #ifdef DEBUG
 #include <iostream>

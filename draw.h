@@ -1,6 +1,6 @@
 // draw.h
 // graphics for mancala
-// Copyright Matthew Chandler 2012
+// Copyright Matthew Chandler 2014
 
 #ifndef MANCALA_DRAW_H
 #define MANCALA_DRAW_H

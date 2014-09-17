@@ -1,6 +1,6 @@
 // appstart.cpp
 // main routines for mancala game
-// Copyright Matthew Chandler 2012
+// Copyright Matthew Chandler 2014
 
 #include <iostream>
 

@@ -1,6 +1,6 @@
 // board.h
 // Mancala board representation
-// Copyright Matthew Chandler 2012
+// Copyright Matthew Chandler 2014
 
 #ifndef MANCALA_BOARD_H
 #define MANCALA_BOARD_H

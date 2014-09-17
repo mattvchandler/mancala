@@ -1,6 +1,6 @@
 // gui.h
 // GUI for mancala game, using gtkmm
-// Copyright Matthew Chandler 2012
+// Copyright Matthew Chandler 2014
 
 #ifndef MANCALA_GUI_H
 #define MANCALA_GUI_H
