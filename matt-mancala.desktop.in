@@ -5,5 +5,5 @@ Exec=@bindir@/matt-mancala
 Terminal=false
 Icon=@datadir@/img/icon.svg
 Type=Application
-Categories=Games;
+Categories=Game;
 Comment=A Kalah game
