@@ -7,9 +7,8 @@
 
 #include <atomic>
 #include <memory>
+#include <thread>
 #include <vector>
-
-#include <boost/thread.hpp>
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
@@ -81,7 +80,7 @@ namespace Mancala
         bool mouse_down(GdkEventButton * event);
         // AI move functions
         bool ai_timer();
-        void ai_move(int i, boost::thread::id id);
+        void ai_move(int i, std::thread::id id);
         // simple gui button click
         void simple_button_click(const Player p, const int i);
 
@@ -90,7 +89,7 @@ namespace Mancala
 
         // get a hint, will highlight a bowl
         void hint();
-        void hint_done(int i, boost::thread::id id);
+        void hint_done(int i, std::thread::id id);
 
         // reset the game
         void new_game();
@@ -153,7 +152,7 @@ namespace Mancala
 
         // id of the thread running the ai search.
         // makes sure we get the result one back
-        boost::thread::id ai_thread_id;
+        std::thread::id ai_thread_id;
 
         // Drawing area
         Draw draw;

@@ -5,9 +5,8 @@
 #ifndef MANCALA_BOARD_H
 #define MANCALA_BOARD_H
 
+#include <thread>
 #include <vector>
-
-#include <boost/thread.hpp>
 
 #include <sigc++/sigc++.h>
 
@@ -79,10 +78,10 @@ namespace Mancala
         // non-blocking version
         // emits signal with int when complete
         // return id of thread, to be matched with signal
-        boost::thread::id choosemove_noblock(const Mancala::Player p) const;
+        std::thread::id choosemove_noblock(const Mancala::Player p) const;
 
         // signal for choosemove_noblock
-        typedef sigc::signal<void, int, boost::thread::id> signal_choosemove_t;
+        typedef sigc::signal<void, int, std::thread::id> signal_choosemove_t;
         signal_choosemove_t signal_choosemove();
 
         int num_bowls;

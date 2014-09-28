@@ -11,10 +11,6 @@
 
 #include "board.h"
 
-#ifndef M_PI
-#define M_PI 3.14159265
-#endif
-
 // random double between 0 and 1
 double randd()
 {
@@ -285,7 +281,7 @@ void choosemove_thread_func(const Mancala::Board & b, const Mancala::Player p)
 {
     int move = b.choosemove(p);
     // emit signal
-    boost::thread::id id = boost::this_thread::get_id();
+    std::thread::id id = std::this_thread::get_id();
     b.signal_choosemove_sig.emit(move, id);
 }
 
@@ -647,10 +643,10 @@ namespace Mancala
         return best_i[rand() % best_i.size()];
     }
 
-    boost::thread::id Board::choosemove_noblock(const Mancala::Player p) const
+    std::thread::id Board::choosemove_noblock(const Mancala::Player p) const
     {
-        boost::thread choosemove_thread(choosemove_thread_func, std::cref(*this), p);
-        boost::thread::id id = choosemove_thread.get_id();
+        std::thread choosemove_thread(choosemove_thread_func, std::cref(*this), p);
+        std::thread::id id = choosemove_thread.get_id();
         choosemove_thread.detach();
         return id;
     }

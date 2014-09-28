@@ -8,7 +8,8 @@ set(MANCALA_AUTHOR "Matthew Chandler <tardarsauce@gmail.com>")
 set(MANCALA_SUMMARY "Kalah game")
 set(MANCALA_WEBSITE "http://github.com/mattvchandler/mancala")
 
-set(CMAKE_CXX_FLAGS "-Wall -std=c++0x")
+#flags
+set(CMAKE_CXX_FLAGS "-Wall -std=c++11")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -DDEBUG")
 if(MSYS)
@@ -23,7 +24,7 @@ endif()
 # libraries
 find_package(PkgConfig)
 pkg_check_modules(GTKMM gtkmm-3.0)
-find_package(Boost COMPONENTS thread system REQUIRED)
+find_package(Threads)
 
 # configure variables
 set(bindir ${CMAKE_INSTALL_PREFIX}/bin)
@@ -50,7 +51,7 @@ add_executable(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
     ${GTKMM_LIBRARIES}
-    ${Boost_LIBRARIES})
+    ${CMAKE_THREAD_LIBS_INIT})
 
 # install targets
 install(TARGETS "${PROJECT_NAME}" DESTINATION "bin")
@@ -66,57 +67,15 @@ install(FILES
     img/bg_bowl.png
     img/bg_store.png
     img/hint.png
-    img/icon_128.ico
     img/icon.svg
     DESTINATION "share/matt-mancala/img")
+
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     install(FILES "img/icon.svg" DESTINATION "share/icons/hicolor/scalable/apps" RENAME "matt-mancala.svg")
     install(FILES "img/icon_128.png" DESTINATION "share/icons/hicolor/128x128/apps" RENAME "matt-mancala.png")
     install(FILES "${PROJECT_BINARY_DIR}/matt-mancala.desktop" DESTINATION "share/applications")
 endif()
 
-
-install(FILES C:/gtkmm340_mingw462/share/glib-2.0/schemas/gschemas.compiled DESTINATION "share/glib-2.0/schemas")
-install(FILES
-    C:/gtkmm340_mingw462/bin/libatk-1.0-0.dll
-    C:/gtkmm340_mingw462/bin/libatkmm-1.6-1.dll
-    C:/gtkmm340_mingw462/bin/libcairo-2.dll
-    C:/gtkmm340_mingw462/bin/libcairo-gobject-2.dll
-    C:/gtkmm340_mingw462/bin/libcairomm-1.0-1.dll
-    C:/gtkmm340_mingw462/bin/libffi-5.dll
-    C:/gtkmm340_mingw462/bin/libfontconfig-1.dll
-    C:/gtkmm340_mingw462/bin/libfreetype-6.dll
-    C:/gtkmm340_mingw462/bin/libgcc_s_dw2-1.dll
-    C:/gtkmm340_mingw462/bin/libgdk-3-0.dll
-    C:/gtkmm340_mingw462/bin/libgdk_pixbuf-2.0-0.dll
-    C:/gtkmm340_mingw462/bin/libgdkmm-3.0-1.dll
-    C:/gtkmm340_mingw462/bin/libgio-2.0-0.dll
-    C:/gtkmm340_mingw462/bin/libgiomm-2.4-1.dll
-    C:/gtkmm340_mingw462/bin/libglib-2.0-0.dll
-    C:/gtkmm340_mingw462/bin/libglibmm-2.4-1.dll
-    C:/gtkmm340_mingw462/bin/libgmodule-2.0-0.dll
-    C:/gtkmm340_mingw462/bin/libgobject-2.0-0.dll
-    C:/gtkmm340_mingw462/bin/libgtk-3-0.dll
-    C:/gtkmm340_mingw462/bin/libgtkmm-3.0-1.dll
-    C:/gtkmm340_mingw462/bin/libjasper-1.dll
-    C:/gtkmm340_mingw462/bin/libjpeg-8.dll
-    C:/gtkmm340_mingw462/bin/liblzma-5.dll
-    C:/gtkmm340_mingw462/bin/libpango-1.0-0.dll
-    C:/gtkmm340_mingw462/bin/libpangocairo-1.0-0.dll
-    C:/gtkmm340_mingw462/bin/libpangoft2-1.0-0.dll
-    C:/gtkmm340_mingw462/bin/libpangomm-1.4-1.dll
-    C:/gtkmm340_mingw462/bin/libpangowin32-1.0-0.dll
-    C:/gtkmm340_mingw462/bin/libpixman-1-0.dll
-    C:/gtkmm340_mingw462/bin/libpng15-15.dll
-    C:/gtkmm340_mingw462/bin/libsigc-2.0-0.dll
-    C:/gtkmm340_mingw462/bin/libstdc++-6.dll
-    C:/gtkmm340_mingw462/bin/libtiff-5.dll
-    C:/gtkmm340_mingw462/bin/libxml2-2.dll
-    C:/gtkmm340_mingw462/bin/zlib1.dll
-    C:/gtkmm340_mingw462/lib/libboost_chrono-mgw46-mt-1_55.dll
-    C:/gtkmm340_mingw462/lib/libboost_system-mgw46-mt-1_55.dll
-    C:/gtkmm340_mingw462/lib/libboost_thread-mgw46-mt-1_55.dll
-    DESTINATION "bin/")
 
 # CPack vars
 set(CPACK_GENERATOR TGZ)
