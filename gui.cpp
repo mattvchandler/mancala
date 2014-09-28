@@ -183,13 +183,10 @@ namespace Mancala
         {
             set_default_icon_from_file(check_in_pwd("img/icon.svg").c_str());
         }
-        catch(const Glib::FileError& ex)
+        catch(Glib::Exception & e)
         {
-            std::cerr<<"File Error: "<<ex.what()<<std::endl;
-        }
-        catch(const Gdk::PixbufError& ex)
-        {
-            std::cerr<<"Pixbuf Error: "<< ex.what()<<std::endl;
+            // try to get icon from theme
+            set_default_icon_name("matt-mancala");
         }
 
         // build menu and toolbar
@@ -615,6 +612,16 @@ namespace Mancala
         Gtk::AboutDialog about;
         about.set_modal(true);
         about.set_transient_for(*this);
+
+        try
+        {
+            about.set_icon_from_file(check_in_pwd("img/icon.svg").c_str());
+        }
+        catch(Glib::Exception & e)
+        {
+            // try to get icon from theme
+            set_default_icon_name("matt-mancala");
+        }
 
         about.set_program_name(MANCALA_TITLE);
         about.set_version(VERSION_MAJOR_STR "." VERSION_MINOR_STR);

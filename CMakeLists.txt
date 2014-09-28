@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 2.6)
 project(matt-mancala)
 set(VERSION_MAJOR 1)
 set(VERSION_MINOR 0)
-set(VERSION_PATCH 1)
+set(VERSION_PATCH 2)
 set(MANCALA_TITLE "Mancala")
 set(MANCALA_AUTHOR "Matthew Chandler <tardarsauce@gmail.com>")
 set(MANCALA_SUMMARY "Kalah game")
@@ -54,7 +54,6 @@ target_link_libraries(${PROJECT_NAME}
 
 # install targets
 install(TARGETS "${PROJECT_NAME}" DESTINATION "bin")
-install(FILES "${PROJECT_BINARY_DIR}/matt-mancala.desktop" DESTINATION "share/applications")
 install(FILES
     img/bead_blue.png
     img/bead_cyan.png
@@ -68,9 +67,15 @@ install(FILES
     img/bg_store.png
     img/hint.png
     img/icon_128.ico
-    img/icon_128.png
     img/icon.svg
     DESTINATION "share/matt-mancala/img")
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    install(FILES "img/icon.svg" DESTINATION "share/icons/hicolor/scalable/apps" RENAME "matt-mancala.svg")
+    install(FILES "img/icon_128.png" DESTINATION "share/icons/hicolor/128x128/apps" RENAME "matt-mancala.png")
+    install(FILES "${PROJECT_BINARY_DIR}/matt-mancala.desktop" DESTINATION "share/applications")
+endif()
+
+
 install(FILES C:/gtkmm340_mingw462/share/glib-2.0/schemas/gschemas.compiled DESTINATION "share/glib-2.0/schemas")
 install(FILES
     C:/gtkmm340_mingw462/bin/libatk-1.0-0.dll
