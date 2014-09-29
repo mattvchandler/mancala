@@ -34,6 +34,8 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
     ${PROJECT_BINARY_DIR}/config.h)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/matt-mancala.desktop.in
     ${PROJECT_BINARY_DIR}/matt-mancala.desktop)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/matt-mancala.rc.in
+    ${PROJECT_BINARY_DIR}/matt-mancala.rc)
 
 # directories
 include_directories(${GTKMM_INCLUDE_DIRS}
@@ -47,7 +49,8 @@ add_executable(${PROJECT_NAME}
     board.cpp
     config.cpp
     draw.cpp
-    gui.cpp)
+    gui.cpp
+    matt-mancala.rc)
 
 target_link_libraries(${PROJECT_NAME}
     ${GTKMM_LIBRARIES}
