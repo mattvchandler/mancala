@@ -50,7 +50,7 @@ add_executable(${PROJECT_NAME}
     config.cpp
     draw.cpp
     gui.cpp
-    matt-mancala.rc)
+    ${PROJECT_BINARY_DIR}/matt-mancala.rc)
 
 target_link_libraries(${PROJECT_NAME}
     ${GTKMM_LIBRARIES}
