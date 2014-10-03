@@ -17,7 +17,8 @@ int main(int argc, char * argv[])
     srand(time(0));
 
     // set up and launch a GTK window
-    Glib::RefPtr<Gtk::Application> app = Gtk::Application::create(argc, argv, "mancala.mancala");
+    Glib::RefPtr<Gtk::Application> app = Gtk::Application::create(argc, argv,
+        "org.matt.mancala", Gio::APPLICATION_NON_UNIQUE);
 
     Mancala::Win m_win;
 

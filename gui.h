@@ -10,18 +10,19 @@
 #include <thread>
 #include <vector>
 
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/checkbutton.h>
-#include <gtkmm/dialog.h>
-#include <gtkmm/label.h>
-#include <gtkmm/radioaction.h>
-#include <gtkmm/radiobutton.h>
-#include <gtkmm/separator.h>
-#include <gtkmm/spinbutton.h>
-#include <gtkmm/toggleaction.h>
-#include <gtkmm/uimanager.h>
 #include <gtkmm/window.h>
+#include <gtkmm/toolbutton.h>
+#include <gtkmm/spinbutton.h>
+#include <gtkmm/separator.h>
+#include <gtkmm/radiomenuitem.h>
+#include <gtkmm/radiobutton.h>
+#include <gtkmm/menuitem.h>
+#include <gtkmm/label.h>
+#include <gtkmm/dialog.h>
+#include <gtkmm/checkmenuitem.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/button.h>
+#include <gtkmm/box.h>
 
 #include "board.h"
 #include "draw.h"
@@ -118,15 +119,15 @@ namespace Mancala
 
         // Identify who's turn it is
         Gtk::Label player_label;
-        // Menu and toolbar
-        Glib::RefPtr<Gtk::UIManager> uiman;
-        Glib::RefPtr<Gtk::ActionGroup> actgrp;
-
         // AI menu items
-        Glib::RefPtr<Gtk::ToggleAction> p1_ai_menu, p2_ai_menu;
+        std::unique_ptr<Gtk::CheckMenuItem> players_1_ai, players_2_ai;
 
         // GUI selection menu item
-        Glib::RefPtr<Gtk::RadioAction> full_gui_menu, simple_gui_menu;
+        std::unique_ptr<Gtk::RadioMenuItem> display_full_gui, display_simple_gui;
+
+        // hint items (saved so we can disable them)
+        std::unique_ptr<Gtk::MenuItem> game_hint;
+        std::unique_ptr<Gtk::ToolButton> hint_button;
 
         // settings window
         Settings_win settings_win;

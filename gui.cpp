@@ -7,11 +7,16 @@
 
 #include <gtkmm/aboutdialog.h>
 #include <gtkmm/drawingarea.h>
+#include <gtkmm/menubar.h>
+#include <gtkmm/menu.h>
+#include <gtkmm/messagedialog.h>
+#include <gtkmm/separatormenuitem.h>
+#include <gtkmm/toolbar.h>
+
 #include <gdkmm/general.h>
+
 #include <glibmm/fileutils.h>
 #include <glibmm/main.h>
-#include <gtkmm/messagedialog.h>
-#include <gtkmm/stock.h>
 
 #include "config.h"
 #include "gui.h"
@@ -83,8 +88,8 @@ namespace Mancala
         simple_gui_radio.set_tooltip_text("Use a simple, button-based GUI");
 
         // pack the buttons
-        add_button(Gtk::Stock::OK, 1);
-        add_button(Gtk::Stock::CANCEL, 0);
+        add_button("OK", Gtk::RESPONSE_OK);
+        add_button("Cancel", Gtk::RESPONSE_CANCEL);
 
         // set radio group
         Gtk::RadioButton::Group group = full_gui_radio.get_group();
@@ -102,7 +107,7 @@ namespace Mancala
     // callback for settings window okay button
     void Settings_win::button_func(int response_id)
     {
-        if(response_id == 1) // OK button
+        if(response_id == Gtk::RESPONSE_OK)
         {
             // update state vars with new values
             win->p1_ai = p1_ai_check.get_active();
@@ -118,9 +123,9 @@ namespace Mancala
             // this, in turn, calls its callback function which takes care of
             // switching modes
             if(full_gui_radio.get_active())
-                win->full_gui_menu->set_active(true);
+                win->display_full_gui->set_active(true);
             else
-                win->simple_gui_menu->set_active(true);
+                win->display_simple_gui->set_active(true);
 
             win->new_game();
         }
@@ -189,92 +194,112 @@ namespace Mancala
             set_default_icon_name("matt-mancala");
         }
 
-        // build menu and toolbar
-        actgrp = Gtk::ActionGroup::create();
-        actgrp->add(Gtk::Action::create("Game", "Game"));
-        actgrp->add(Gtk::Action::create("Game_newgame", Gtk::Stock::NEW, "_New Game", "Give up and start a new game"),
-            sigc::mem_fun(*this, &Win::new_game));
-        actgrp->add(Gtk::Action::create("Game_hint", Gtk::Stock::HELP, "Hint", "Get a hint."),
-            sigc::mem_fun(*this, &Win::hint));
-        actgrp->add(Gtk::Action::create("Game_set", Gtk::Stock::PREFERENCES, "_Settings", "Game settings"),
-            sigc::mem_fun(settings_win, &Settings_win::show));
-        actgrp->add(Gtk::Action::create("Game_quit", Gtk::Stock::QUIT, "_Quit", "Quit"),
-            sigc::mem_fun(*this, &Win::hide));
-
-        actgrp->add(Gtk::Action::create("Players", "Players"));
-        p1_ai_menu = Gtk::ToggleAction::create("Players_1_ai", "Player 1 AI", "Toggle Player 1 AI", p1_ai);
-        p2_ai_menu = Gtk::ToggleAction::create("Players_2_ai", "Player 2 AI", "Toggle Player 2 AI", p2_ai);
-        actgrp->add(p1_ai_menu, sigc::mem_fun(*this, &Win::p1_ai_menu_f));
-        actgrp->add(p2_ai_menu, sigc::mem_fun(*this, &Win::p2_ai_menu_f));
-
-        actgrp->add(Gtk::Action::create("Display", "Display"));
-        Gtk::RadioAction::Group gui_radio_group;
-        full_gui_menu = Gtk::RadioAction::create(gui_radio_group, "full_gui", "Full GUI");
-        actgrp->add(full_gui_menu, sigc::mem_fun(*this, &Win::gui_f));
-        simple_gui_menu = Gtk::RadioAction::create(gui_radio_group, "simple_gui", "Simple GUI");
-        actgrp->add(simple_gui_menu, sigc::mem_fun(*this, &Win::gui_f));
-
-        actgrp->add(Gtk::Action::create("Help", "Help"));
-        actgrp->add(Gtk::Action::create("Help_about", "About", "About"), sigc::mem_fun(*this, &Win::about));
-
-        uiman = Gtk::UIManager::create();
-        uiman->insert_action_group(actgrp);
-        add_accel_group(uiman->get_accel_group());
-
-        Glib::ustring ui_str =
-        "<ui>"
-        "   <menubar name='MenuBar'>"
-        "       <menu action='Game'>"
-        "           <menuitem action='Game_newgame'/>"
-        "           <menuitem action='Game_hint'/>"
-        "           <menuitem action='Game_set'/>"
-        "           <separator/>"
-        "           <menuitem action='Game_quit'/>"
-        "       </menu>"
-        "       <menu action='Players'>"
-        "           <menuitem action='Players_1_ai'/>"
-        "           <menuitem action='Players_2_ai'/>"
-        "       </menu>"
-        "       <menu action='Display'>"
-        "           <menuitem action='full_gui'/>"
-        "           <menuitem action='simple_gui'/>"
-        "       </menu>"
-        "       <menu action='Help'>"
-        "           <menuitem action='Help_about'/>"
-        "       </menu>"
-        "   </menubar>"
-        "   <toolbar name='ToolBar'>"
-        "       <toolitem action='Game_newgame'/>"
-        "       <toolitem action='Game_hint'/>"
-        "       <toolitem action='Game_set'/>"
-        "   </toolbar>"
-        "</ui>";
-
-        try
-        {
-            uiman->add_ui_from_string(ui_str);
-        }
-        catch(const Glib::Error& ex)
-        {
-            std::cerr<<"Menu Error: "<<ex.what()<<std::endl;
-        }
-
         // add widgets to containers
         add(main_box);
 
-        Gtk::Widget * menu = uiman->get_widget("/MenuBar");
-        Gtk::Widget * toolbar = uiman->get_widget("/ToolBar");
+        // build menus
+        Glib::RefPtr<Gtk::AccelGroup> accel_group = get_accel_group();
 
-        if(menu)
-        {
-            main_box.pack_start(*menu, Gtk::PACK_SHRINK);
-            menu->show();
-        }
-        if(toolbar)
-        {
-            main_box.pack_start(*toolbar, Gtk::PACK_SHRINK);
-            toolbar->show();
-        }
+        Gtk::MenuBar * main_menu = Gtk::manage(new Gtk::MenuBar);
+        main_box.pack_start(*main_menu, Gtk::PACK_SHRINK);
+
+        // create menu items
+        Gtk::MenuItem * game_menu_item = Gtk::manage(new Gtk::MenuItem("_Game", true));
+        Gtk::MenuItem * players_menu_item = Gtk::manage(new Gtk::MenuItem("_Players", true));
+        Gtk::MenuItem * display_menu_item = Gtk::manage(new Gtk::MenuItem("_Display", true));
+        Gtk::MenuItem * help_menu_item = Gtk::manage(new Gtk::MenuItem("_Help", true));
+        main_menu->append(*game_menu_item);
+        main_menu->append(*players_menu_item);
+        main_menu->append(*display_menu_item);
+        main_menu->append(*help_menu_item);
+
+        Gtk::Menu * game_menu = Gtk::manage(new Gtk::Menu);
+        Gtk::Menu * players_menu = Gtk::manage(new Gtk::Menu);
+        Gtk::Menu * display_menu = Gtk::manage(new Gtk::Menu);
+        Gtk::Menu * help_menu = Gtk::manage(new Gtk::Menu);
+        game_menu_item->set_submenu(*game_menu);
+        players_menu_item->set_submenu(*players_menu);
+        display_menu_item->set_submenu(*display_menu);
+        help_menu_item->set_submenu(*help_menu);
+
+        // "Game" Menu
+        Gtk::MenuItem * game_new = Gtk::manage(new Gtk::MenuItem("_New Game", true));
+        game_menu->append(*game_new);
+        game_new->signal_activate().connect(sigc::mem_fun(*this, &Win::new_game));
+        game_new->add_accelerator("activate", accel_group, GDK_KEY_n, Gdk::CONTROL_MASK, Gtk::ACCEL_VISIBLE);
+
+        game_hint.reset(new Gtk::MenuItem("_Hint", true));
+        game_menu->append(*game_hint);
+        game_hint->signal_activate().connect(sigc::mem_fun(*this, &Win::hint));
+        game_hint->add_accelerator("activate", accel_group, GDK_KEY_F1, (Gdk::ModifierType)0, Gtk::ACCEL_VISIBLE);
+
+        Gtk::MenuItem * game_settings = Gtk::manage(new Gtk::MenuItem("_Settings", true));
+        game_menu->append(*game_settings);
+        game_settings->signal_activate().connect(sigc::mem_fun(settings_win, &Settings_win::show));
+
+        game_menu->append(*Gtk::manage(new Gtk::SeparatorMenuItem));
+
+        Gtk::MenuItem * game_quit = Gtk::manage(new Gtk::MenuItem("_Quit", true));
+        game_menu->append(*game_quit);
+        game_quit->signal_activate().connect(sigc::mem_fun(*this, &Win::hide));
+        game_quit->add_accelerator("activate", accel_group, GDK_KEY_q, Gdk::CONTROL_MASK, Gtk::ACCEL_VISIBLE);
+
+
+        // "Players" menu
+        players_1_ai.reset(new Gtk::CheckMenuItem("Player _1 AI", true));
+        players_menu->append(*players_1_ai);
+        players_1_ai->signal_activate().connect(sigc::mem_fun(*this, &Win::p1_ai_menu_f));
+
+        players_2_ai.reset(new Gtk::CheckMenuItem("Player _2 AI", true));
+        players_menu->append(*players_2_ai);
+        players_2_ai->signal_activate().connect(sigc::mem_fun(*this, &Win::p2_ai_menu_f));
+
+        // "Display" menu
+        Gtk::RadioMenuItem::Group gui_radio_group;
+
+        display_full_gui.reset(new Gtk::RadioMenuItem(gui_radio_group, "_Full GUI", true));
+        display_menu->append(*display_full_gui);
+        display_full_gui->signal_activate().connect(sigc::mem_fun(*this, &Win::gui_f));
+
+        display_simple_gui.reset(new Gtk::RadioMenuItem(gui_radio_group, "_Simple GUI", true));
+        display_menu->append(*display_simple_gui);
+        display_simple_gui->signal_activate().connect(sigc::mem_fun(*this, &Win::gui_f));
+
+        // "Help" Menu
+        Gtk::MenuItem * help_about = Gtk::manage(new Gtk::MenuItem("_About", true));
+        help_menu->append(*help_about);
+        help_about->signal_activate().connect(sigc::mem_fun(*this, &Win::about));
+
+        main_menu->show();
+        main_menu->show_all_children();
+
+        // create toolbar
+        Gtk::Toolbar * tool_bar = Gtk::manage(new Gtk::Toolbar);
+        main_box.pack_start(*tool_bar, Gtk::PACK_SHRINK);
+
+        Gtk::ToolButton * new_button = Gtk::manage(new Gtk::ToolButton("_New Game"));
+        tool_bar->append(*new_button);
+        new_button->set_icon_name("document-new");
+        new_button->set_tooltip_text("Give up and start a new game");
+        new_button->set_use_underline(true);
+        new_button->signal_clicked().connect(sigc::mem_fun(*this, &Win::new_game));
+
+        hint_button.reset(new Gtk::ToolButton("_Hint"));
+        tool_bar->append(*hint_button);
+        hint_button->set_icon_name("help-browser");
+        hint_button->set_tooltip_text("Get a hint");
+        hint_button->set_use_underline(true);
+        hint_button->signal_clicked().connect(sigc::mem_fun(*this, &Win::hint));
+
+        Gtk::ToolButton * settings_button = Gtk::manage(new Gtk::ToolButton("_Settings"));
+        tool_bar->append(*settings_button);
+        settings_button->set_icon_name("preferences-desktop");
+        settings_button->set_tooltip_text("Game settings");
+        settings_button->set_use_underline(true);
+        settings_button->signal_clicked().connect(sigc::mem_fun(settings_win, &Settings_win::show));
+
+        tool_bar->show();
+        tool_bar->show_all_children();
 
         main_box.pack_start(draw);
         draw.show();
@@ -427,7 +452,8 @@ namespace Mancala
     {
         // deactivate hint feature
         game_over = true;
-        actgrp->get_action("Game_hint")->set_sensitive(false);
+        game_hint->set_sensitive(false);
+        hint_button->set_sensitive(false);
 
         // create and show a dialog announcing the winner
         Glib::ustring msg;
@@ -475,7 +501,8 @@ namespace Mancala
     {
         // Reactivate hint feature
         game_over = false;
-        actgrp->get_action("Game_hint")->set_sensitive(true);
+        game_hint->set_sensitive(true);
+        hint_button->set_sensitive(true);
 
         player = PLAYER_1;
         draw.b = Board(num_bowls, num_seeds, ai_depth, extra_rule, capture_rule, collect_rule);
@@ -523,8 +550,8 @@ namespace Mancala
             player_label.set_text("Player 2");
 
         // update ai menu items
-        p1_ai_menu->set_active(p1_ai);
-        p2_ai_menu->set_active(p2_ai);
+        players_1_ai->set_active(p1_ai);
+        players_2_ai->set_active(p2_ai);
 
         // call for a redraw
         if(full_gui)
@@ -573,14 +600,14 @@ namespace Mancala
     // AI menu callbacks
     void Win::p1_ai_menu_f()
     {
-        p1_ai = p1_ai_menu->get_active();
+        p1_ai = players_1_ai->get_active();
         ai_sig.disconnect();
         hint_sig.disconnect();
     }
 
     void Win::p2_ai_menu_f()
     {
-        p2_ai = p2_ai_menu->get_active();
+        p2_ai = players_2_ai->get_active();
         ai_sig.disconnect();
         hint_sig.disconnect();
     }
@@ -588,7 +615,7 @@ namespace Mancala
     // GUI menu callback
     void Win::gui_f()
     {
-        if(full_gui_menu->get_active() && !full_gui)
+        if(display_full_gui->get_active() && !full_gui)
         {
             full_gui = true;
             draw.show();
@@ -596,7 +623,7 @@ namespace Mancala
             resize(800,400);
             update_board();
         }
-        else if(simple_gui_menu->get_active() && full_gui)
+        else if(display_simple_gui->get_active() && full_gui)
         {
             full_gui = false;
             draw.hide();
