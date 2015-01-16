@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 2.6)
 project(matt-mancala)
 set(VERSION_MAJOR 1)
 set(VERSION_MINOR 0)
-set(VERSION_PATCH 3)
+set(VERSION_PATCH 4)
 set(MANCALA_TITLE "Mancala")
 set(MANCALA_AUTHOR "Matthew Chandler <tardarsauce@gmail.com>")
 set(MANCALA_SUMMARY "Kalah game")
@@ -41,7 +41,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/matt-mancala.rc.in
 include_directories(${GTKMM_INCLUDE_DIRS}
     ${PROJECT_BINARY_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR})
-link_directories(${GTKMM_LINK_DIRS})
+link_directories(${GTKMM_LIBRARY_DIRS})
 
 # main compilation
 add_executable(${PROJECT_NAME}
