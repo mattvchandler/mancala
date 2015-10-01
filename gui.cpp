@@ -647,7 +647,7 @@ namespace Mancala
         catch(Glib::Exception & e)
         {
             // try to get icon from theme
-            set_default_icon_name("matt-mancala");
+            about.set_logo_icon_name("matt-mancala");
         }
 
         about.set_program_name(MANCALA_TITLE);

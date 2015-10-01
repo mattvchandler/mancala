@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 2.6)
 project(matt-mancala)
 set(VERSION_MAJOR 1)
 set(VERSION_MINOR 0)
-set(VERSION_PATCH 4)
+set(VERSION_PATCH 5)
 set(MANCALA_TITLE "Mancala")
 set(MANCALA_AUTHOR "Matthew Chandler <tardarsauce@gmail.com>")
 set(MANCALA_SUMMARY "Kalah game")
@@ -12,13 +12,14 @@ set(MANCALA_WEBSITE "http://github.com/mattvchandler/mancala")
 set(CMAKE_CXX_FLAGS "-Wall -std=c++11")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -DDEBUG")
-if(MSYS)
-    set(CMAKE_EXE_LINKER_FLAGS "-mwindows")
-endif()
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
+endif()
+
+if(MSYS AND CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(CMAKE_EXE_LINKER_FLAGS "-mwindows")
 endif()
 
 # libraries
@@ -70,15 +71,14 @@ install(FILES
     img/bg_bowl.png
     img/bg_store.png
     img/hint.png
-    img/icon.svg
     DESTINATION "share/matt-mancala/img")
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    install(FILES "img/icon.svg" DESTINATION "share/icons/hicolor/scalable/apps" RENAME "matt-mancala.svg")
-    install(FILES "img/icon_128.png" DESTINATION "share/icons/hicolor/128x128/apps" RENAME "matt-mancala.png")
     install(FILES "${PROJECT_BINARY_DIR}/matt-mancala.desktop" DESTINATION "share/applications")
 endif()
 
+install(FILES "img/icon.svg" DESTINATION "share/icons/hicolor/scalable/apps" RENAME "matt-mancala.svg")
+install(FILES "img/icon_128.png" DESTINATION "share/icons/hicolor/128x128/apps" RENAME "matt-mancala.png")
 
 # CPack vars
 set(CPACK_GENERATOR TGZ)
